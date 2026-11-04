@@ -1,7 +1,7 @@
 'use strict';
 /* =========================================================================
    FRENTE GLOBAL · motor de juego
-   Costa, dos rutas terrestres, una ruta aérea y flota propia.
+   Costa, una pista terrestre de dos carriles, una ruta aérea y flota propia.
    Modelos procedurales detallados, sin assets externos.
    ========================================================================= */
 
@@ -10,7 +10,7 @@ const ARMIES = [
   {
     id: 'usa', name: 'Estados Unidos', nameEn: 'United States', flag: '🇺🇸', bonus: 'Cadencia +12%', bonusEn: 'Fire rate +12%',
     weapons: 'M134 · M777 · M270 · Patriot · HELIOS · EA-18G · Arleigh Burke · Gerald R. Ford',
-    cash: 720, color: 0x68764a,
+    cash: 660, color: 0x68764a,
     mults: { gun: 1.12, mortar: 1, art: 1, rocket: 1.05, aa: 1.08, laser: 1, ew: 1, destroyer: 1.05, carrier: 1.1 },
     kit: { gun: 'gatling', art: 'truck', rocket: 'tracked', aa: 'canister', laser: 'container', ew: 'dish', destroyer: 'burke', carrier: 'ford' },
     perk: 'Cadencia elevada', perkEn: 'Elevated rate of fire'
@@ -18,7 +18,7 @@ const ARMIES = [
   {
     id: 'china', name: 'China', nameEn: 'China', flag: '🇨🇳', bonus: 'Torres −10%', bonusEn: 'Towers −10%',
     weapons: 'Type 1130 · PLL-05 · PCL-181 · PHL-03 · HQ-17 · GuoRong · DWL-002 · Type 055 · Fujian',
-    cash: 760, color: 0x9a4935, discount: .9,
+    cash: 700, color: 0x9a4935, discount: .9,
     mults: { gun: 1, mortar: 1.05, art: 1.05, rocket: 1.08, aa: 1.05, laser: 1.08, ew: 1, destroyer: 1.08, carrier: 1.05 },
     kit: { gun: 'ciws', art: 'truck', rocket: 'truck', aa: 'box', laser: 'container', ew: 'array', destroyer: 'type055', carrier: 'fujian' },
     perk: 'Construcción eficiente', perkEn: 'Efficient construction'
@@ -26,7 +26,7 @@ const ARMIES = [
   {
     id: 'russia', name: 'Rusia', nameEn: 'Russia', flag: '🇷🇺', bonus: 'Artillería +18%', bonusEn: 'Artillery +18%',
     weapons: 'GSh-6-30 · 2B25 · 2S19 Msta · BM-30 Smerch · S-400 · Peresvet · Krasukha · Slava · Kuznetsov',
-    cash: 700, color: 0x647486,
+    cash: 640, color: 0x647486,
     mults: { gun: 1, mortar: 1.15, art: 1.18, rocket: 1.12, aa: 1.1, laser: 1, ew: 1.1, destroyer: 1.1, carrier: 1 },
     kit: { gun: 'rotary', art: 'tracked', rocket: 'truck', aa: 'tube', laser: 'container', ew: 'dish', destroyer: 'slava', carrier: 'kuznetsov' },
     perk: 'Artillería devastadora', perkEn: 'Devastating artillery'
@@ -35,7 +35,7 @@ const ARMIES = [
     id: 'israel', name: 'Israel', nameEn: 'Israel', flag: '🇮🇱', bonus: 'Láser +25%', bonusEn: 'Laser +25%',
     weapons: 'MAG · Keshet · ATMOS · Lynx · Cúpula de Hierro · Iron Beam · Scorpius · Sa’ar 6 · Sa’ar 5',
     weaponsEn: 'MAG · Keshet · ATMOS · Lynx · Iron Dome · Iron Beam · Scorpius · Sa’ar 6 · Sa’ar 5',
-    cash: 700, color: 0x7d8b77,
+    cash: 640, color: 0x7d8b77,
     mults: { gun: 1, mortar: 1, art: 1, rocket: 1.05, aa: 1.08, laser: 1.25, ew: 1.08, destroyer: 1.05, carrier: 1 },
     kit: { gun: 'mg', art: 'truck', rocket: 'truck', aa: 'rail', laser: 'turret', ew: 'array', destroyer: 'saar6', carrier: 'saar5' },
     perk: 'Energía dirigida mejorada', perkEn: 'Enhanced directed energy'
@@ -43,7 +43,7 @@ const ARMIES = [
   {
     id: 'uk', name: 'Reino Unido', nameEn: 'United Kingdom', flag: '🇬🇧', bonus: 'Antiaéreo +18%', bonusEn: 'Anti-air +18%',
     weapons: 'L7 Minigun · 81 mm · AS-90 · M270 · Sky Sabre · DragonFire · Land Ceptor · Type 45 · Queen Elizabeth',
-    cash: 700, color: 0x586783,
+    cash: 640, color: 0x586783,
     mults: { gun: 1.05, mortar: 1, art: 1.08, rocket: 1.04, aa: 1.18, laser: 1.1, ew: 1, destroyer: 1.1, carrier: 1.05 },
     kit: { gun: 'rotary', art: 'tracked', rocket: 'tracked', aa: 'rail', laser: 'turret', ew: 'array', destroyer: 'type45', carrier: 'queen' },
     perk: 'Defensa aérea superior', perkEn: 'Superior air defense'
@@ -52,7 +52,7 @@ const ARMIES = [
     id: 'france', name: 'Francia', nameEn: 'France', flag: '🇫🇷', bonus: 'Láser +12% · apoyo', bonusEn: 'Laser +12% · support',
     weapons: 'Nexter 20 mm · MO-120 · CAESAR · LRU · VL MICA · HELMA-P · Brouilleur · FREMM · Charles de Gaulle',
     weaponsEn: 'Nexter 20 mm · MO-120 · CAESAR · LRU · VL MICA · HELMA-P · Jammer · FREMM · Charles de Gaulle',
-    cash: 730, color: 0x596f8a,
+    cash: 670, color: 0x596f8a,
     mults: { gun: 1.05, mortar: 1.05, art: 1.1, rocket: 1.05, aa: 1.05, laser: 1.12, ew: 1.12, destroyer: 1.05, carrier: 1.1 },
     kit: { gun: 'rotary', art: 'truck', rocket: 'truck', aa: 'box', laser: 'turret', ew: 'array', destroyer: 'fremm', carrier: 'charles' },
     perk: 'Doctrina versátil', perkEn: 'Versatile doctrine'
@@ -60,7 +60,7 @@ const ARMIES = [
   {
     id: 'korea', name: 'Corea del Sur', nameEn: 'South Korea', flag: '🇰🇷', bonus: 'Cadencia +8%', bonusEn: 'Fire rate +8%',
     weapons: 'K6 · KM114 · K9 Thunder · Chunmoo · Cheongung · Laser AA · KJ-100 · Sejong · Dokdo',
-    cash: 710, color: 0x65745c,
+    cash: 650, color: 0x65745c,
     mults: { gun: 1.08, mortar: 1.05, art: 1.1, rocket: 1.08, aa: 1.1, laser: 1.05, ew: 1, destroyer: 1.08, carrier: 1 },
     kit: { gun: 'gatling', art: 'tracked', rocket: 'tracked', aa: 'box', laser: 'turret', ew: 'array', destroyer: 'sejong', carrier: 'dokdo' },
     perk: 'Respuesta rápida', perkEn: 'Rapid response'
@@ -68,7 +68,7 @@ const ARMIES = [
   {
     id: 'turkey', name: 'Turquía', nameEn: 'Turkey', flag: '🇹🇷', bonus: 'EW +20%', bonusEn: 'EW +20%',
     weapons: 'Korkut · MKE 81 mm · T-155 Fırtına · T-300 · Hisar · Gökberk · Koral · Barbaros · Anadolu',
-    cash: 710, color: 0x8c4c42,
+    cash: 650, color: 0x8c4c42,
     mults: { gun: 1.05, mortar: 1.05, art: 1.12, rocket: 1.08, aa: 1.08, laser: 1.05, ew: 1.2, destroyer: 1.05, carrier: 1.05 },
     kit: { gun: 'rotary', art: 'tracked', rocket: 'truck', aa: 'box', laser: 'turret', ew: 'array', destroyer: 'barbaros', carrier: 'anadolu' },
     perk: 'Guerra electrónica potente', perkEn: 'Powerful electronic warfare'
@@ -93,7 +93,7 @@ const TOWERS = [
   { id: 'rocket', name: 'Lanzacohetes', nameEn: 'Rocket launcher', icon: '⌁', cost: 245, range: 7.6, damage: 27, rate: 3.4, targets: ['ground'], splash: 1.5, desc: 'Salva de cohetes de saturación', descEn: 'Saturation rocket salvo', domain: 'land', pierce: .4, salvo: 4 },
   { id: 'aa', name: 'Misil antiaéreo', nameEn: 'Surface-to-air missile', icon: '⌃', cost: 170, range: 7.4, damage: 48, rate: 1.45, targets: ['air'], desc: 'Lanzador guiado contra aeronaves', descEn: 'Guided launcher against aircraft', domain: 'land', pierce: .2 },
   { id: 'laser', name: 'Láser', nameEn: 'Laser', icon: '⌇', cost: 225, range: 5.8, damage: 16, rate: .12, targets: ['ground', 'air'], desc: 'Haz continuo de energía dirigida', descEn: 'Continuous directed-energy beam', domain: 'land', pierce: 1 },
-  { id: 'ew', name: 'Guerra electrónica', nameEn: 'Electronic warfare', icon: '⌘', cost: 180, range: 4.6, damage: 0, rate: .5, targets: ['ground', 'air'], slow: .5, desc: 'Pulso de interferencia y ralentización', descEn: 'Jamming pulse and slowdown', domain: 'land', pierce: 0 },
+  { id: 'ew', name: 'Guerra electrónica', nameEn: 'Electronic warfare', icon: '⌘', cost: 180, range: 5.2, damage: 0, rate: .5, targets: ['ground', 'air'], slow: .5, desc: 'Interferencia: ralentiza y repele drones', descEn: 'Jamming: slows and repels drones', domain: 'land', pierce: 0 },
   { id: 'destroyer', name: 'Destructor', nameEn: 'Destroyer', icon: '⚓', cost: 330, range: 9.2, damage: 72, rate: 2.7, targets: ['ground', 'air'], splash: 1.7, desc: 'Misiles de crucero desde el mar', descEn: 'Cruise missiles from the sea', domain: 'sea', pierce: .55 },
   { id: 'carrier', name: 'Portaaviones', nameEn: 'Aircraft carrier', icon: '✈', cost: 490, range: 12.5, damage: 62, rate: 5.2, targets: ['ground', 'air'], splash: 2.3, desc: 'Ataque aéreo embarcado de largo alcance', descEn: 'Long-range carrier air strike', domain: 'sea', pierce: .5 }
 ];
@@ -108,35 +108,28 @@ const ENEMIES = {
   drone: { name: 'Dron de combate', nameEn: 'Combat drone', kind: 'air', hp: 92, speed: 2.5, reward: 29, radius: .18, color: 0x7d817c, damage: 6, armor: 0, tier: 1, icon: '⌖', desc: 'Blanco rápido y frágil', descEn: 'Fast, fragile target' },
   fighter: { name: 'Caza', nameEn: 'Fighter jet', kind: 'air', hp: 195, speed: 2.8, reward: 46, radius: .25, color: 0x909a9a, damage: 10, armor: .05, tier: 3, icon: '➤', desc: 'Aeronave supersónica', descEn: 'Supersonic aircraft' },
   bomber: { name: 'Bombardero', nameEn: 'Bomber', kind: 'air', hp: 540, speed: 1.1, reward: 92, radius: .42, color: 0x777f80, damage: 19, armor: .12, tier: 4, icon: '✥', desc: 'Plataforma pesada', descEn: 'Heavy platform' },
-  boss: { name: 'Coloso acorazado', nameEn: 'Armored colossus', kind: 'ground', hp: 2450, speed: .42, reward: 330, radius: .72, color: 0x46523b, damage: 30, armor: .5, tier: 5, icon: '☠', desc: 'Jefe de oleada', descEn: 'Wave boss', boss: true }
+  boss: { name: 'Coloso acorazado', nameEn: 'Armored colossus', kind: 'ground', hp: 2800, speed: .42, reward: 330, radius: .72, color: 0x46523b, damage: 30, armor: .5, tier: 5, icon: '☠', desc: 'Jefe de oleada', descEn: 'Wave boss', boss: true }
 };
 
 const MAP = { w: 30, h: 18, cell: 1 };
 const SEA_ROWS = 4;                 // filas cz 0..3
 const SEA_LIMIT = -4.5;             // z < SEA_LIMIT es agua
 
-/* Dos rutas terrestres largas y quebradas. La segunda es un flanqueo real. */
+/* Una única pista terrestre de dos carriles. Así las unidades no se cruzan,
+   la carretera ocupa una sola celda y queda espacio de construcción limpio. */
 const ROUTES = [
   {
-    id: 'main', name: 'Ruta principal', nameEn: 'Main route', color: 0x706554,
+    id: 'main', name: 'Pista principal', nameEn: 'Main road', color: 0x706554,
     points: [
-      [-14.5, -2.5], [-10.5, -2.5], [-10.5, 1.5], [-6.5, 1.5], [-6.5, -2.5],
-      [-2.5, -2.5], [-2.5, 2.5], [1.5, 2.5], [1.5, -1.5], [5.5, -1.5],
-      [5.5, 3.5], [9.5, 3.5], [9.5, .5], [12.5, .5], [12.5, -1.5], [14.5, -1.5]
-    ]
-  },
-  {
-    id: 'bypass', name: 'Ruta de flanqueo', nameEn: 'Flanking route', color: 0x7a7059,
-    points: [
-      [-14.5, -2.5], [-12.5, -2.5], [-12.5, 4.5], [-8.5, 4.5], [-8.5, .5],
-      [-4.5, .5], [-4.5, 5.5], [.5, 5.5], [.5, 1.5], [4.5, 1.5],
-      [4.5, 6.5], [8.5, 6.5], [8.5, 2.5], [12.5, 2.5], [12.5, -1.5], [14.5, -1.5]
+      [-14.5, -2.5], [-11.5, -2.5], [-11.5, 2.5], [-7.5, 2.5], [-7.5, -1.5],
+      [-3.5, -1.5], [-3.5, 4.5], [.5, 4.5], [.5, .5], [4.5, .5],
+      [4.5, 6.5], [8.5, 6.5], [8.5, 2.5], [13.5, 2.5], [13.5, -1.5]
     ]
   }
 ];
 const AIR_ROUTE = { id: 'air', name: 'Corredor aéreo', nameEn: 'Air corridor', points: [[-14.5, -6.5], [-5, -7.5], [3, -5.5], [9, -3.5], [14.5, -1.5]] };
 
-const APP_VERSION = '2.1.0';
+const APP_VERSION = '2.2.0';
 const STORE_SETTINGS = 'frente-global:settings:v1';
 const STORE_RECORDS = 'frente-global:records:v1';
 function loadStore(key, fallback) {
@@ -171,7 +164,7 @@ const I18N = {
     'ability.repair': 'Reparar base', 'ability.repairHint': 'C · 80 cr', 'ability.repairTitle': 'Reparar base (C) · 80 créditos',
     'map.sector': 'SECTOR 07 / CUADRÍCULA 01',
     'menu.eyebrow': 'Protocolo de despliegue · Operación indefinida', 'menu.title': 'Elige tu fuerza',
-    'menu.copyHtml': 'Dos rutas terrestres. Un mar. Un corredor aéreo.<br>Tu doctrina define cada defensa.',
+    'menu.copyHtml': 'Una pista de dos carriles. Un mar. Un corredor aéreo.<br>Tu doctrina define cada defensa.',
     'menu.note': 'Los parámetros son valores de equilibrio de juego.',
     'menu.bestWave': 'Mejor oleada', 'menu.record': 'Récord', 'menu.runs': 'Partidas',
     'menu.install': 'Instalar app', 'menu.deploy': 'Desplegar fuerza →', 'menu.roster': 'Dotación:',
@@ -180,6 +173,7 @@ const I18N = {
     'pause.eyebrow': 'Operación en espera', 'pause.title': 'Pausa',
     'pause.text': 'La simulación está detenida. Tu posición se mantiene intacta.',
     'pause.resume': 'Reanudar', 'pause.settings': 'Ajustes', 'pause.quit': 'Salir al menú',
+    'pause.restart': 'Reiniciar partida',
     'language.eyebrow': 'Configuración inicial', 'language.title': 'Elige tu idioma',
     'language.copy': 'Puedes cambiarlo después en Ajustes.', 'language.esSub': 'Jugar en español', 'language.enSub': 'Play in English',
     'settings.kicker': 'Configuración', 'settings.title': 'Ajustes', 'settings.close': 'Cerrar',
@@ -212,9 +206,9 @@ const I18N = {
     'toast.priority': 'Prioridad: {mode}', 'toast.upgrade': 'Mejora completada · nivel {level}',
     'toast.sold': 'Sistema vendido · 60% recuperado', 'toast.waveStart': 'Oleada {wave}: {summary}',
     'toast.waveClear': 'Oleada {wave} contenida · bonificación recibida', 'toast.reloading': '{name} recargando · {s} s',
-    'toast.strikeSelect': 'Ataque aéreo: selecciona el punto de impacto', 'toast.emp': 'Pulso EMP · amenazas ralentizadas',
+    'toast.strikeSelect': 'Ataque aéreo: selecciona el punto de impacto', 'toast.emp': 'Pulso EMP · amenazas ralentizadas y drones repelidos',
     'toast.repair': 'Base reparada · +22% de integridad', 'toast.strikeActive': 'Ataque aéreo en curso',
-    'toast.army': '{name} desplegado · 2 rutas y flota disponibles', 'toast.language': 'Idioma: {language}',
+    'toast.army': '{name} desplegado · pista de dos carriles y flota disponibles', 'toast.armyNew': '{name} desplegado · nueva partida iniciada', 'toast.restart': 'Partida reiniciada', 'toast.language': 'Idioma: {language}',
     'toast.camera': 'Cámara centrada', 'toast.recordsCleared': 'Récords borrados', 'toast.quality': 'Calidad gráfica: {level}',
     'toast.qualityReduced': 'Calidad gráfica reducida para mantener la fluidez', 'toast.qualityMinimum': 'Calidad gráfica al mínimo',
     'toast.fullscreenUnavailable': 'Pantalla completa no disponible en este navegador', 'toast.fullscreenFailed': 'No se pudo activar pantalla completa',
@@ -223,7 +217,7 @@ const I18N = {
     'threat.none': 'Sin contacto', 'threat.low': 'Baja', 'threat.medium': 'Media', 'threat.high': 'Alta', 'threat.severe': 'Severa', 'threat.critical': 'Crítica',
     'intel.inProgress': 'en curso', 'intel.planned': 'prevista', 'intel.head': 'Oleada {wave} <em>{state}</em>',
     'intel.scaling': 'HP enemigo ×{hp} · daño ×{dmg}', 'intel.noThreats': 'Sin amenazas confirmadas',
-    'intel.routes': '2 rutas terrestres', 'intel.routesDetail': 'Principal + flanqueo', 'intel.airRoute': 'Corredor aéreo',
+    'intel.routes': 'Pista terrestre', 'intel.routesDetail': 'Única · dos carriles', 'intel.airRoute': 'Corredor aéreo',
     'intel.support': 'Apoyo de mando', 'intel.supportHtml': '<kbd>Z</kbd> ataque aéreo · <kbd>X</kbd> EMP · <kbd>C</kbd> reparar',
     'intel.air': 'Aire', 'intel.boss': 'Jefe', 'intel.ground': 'Tierra', 'intel.armor': 'blindaje {n}%',
     'rank.elite': 'ÉLITE', 'rank.veteran': 'VETERANO'
@@ -247,7 +241,7 @@ const I18N = {
     'ability.repair': 'Repair base', 'ability.repairHint': 'C · 80 cr', 'ability.repairTitle': 'Repair base (C) · 80 credits',
     'map.sector': 'SECTOR 07 / GRID 01',
     'menu.eyebrow': 'Deployment protocol · Indefinite operation', 'menu.title': 'Choose your force',
-    'menu.copyHtml': 'Two land routes. One sea. One air corridor.<br>Your doctrine shapes every defense.',
+    'menu.copyHtml': 'One two-lane road. One sea. One air corridor.<br>Your doctrine shapes every defense.',
     'menu.note': 'Values shown are gameplay balance parameters.',
     'menu.bestWave': 'Best wave', 'menu.record': 'High score', 'menu.runs': 'Runs',
     'menu.install': 'Install app', 'menu.deploy': 'Deploy force →', 'menu.roster': 'Loadout:',
@@ -256,6 +250,7 @@ const I18N = {
     'pause.eyebrow': 'Operation on hold', 'pause.title': 'Paused',
     'pause.text': 'The simulation is stopped. Your position remains intact.',
     'pause.resume': 'Resume', 'pause.settings': 'Settings', 'pause.quit': 'Quit to menu',
+    'pause.restart': 'Restart match',
     'language.eyebrow': 'Initial setup', 'language.title': 'Choose your language',
     'language.copy': 'You can change it later in Settings.', 'language.esSub': 'Jugar en español', 'language.enSub': 'Play in English',
     'settings.kicker': 'Configuration', 'settings.title': 'Settings', 'settings.close': 'Close',
@@ -288,9 +283,9 @@ const I18N = {
     'toast.priority': 'Priority: {mode}', 'toast.upgrade': 'Upgrade complete · level {level}',
     'toast.sold': 'System sold · 60% recovered', 'toast.waveStart': 'Wave {wave}: {summary}',
     'toast.waveClear': 'Wave {wave} contained · bonus received', 'toast.reloading': '{name} reloading · {s} s',
-    'toast.strikeSelect': 'Airstrike: select the impact point', 'toast.emp': 'EMP pulse · threats slowed',
+    'toast.strikeSelect': 'Airstrike: select the impact point', 'toast.emp': 'EMP pulse · threats slowed and drones repelled',
     'toast.repair': 'Base repaired · +22% integrity', 'toast.strikeActive': 'Airstrike in progress',
-    'toast.army': '{name} deployed · 2 routes and fleet available', 'toast.language': 'Language: {language}',
+    'toast.army': '{name} deployed · two-lane road and fleet available', 'toast.armyNew': '{name} deployed · new match started', 'toast.restart': 'Match restarted', 'toast.language': 'Language: {language}',
     'toast.camera': 'Camera centered', 'toast.recordsCleared': 'Records cleared', 'toast.quality': 'Graphics quality: {level}',
     'toast.qualityReduced': 'Graphics quality reduced to keep frame rate smooth', 'toast.qualityMinimum': 'Graphics quality set to minimum',
     'toast.fullscreenUnavailable': 'Fullscreen is not available in this browser', 'toast.fullscreenFailed': 'Could not enable fullscreen',
@@ -299,7 +294,7 @@ const I18N = {
     'threat.none': 'No contact', 'threat.low': 'Low', 'threat.medium': 'Medium', 'threat.high': 'High', 'threat.severe': 'Severe', 'threat.critical': 'Critical',
     'intel.inProgress': 'in progress', 'intel.planned': 'planned', 'intel.head': 'Wave {wave} <em>{state}</em>',
     'intel.scaling': 'Enemy HP ×{hp} · damage ×{dmg}', 'intel.noThreats': 'No confirmed threats',
-    'intel.routes': '2 land routes', 'intel.routesDetail': 'Main + flanking', 'intel.airRoute': 'Air corridor',
+    'intel.routes': 'Land road', 'intel.routesDetail': 'Single · two lanes', 'intel.airRoute': 'Air corridor',
     'intel.support': 'Command support', 'intel.supportHtml': '<kbd>Z</kbd> airstrike · <kbd>X</kbd> EMP · <kbd>C</kbd> repair',
     'intel.air': 'Air', 'intel.boss': 'Boss', 'intel.ground': 'Ground', 'intel.armor': 'armor {n}%',
     'rank.elite': 'ELITE', 'rank.veteran': 'VETERAN'
@@ -335,7 +330,7 @@ let qualityLevel = settings.quality === 'auto' ? (coarsePointer ? 'medium' : 'hi
 function quality() { return QUALITY_PRESETS[qualityLevel] || QUALITY_PRESETS.medium; }
 
 const state = {
-  army: ARMIES[0], cash: 720, hp: 100, wave: 0, active: false, speed: 1,
+  army: ARMIES[0], cash: 660, hp: 100, wave: 0, active: false, speed: 1,
   spawnQueue: [], spawnTimer: 0, spawned: 0, enemies: [], towers: [], effects: [],
   selectedTower: null, buildType: null, abilityMode: null, gameOver: false,
   selectedArmy: Number.isInteger(settings.army) && ARMIES[settings.army] ? settings.army : 0,
@@ -525,22 +520,46 @@ function nearestPath(x, z) {
   return Math.sqrt(best) < 1.02;
 }
 
-function buildPathCells() {
-  gridCells.clear();
-  for (const route of ROUTES) {
-    const p = route.points;
-    for (let i = 0; i < p.length - 1; i++) {
-      let [x1, z1] = p[i], [x2, z2] = p[i + 1];
-      const dx = Math.sign(x2 - x1), dz = Math.sign(z2 - z1);
-      let x = x1, z = z1;
-      for (let guard = 0; guard < 200; guard++) {
-        const c = worldCell(x, z);
-        gridCells.add(cellKey(c.x, c.z));
-        if (x === x2 && z === z2) break;
-        x += dx; z += dz;
-      }
+function forEachRouteCell(route, visit) {
+  const p = route.points;
+  for (let i = 0; i < p.length - 1; i++) {
+    const [x1, z1] = p[i], [x2, z2] = p[i + 1];
+    const length = Math.hypot(x2 - x1, z2 - z1);
+    const steps = Math.max(1, Math.ceil(length * 4));
+    for (let s = 0; s <= steps; s++) {
+      const t = s / steps;
+      visit(worldCell(x1 + (x2 - x1) * t, z1 + (z2 - z1) * t));
     }
   }
+}
+
+function buildPathCells() {
+  gridCells.clear();
+  for (const route of ROUTES) forEachRouteCell(route, c => gridCells.add(cellKey(c.x, c.z)));
+}
+
+/* Decoración retirable: si se construye encima, el objeto desaparece para que
+   nunca atraviese una estructura. */
+const decorCells = new Map();
+function registerDecor(object, x, z, radius = .55) {
+  const a = worldCell(x - radius, z - radius), b = worldCell(x + radius, z + radius);
+  for (let cz = Math.max(0, a.z); cz <= Math.min(MAP.h - 1, b.z); cz++) {
+    for (let cx = Math.max(0, a.x); cx <= Math.min(MAP.w - 1, b.x); cx++) {
+      const key = cellKey(cx, cz);
+      let set = decorCells.get(key);
+      if (!set) { set = new Set(); decorCells.set(key, set); }
+      set.add(object);
+    }
+  }
+}
+function clearDecorAt(cx, cz) {
+  const set = decorCells.get(cellKey(cx, cz));
+  if (!set) return;
+  for (const object of [...set]) {
+    if (object.parent) object.parent.remove(object);
+    for (const other of decorCells.values()) other.delete(object);
+  }
+  decorCells.delete(cellKey(cx, cz));
 }
 
 /* ----------------------------------------------------------- texturas */
@@ -750,24 +769,13 @@ function buildTerrain() {
   sand.count = sn; sand.receiveShadow = true; world.add(sand);
 
   const allCells = new Map();
-  for (const route of ROUTES) {
-    const p = route.points;
-    for (let i = 0; i < p.length - 1; i++) {
-      let [x1, z1] = p[i], [x2, z2] = p[i + 1];
-      const dx = Math.sign(x2 - x1), dz = Math.sign(z2 - z1);
-      let x = x1, z = z1;
-      for (let guard = 0; guard < 200; guard++) {
-        const c = worldCell(x, z);
-        const key = cellKey(c.x, c.z);
-        if (!allCells.has(key)) allCells.set(key, { cx: c.x, cz: c.z, route: route.id });
-        if (x === x2 && z === z2) break;
-        x += dx; z += dz;
-      }
-    }
-  }
+  for (const route of ROUTES) forEachRouteCell(route, c => {
+    const key = cellKey(c.x, c.z);
+    if (!allCells.has(key)) allCells.set(key, { cx: c.x, cz: c.z, route: route.id });
+  });
   const roadMat = new THREE.MeshStandardMaterial({ map: makeNoiseTexture('#565650', '#76756d', '#3e3e3a'), color: 0xffffff, roughness: .96, metalness: .02 });
-  const road = new THREE.InstancedMesh(new THREE.BoxGeometry(1.015, .17, 1.015), roadMat, allCells.size);
-  const shoulder = new THREE.InstancedMesh(new THREE.BoxGeometry(1.24, .13, 1.24), mat(0x48453c, .99), allCells.size);
+  const road = new THREE.InstancedMesh(new THREE.BoxGeometry(1.005, .17, 1.005), roadMat, allCells.size);
+  const shoulder = new THREE.InstancedMesh(new THREE.BoxGeometry(1.04, .13, 1.04), mat(0x48453c, .99), allCells.size);
   let rn = 0;
   for (const item of allCells.values()) {
     const c = cellCenter(item.cx, item.cz);
@@ -857,6 +865,7 @@ function buildDecor() {
       const h = .7 + rng() * 1.05, tree = new THREE.Group(); tree.position.set(x, 0, z);
       addMesh(tree, cylGeo(.07, .13, h * .85, 7), mat(0x5b4a33), 0, h * .42, 0);
       for (let j = 0; j < 3; j++) addMesh(tree, new THREE.ConeGeometry(.48 - j * .1, .72, 7), matsFoliage[rng() * matsFoliage.length | 0], 0, h * .6 + j * .22, 0);
+      registerDecor(tree, x, z, .55);
       world.add(tree);
     } else {
       const cluster = 1 + (rng() < .35 ? 1 : 0) + (rng() < .15 ? 1 : 0);
@@ -876,6 +885,7 @@ function buildDecor() {
     const roof = addMesh(tent, new THREE.CylinderGeometry(.56, .56, 1.2, 4, 1, false), mat(0x5c634a), 0, .6, 0);
     roof.rotation.z = Math.PI / 2; roof.rotation.y = Math.PI / 4; roof.scale.z = .62;
     addMesh(tent, new THREE.BoxGeometry(.3, .38, .04), mat(0x3d4438), 0, .25, .4);
+    registerDecor(tent, x, z, .7);
     world.add(tent);
   }
   for (const [x, z] of [[-13, 6], [12, 7], [-12, -7], [12, -7]]) {
@@ -887,6 +897,7 @@ function buildDecor() {
     addMesh(b, rboxGeo(.34, .34, .34, .03), mat(0x60533d), .95, .17, .55);
     addMesh(b, rboxGeo(.28, .28, .28, .03), mat(0x60533d), .95, .17, .15).rotation.y = .4;
     addMesh(b, cylGeo(.16, .16, .44, 12), mat(0x59614a), -.95, .22, .5);
+    registerDecor(b, x, z, 1);
     world.add(b);
   }
 
@@ -1051,6 +1062,7 @@ function updatePointer(clientX, clientY) {
   hoverCell = { cellX: c.x, cellZ: c.z, ...center };
   cursorCell.position.set(center.x, .025, center.z); cursorCell.visible = true; gridLines.visible = true;
   if (state.abilityMode === 'strike') {
+    cursorCell.scale.set(1, 1, 1);
     cursorMat.color.set(0xdf6653);
     placementRing.position.set(center.x, .1, center.z);
     placementRing.material.color.set(0xdf6551);
@@ -1059,14 +1071,17 @@ function updatePointer(clientX, clientY) {
   }
   if (state.buildType) {
     ensureGhost();
-    ghost.position.set(center.x, .08, center.z); ghost.visible = true;
+    const def = TOWERS.find(t => t.id === state.buildType);
+    const fp = def ? footprintOf(def) : { w: 1, d: 1 };
+    cursorCell.scale.set(fp.w, 1, fp.d);
+    ghost.position.set(center.x, def && def.domain === 'sea' ? -.22 : .08, center.z); ghost.visible = true;
     const ok = validPlacement(c.x, c.z);
     cursorMat.color.set(ok ? 0x8fcb6d : 0xdf6653);
     placementRing.position.set(center.x, .1, center.z);
     placementRing.material.color.set(ok ? 0x7fcf6a : 0xdf6551);
     placementRing.visible = true;
-    placementRing.scale.setScalar(TOWERS.find(t => t.id === state.buildType).range);
-  } else if (ghost) ghost.visible = false;
+    placementRing.scale.setScalar(def ? def.range : 1);
+  } else { cursorCell.scale.set(1, 1, 1); if (ghost) ghost.visible = false; }
 }
 
 /* ------------------------------------------------------- modelos de torre */
@@ -1087,16 +1102,16 @@ const jetGlow = () => new THREE.MeshBasicMaterial({ color: 0xffb15c, transparent
 
 function landPad(root, army) {
   const concrete = TOWER_MATS.concrete(), sandbag = TOWER_MATS.sandbag();
-  addMesh(root, cylGeo(.58, .64, .08, 26), concrete, 0, .04, 0);
+  addMesh(root, cylGeo(.48, .52, .08, 26), concrete, 0, .04, 0);
   const bags = qualityLevel === 'low' ? 6 : 11;
   for (let i = 0; i < bags; i++) {
     const a = i / bags * Math.PI * 2;
-    const bag = addMesh(root, rboxGeo(.2, .1, .11, .03), sandbag, Math.cos(a) * .55, .1, Math.sin(a) * .55);
+    const bag = addMesh(root, rboxGeo(.16, .09, .1, .03), sandbag, Math.cos(a) * .44, .1, Math.sin(a) * .44);
     bag.rotation.y = -a; bag.rotation.z = Math.sin(a) * .07;
   }
-  addMesh(root, rboxGeo(.18, .15, .24, .03), mat(0x5b5b45), -.44, .13, .38);
-  addMesh(root, rboxGeo(.14, .12, .18, .03), mat(0x6d6248), -.58, .18, .2);
-  addFlag(root, army, .24, .15, 0, .14, .58);
+  addMesh(root, rboxGeo(.16, .13, .21, .03), mat(0x5b5b45), -.38, .12, .33);
+  addMesh(root, rboxGeo(.12, .1, .15, .03), mat(0x6d6248), -.5, .16, .18);
+  addFlag(root, army, .22, .14, 0, .13, .5);
 }
 
 function gunTower(root, army, kit) {
@@ -1547,6 +1562,64 @@ function carrierModel(root, army, kit) {
   root.userData.carrierRole = 'carrier';
 }
 
+function addUpgradeDetails(root, type, army, level) {
+  if (level <= 1) return;
+  const gold = TOWER_MATS.gold(), steel = TOWER_MATS.steel(), dark = TOWER_MATS.dark();
+  const paint = camoMaterial(army.color), warn = TOWER_MATS.warn();
+  const navy = type === 'destroyer' || type === 'carrier';
+  if (navy) {
+    const len = root.userData.navyLength || 2.2;
+    const deckY = .26;
+    // Nivel 2: cajas de misiles y aros de salvamento.
+    addMesh(root, rboxGeo(.24, .13, .3, .03), steel, .19, deckY, -len * .16);
+    for (let i = 0; i < 2; i++) addMesh(root, cylGeo(.025, .025, .26, 6), dark, .13 + i * .11, deckY + .1, -len * .16).rotation.x = Math.PI / 2;
+    if (level >= 3) {
+      // Nivel 3: mástil secundario con radar.
+      addMesh(root, cylGeo(.02, .03, .5, 8), steel, -.16, deckY + .3, len * .2);
+      addMesh(root, rboxGeo(.3, .04, .1, .01), steel, -.16, deckY + .55, len * .2);
+      addMesh(root, sphGeo(.035, 8), warn, -.16, deckY + .58, len * .2);
+    }
+    if (level >= 4) {
+      // Nivel 4: CIWS adicional y blindaje de cubierta.
+      addMesh(root, cylGeo(.06, .07, .08, 10), paint, .18, deckY + .04, len * .3);
+      addMesh(root, sphGeo(.06, 10), steel, .18, deckY + .11, len * .3);
+      addMesh(root, cylGeo(.012, .016, .2, 6), dark, .18, deckY + .11, len * .3 - .14).rotation.x = Math.PI / 2;
+      addMesh(root, rboxGeo(.12, .035, len * .34, .01), steel, -.2, deckY + .03, -.1);
+    }
+    if (level >= 5) {
+      // Nivel 5: distintivo dorado y núcleo de mando.
+      addMesh(root, torusGeo(.26, .015, 6, 20), gold, 0, deckY + .03, 0).rotation.x = Math.PI / 2;
+      addMesh(root, sphGeo(.06, 10), glowMaterial(), 0, deckY + .09, 0);
+    }
+    return;
+  }
+  // Nivel 2: placas de refuerzo, munición y sacos adicionales.
+  for (let i = 0; i < 4; i++) {
+    const a = i / 4 * Math.PI * 2 + Math.PI / 4;
+    const plate = addMesh(root, rboxGeo(.2, .05, .13, .015), steel, Math.cos(a) * .47, .14, Math.sin(a) * .47);
+    plate.rotation.y = -a;
+  }
+  addMesh(root, rboxGeo(.17, .11, .13, .02), dark, -.34, .15, .28);
+  if (level >= 3) {
+    // Nivel 3: mástil de sensores con radar y baliza.
+    addMesh(root, cylGeo(.022, .03, .44, 8), steel, .4, .33, -.33);
+    addMesh(root, rboxGeo(.26, .035, .09, .01), steel, .4, .55, -.33);
+    addMesh(root, sphGeo(.03, 8), warn, .4, .6, -.33);
+  }
+  if (level >= 4) {
+    // Nivel 4: blindaje lateral, cajas de carga y antena.
+    for (const side of [-1, 1]) addMesh(root, rboxGeo(.09, .17, .32, .02), paint, side * .4, .21, .18);
+    addMesh(root, rboxGeo(.22, .11, .15, .02), gold, .32, .17, .21);
+    addMesh(root, cylGeo(.012, .018, .34, 6), steel, -.4, .4, -.2);
+  }
+  if (level >= 5) {
+    // Nivel 5: anillo dorado, estandarte y núcleo de energía.
+    addMesh(root, torusGeo(.45, .017, 6, 24), gold, 0, .1, 0).rotation.x = Math.PI / 2;
+    addMesh(root, sphGeo(.07, 12), glowMaterial(), 0, .34, -.04);
+    addMesh(root, rboxGeo(.018, .34, .12, .01), gold, -.48, .28, .1);
+  }
+}
+
 function buildTowerModel(type, army, level = 1, preview = false) {
   const root = new THREE.Group();
   const kit = army.kit || {};
@@ -1563,16 +1636,25 @@ function buildTowerModel(type, army, level = 1, preview = false) {
     else if (type === 'aa') aaTower(root, army, kit);
     else if (type === 'laser') laserTower(root, army, kit);
     else if (type === 'ew') ewTower(root, army, kit);
-    root.scale.setScalar(1.48);
   }
+  addUpgradeDetails(root, type, army, level);
   if (level > 1) {
     const marks = Math.min(4, level - 1);
     for (let i = 0; i < marks; i++) {
-      const m = addMesh(root, rboxGeo(.13, .03, .045, .01), TOWER_MATS.gold(), -.26 + i * .16, .14, .48);
+      const m = addMesh(root, rboxGeo(.11, .028, .04, .01), TOWER_MATS.gold(), -.22 + i * .145, .135, .47);
       m.rotation.y = .08;
     }
   }
-  root.userData = { ...root.userData, type, level, domain: TOWERS.find(t => t.id === type).domain };
+  const domain = TOWERS.find(t => t.id === type).domain;
+  if (domain === 'land') {
+    // Ajusta el ancho real del modelo (incluidos cañones y detalles de mejora)
+    // para que nunca invada la celda vecina; la altura sí puede crecer.
+    const size = new THREE.Box3().setFromObject(root).getSize(new THREE.Vector3());
+    const span = Math.max(size.x, size.z);
+    const fit = span > .96 ? .96 / span : 1;
+    root.scale.set(fit, 1.06 + (level - 1) * .018, fit);
+  }
+  root.userData = { ...root.userData, type, level, domain };
   if (preview) {
     root.traverse(o => {
       if (o.isMesh) {
@@ -1849,26 +1931,47 @@ function ensureGhost() {
   ghost = buildTowerModel(state.buildType, state.army, 1, true);
   world.add(ghost);
 }
+function footprintOf(def) {
+  // Los cascos navales ocupan tres celdas de eslora; el resto, una sola celda.
+  return def.domain === 'sea' ? { w: 1, d: 3 } : { w: 1, d: 1 };
+}
+function footprintCells(cx, cz, def) {
+  const f = footprintOf(def), ox = Math.floor((f.w - 1) / 2), oz = Math.floor((f.d - 1) / 2);
+  const cells = [];
+  for (let dz = 0; dz < f.d; dz++) for (let dx = 0; dx < f.w; dx++) cells.push({ x: cx - ox + dx, z: cz - oz + dz });
+  return cells;
+}
 function validPlacement(cx, cz) {
   if (!insideCell(cx, cz)) return false;
-  if (towerCells.has(cellKey(cx, cz))) return false;
   const def = TOWERS.find(t => t.id === state.buildType);
   if (!def) return false;
-  const c = cellCenter(cx, cz);
-  if (def.domain === 'sea') {
-    if (!isWaterCell(cx, cz)) return false;
-    // Los cascos miden hasta 2,7 celdas: solo las dos filas centrales evitan que
-    // el barco sobresalga del agua o invada la playa.
-    if (cz < 1 || cz > 2) return false;
-    if (Math.abs(c.x) > 14.4) return false;
-    return true;
+  const cells = footprintCells(cx, cz, def);
+  for (const cell of cells) {
+    if (!insideCell(cell.x, cell.z)) return false;
+    if (towerCells.has(cellKey(cell.x, cell.z))) return false;
+    if (def.domain === 'sea') {
+      if (!isWaterCell(cell.x, cell.z)) return false;
+    } else {
+      if (isWaterCell(cell.x, cell.z)) return false;
+      if (gridCells.has(cellKey(cell.x, cell.z))) return false;
+      const p = cellCenter(cell.x, cell.z);
+      if (state.base && Math.hypot(p.x - state.base.position.x, p.z - state.base.position.z) < 1.3) return false;
+    }
   }
-  if (isWaterCell(cx, cz)) return false;
-  if (gridCells.has(cellKey(cx, cz))) return false;
-  if (nearestPath(c.x, c.z)) return false;
-  if (c.z > 8.4 || c.z < -3.9) return false;
-  if (state.base && Math.hypot(c.x - state.base.position.x, c.z - state.base.position.z) < 1.25) return false;
+  if (def.domain === 'sea') {
+    const center = cellCenter(cx, cz);
+    if (Math.abs(center.x) > 14.4) return false;
+  }
   return true;
+}
+function armyMods(army, type) {
+  const factor = (army.mults && army.mults[type]) || 1;
+  const bias = factor - 1;
+  return {
+    damage: factor,
+    range: 1 + bias * .5,
+    rate: 1 / (1 + bias * .35)
+  };
 }
 function makeTower(type, cx, cz) {
   const data = TOWERS.find(t => t.id === type);
@@ -1876,18 +1979,21 @@ function makeTower(type, cx, cz) {
   const group = buildTowerModel(type, state.army);
   group.position.set(center.x, data.domain === 'sea' ? -.22 : 0, center.z);
   world.add(group);
+  const cells = footprintCells(cx, cz, data);
+  for (const cell of cells) clearDecorAt(cell.x, cell.z);
+  const mods = armyMods(state.army, type);
   const tower = {
     type, data, group, pivot: group.userData.pivot, level: 1,
     cooldown: Math.random() * .2, target: null, cell: { x: cx, z: cz },
     barrels: group.userData.barrels || [], mode: 'first',
     stats: {
-      damage: data.damage * state.army.mults[type], range: data.range, rate: data.rate,
+      damage: data.damage * mods.damage, range: data.range * mods.range, rate: data.rate * mods.rate,
       splash: data.splash || 0, pierce: data.pierce || 0, slow: data.slow || 0,
       salvo: data.salvo || 1, muzzleY: group.userData.muzzleY || 1
     }
   };
   state.towers.push(tower);
-  towerCells.set(cellKey(cx, cz), tower);
+  for (const cell of cells) towerCells.set(cellKey(cell.x, cell.z), tower);
   return tower;
 }
 function getCost(type) { return Math.ceil(TOWERS.find(t => t.id === type).cost * (state.army.discount || 1)); }
@@ -2000,7 +2106,7 @@ function sellSelected() {
   if (!t) return;
   state.cash += Math.floor(t.data.cost * .6);
   world.remove(t.group);
-  towerCells.delete(cellKey(t.cell.x, t.cell.z));
+  for (const cell of footprintCells(t.cell.x, t.cell.z, t.data)) towerCells.delete(cellKey(cell.x, cell.z));
   state.towers = state.towers.filter(x => x !== t);
   state.selectedTower = null; placementRing.visible = false;
   updateInspect(); updateHud(); Sound.sell(); toast(tr('toast.sold'));
@@ -2010,7 +2116,7 @@ function sellSelected() {
 const WAVE_UNLOCK = { apc: 3, heli: 4, tank: 5, drone: 6, mlrs: 7, fighter: 9, bomber: 11 };
 const WAVE_WEIGHT = { infantry: 3.4, jeep: 2.6, apc: 2.7, tank: 2.3, mlrs: 1.8, heli: 1.9, drone: 2.2, fighter: 1.6, bomber: .9 };
 function buildWavePlan(wave) {
-  const total = Math.min(56, 6 + wave * 2);
+  const total = Math.min(64, Math.round(7 + wave * 2.3));
   const pool = [];
   for (const [type, weight] of Object.entries(WAVE_WEIGHT)) {
     if ((WAVE_UNLOCK[type] || 1) <= wave) pool.push({ type, weight });
@@ -2018,7 +2124,7 @@ function buildWavePlan(wave) {
   let seed = (wave * 9301 + 49297) % 233280;
   const rnd = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
   const plan = [];
-  const bossCount = wave % 5 === 0 ? 1 + Math.floor(wave / 15) : 0;
+  const bossCount = wave % 5 === 0 ? 1 + Math.floor(wave / 20) : 0;
   for (let i = 0; i < bossCount; i++) plan.push('boss');
   // Garantiza que el arma recién desbloqueada aparezca en su oleada.
   for (const [type, unlock] of Object.entries(WAVE_UNLOCK)) if (unlock === wave) plan.push(type);
@@ -2040,9 +2146,9 @@ function planSummary(plan) {
 }
 function waveScalars(wave) {
   return {
-    hp: 1 + Math.max(0, wave - 1) * .235 + Math.pow(Math.max(0, wave - 12), 1.35) * .035,
-    damage: 1 + Math.max(0, wave - 1) * .075,
-    speed: 1 + Math.min(.36, Math.max(0, wave - 1) * .013)
+    hp: 1 + Math.max(0, wave - 1) * .3 + Math.pow(Math.max(0, wave - 12), 1.4) * .055,
+    damage: 1 + Math.max(0, wave - 1) * .085 + Math.max(0, wave - 15) * .02,
+    speed: 1 + Math.min(.44, Math.max(0, wave - 1) * .016)
   };
 }
 function threatKey(wave) {
@@ -2094,19 +2200,22 @@ function spawnEnemy(type) {
   const d = ENEMIES[type];
   const scalars = waveScalars(state.wave);
   const rankRoll = Math.random();
-  const rank = state.wave >= 13 && rankRoll > .72 ? 'elite' : state.wave >= 8 && rankRoll > .55 ? 'veteran' : '';
-  const rankMul = rank === 'elite' ? 1.55 : rank === 'veteran' ? 1.24 : 1;
+  const rank = state.wave >= 11 && rankRoll > .7 ? 'elite' : state.wave >= 7 && rankRoll > .5 ? 'veteran' : '';
+  const rankMul = rank === 'elite' ? 1.7 : rank === 'veteran' ? 1.3 : 1;
   const model = enemyModel(type);
   const isAir = d.kind === 'air';
-  const route = isAir ? AIR_ROUTE : ROUTES[state.spawned % 2];
+  const route = isAir ? AIR_ROUTE : ROUTES[0];
+  const lane = state.spawned % 2 === 0 ? -1 : 1;
   state.spawned++;
   const hp = d.hp * scalars.hp * rankMul;
+  const armorBonus = Math.min(.12, Math.max(0, state.wave - 1) * .006);
   const e = {
     type, data: d, model, hp, maxHp: hp, speed: d.speed * scalars.speed,
     damage: d.damage * scalars.damage * (rank ? 1.12 : 1),
-    progress: 0, traveled: 0, routeIndex: 0, route, routeLength: routeLength(route),
-    reward: Math.round(d.reward * (rank === 'elite' ? 1.8 : rank === 'veteran' ? 1.25 : 1)),
-    slowTimer: 0, air: isAir, rank, x: route.points[0][0], z: route.points[0][1]
+    armor: Math.min(.82, d.armor + armorBonus),
+    progress: 0, traveled: 0, routeIndex: 0, route, routeLength: routeLength(route), lane,
+    reward: Math.round(d.reward * (rank === 'elite' ? 1.8 : rank === 'veteran' ? 1.25 : 1) * .9),
+    slowTimer: 0, repelTimer: 0, air: isAir, rank, x: route.points[0][0], z: route.points[0][1]
   };
   model.position.set(e.x, isAir ? ALTITUDE[type] : 0, e.z);
   world.add(model);
@@ -2130,45 +2239,97 @@ function updateSpawn(dt) {
   if (!state.spawnQueue.length && state.enemies.length === 0) {
     state.active = false;
     document.getElementById('waveBtn').disabled = false;
-    state.cash += 60 + state.wave * 5;
+    state.cash += 35 + state.wave * 4;
     if (state.wave > records.bestWave) { records.bestWave = state.wave; persistRecords(); updateRecordUI(); }
     Sound.cleared();
     toast(tr('toast.waveClear', { wave: state.wave }));
     updateHud(); renderIntel();
   }
 }
-function updateEnemy(e, dt) {
-  if (e.slowTimer > 0) e.slowTimer -= dt;
-  const slowMult = e.slowTimer > 0 ? .52 : 1;
-  let distanceLeft = e.speed * slowMult * dt;
+function advanceEnemyAlongRoute(e, amount) {
+  const p = e.route.points;
   let moved = 0;
-  const route = e.route;
-  while (distanceLeft > 0 && e.routeIndex < route.points.length - 1) {
-    const next = route.points[e.routeIndex + 1];
-    const dx = next[0] - e.x, dz = next[1] - e.z, len = Math.hypot(dx, dz);
-    if (distanceLeft >= len) {
-      e.x = next[0]; e.z = next[1]; distanceLeft -= len; moved += len; e.routeIndex++;
-    } else {
-      e.x += dx / len * distanceLeft; e.z += dz / len * distanceLeft;
-      moved += distanceLeft; distanceLeft = 0;
+  if (amount >= 0) {
+    let left = amount;
+    while (left > 0 && e.routeIndex < p.length - 1) {
+      const next = p[e.routeIndex + 1];
+      const dx = next[0] - e.x, dz = next[1] - e.z, len = Math.hypot(dx, dz);
+      if (len < 1e-6) { e.routeIndex++; continue; }
+      const step = Math.min(left, len);
+      e.x += dx / len * step; e.z += dz / len * step;
+      left -= step; moved += step;
+      if (step >= len - 1e-6) { e.x = next[0]; e.z = next[1]; e.routeIndex++; }
+    }
+  } else {
+    let left = -amount;
+    while (left > 0 && e.routeIndex >= 0) {
+      const prev = p[e.routeIndex];
+      const dx = prev[0] - e.x, dz = prev[1] - e.z, len = Math.hypot(dx, dz);
+      if (len < 1e-6) {
+        // En el primer waypoint ya no hay segmento anterior: el retroceso termina.
+        if (e.routeIndex === 0) break;
+        e.routeIndex--; continue;
+      }
+      const step = Math.min(left, len);
+      e.x += dx / len * step; e.z += dz / len * step;
+      left -= step; moved -= step;
+      if (step >= len - 1e-6) {
+        e.x = prev[0]; e.z = prev[1];
+        if (e.routeIndex === 0) break;
+        e.routeIndex--;
+      }
     }
   }
-  e.traveled += moved;
+  return moved;
+}
+function enemyLaneOffset(e) {
+  const p = e.route.points;
+  let dx = 0, dz = 1;
+  if (e.routeIndex < p.length - 1) { dx = p[e.routeIndex + 1][0] - e.x; dz = p[e.routeIndex + 1][1] - e.z; }
+  else if (e.routeIndex > 0) { dx = e.x - p[e.routeIndex - 1][0]; dz = e.z - p[e.routeIndex - 1][1]; }
+  const len = Math.hypot(dx, dz) || 1, width = e.air ? .12 : .17;
+  return { x: (dz / len) * e.lane * width, z: (-dx / len) * e.lane * width };
+}
+function laneSpeedFactor(e) {
+  if (e.air || e.repelTimer > 0) return 1;
+  let nearest = Infinity;
+  for (const other of state.enemies) {
+    if (other === e || other.air || other.lane !== e.lane || other.repelTimer > 0) continue;
+    const gap = other.traveled - e.traveled;
+    if (gap > 0 && gap < .7) nearest = Math.min(nearest, gap);
+  }
+  return nearest === Infinity ? 1 : Math.max(.25, nearest / .7);
+}
+function updateEnemy(e, dt) {
+  if (e.slowTimer > 0) e.slowTimer = Math.max(0, e.slowTimer - dt);
+  if (e.repelTimer > 0) e.repelTimer = Math.max(0, e.repelTimer - dt);
+  const jammed = e.repelTimer > 0;
+  const slowMult = e.slowTimer > 0 ? .52 : 1;
+  const speed = jammed ? -e.speed * .85 : e.speed * slowMult * laneSpeedFactor(e);
+  const moved = advanceEnemyAlongRoute(e, speed * dt);
+  e.traveled = Math.max(0, Math.min(e.routeLength, e.traveled + moved));
   e.progress = Math.min(1, e.traveled / e.routeLength);
   const alt = ALTITUDE[e.type] || 0;
   const bob = alt ? Math.sin(state.clock * 2.1 + e.traveled * .6) * .08 : 0;
-  e.model.position.set(e.x, alt + bob, e.z);
-  if (e.routeIndex < route.points.length - 1) {
-    const next = route.points[e.routeIndex + 1];
+  const offset = enemyLaneOffset(e);
+  let jitterX = 0, jitterZ = 0;
+  if (jammed) {
+    jitterX = Math.sin(state.clock * 37 + e.traveled * 9) * .05;
+    jitterZ = Math.cos(state.clock * 31 + e.traveled * 7) * .05;
+    if (Math.random() < dt * 7) makeSparks(e.x, alt + .4, e.z, 0x8ce8ff, 1);
+  }
+  e.model.position.set(e.x + offset.x + jitterX, alt + bob, e.z + offset.z + jitterZ);
+  if (e.routeIndex < e.route.points.length - 1) {
+    const next = e.route.points[e.routeIndex + 1];
     const desired = Math.atan2(next[0] - e.x, next[1] - e.z);
     let delta = ((desired - e.model.rotation.y + Math.PI * 3) % (Math.PI * 2)) - Math.PI;
     e.model.rotation.y += delta * Math.min(1, dt * 5);
   }
   const ud = e.model.userData;
   if (ud.mover && !e.air && e.type !== 'infantry') ud.mover.rotation.y += dt * (e.type === 'tank' || e.type === 'boss' ? .35 : .15);
-  if (ud.rotor) ud.rotor.rotation.y += dt * 20;
+  if (ud.rotor) ud.rotor.rotation.y += dt * (jammed ? 46 : 20);
   if (ud.tailRotor) ud.tailRotor.rotation.z += dt * 34;
-  if (ud.propeller) ud.propeller.rotation.z += dt * 30;
+  if (ud.propeller) ud.propeller.rotation.z += dt * (jammed ? 60 : 30);
   if (e.type === 'infantry' && Array.isArray(ud.legs)) {
     for (const unit of ud.legs) {
       const phase = state.clock * 8 + unit.userData.phase;
@@ -2181,7 +2342,7 @@ function updateEnemy(e, dt) {
   ud.hpfg.scale.x = (e.type === 'boss' ? 1.45 : .7) * ratio;
   ud.hpfg.material.color.set(ratio < .3 ? 0xe17950 : 0x9b443a);
   ud.hpbg.visible = ratio > 0;
-  if (e.routeIndex >= route.points.length - 1) {
+  if (e.routeIndex >= e.route.points.length - 1) {
     Sound.leak();
     state.hp -= e.damage;
     cameraShake = Math.min(.5, cameraShake + .12);
@@ -2192,7 +2353,7 @@ function updateEnemy(e, dt) {
 }
 function applyDamage(e, amount, pierce = 0) {
   if (!e || e.hp <= 0 || !state.enemies.includes(e)) return 0;
-  const armor = Math.max(0, Math.min(.82, (e.data.armor || 0) - pierce + (e.rank === 'elite' ? .06 : 0)));
+  const armor = Math.max(0, Math.min(.82, (e.armor || 0) - pierce + (e.rank === 'elite' ? .06 : 0)));
   const dealt = amount * (1 - armor);
   e.hp -= dealt;
   if (e.hp <= 0) removeEnemy(e, true);
@@ -2246,7 +2407,14 @@ function fire(t, e) {
   const start = new THREE.Vector3(t.group.position.x, t.group.position.y + (t.stats.muzzleY || 1), t.group.position.z);
   if (type === 'ew') {
     for (const enemy of state.enemies) {
-      if (Math.hypot(enemy.x - t.group.position.x, enemy.z - t.group.position.z) <= t.stats.range) enemy.slowTimer = Math.max(enemy.slowTimer, 1.6);
+      if (Math.hypot(enemy.x - t.group.position.x, enemy.z - t.group.position.z) <= t.stats.range) {
+        enemy.slowTimer = Math.max(enemy.slowTimer, 1.6);
+        // La guerra electrónica secuestra los drones: retroceden por la pista.
+        if (enemy.type === 'drone') {
+          enemy.repelTimer = Math.max(enemy.repelTimer, 2);
+          enemy.slowTimer = Math.max(enemy.slowTimer, 2.4);
+        }
+      }
     }
     makePulse(t.group.position.x, t.group.position.z, t.stats.range); Sound.ew();
     return;
@@ -2318,7 +2486,8 @@ function fire(t, e) {
 }
 function carrierStrike(t, e) {
   Sound.jet();
-  const from = new THREE.Vector3(t.group.position.x + 1.2, 3.4, t.group.position.z + 2.4);
+  const deck = t.group.position.clone();
+  const from = new THREE.Vector3(deck.x, .55, deck.z + .3);
   const target = new THREE.Vector3(e.x, .5, e.z);
   const jet = new THREE.Group();
   addMesh(jet, cylGeo(.05, .08, .42, 10), mat(0x828a8a, .4, .35), 0, 0, 0).rotation.x = Math.PI / 2;
@@ -2327,10 +2496,12 @@ function carrierStrike(t, e) {
   addMesh(jet, rboxGeo(.18, .02, .1, .01), mat(0x828a8a, .4, .35), 0, .05, .22);
   jet.position.copy(from);
   world.add(jet);
+  const distance = from.distanceTo(target);
   state.effects.push({
-    kind: 'airstrike', active: true, life: 1.7, data: {
-      mesh: jet, jet, from: from.clone(), target: target.clone(), elapsed: 0, damage: t.stats.damage,
-      splash: t.data.splash, pierce: t.stats.pierce, impacted: false
+    kind: 'airstrike', active: true, life: 6, data: {
+      mesh: jet, jet, from: from.clone(), target: target.clone(), elapsed: 0, returning: false,
+      outDuration: Math.max(.55, distance / 12), backDuration: Math.max(.55, distance / 10),
+      damage: t.stats.damage, splash: t.data.splash, pierce: t.stats.pierce, impacted: false
     }
   });
 }
@@ -2504,19 +2675,31 @@ function updateEffects(dt) {
     if (fx.kind === 'airstrike') {
       const p = fx.data;
       p.elapsed += dt;
-      const progress = Math.min(1, p.elapsed / 1.35);
-      p.jet.position.lerpVectors(p.from, p.target.clone().add(new THREE.Vector3(0, 2.2, -2.5)), progress);
-      p.jet.rotation.y = Math.atan2(p.target.x - p.from.x, p.target.z - p.from.z);
-      if (progress > .6 && !p.impacted) {
-        p.impacted = true;
-        for (let i = 0; i < 3; i++) {
-          const ox = (Math.random() - .5) * p.splash * 1.1, oz = (Math.random() - .5) * p.splash * 1.1;
-          setTimeout(() => impactArtillery(p.target.x + ox, p.target.z + oz, p.damage, p.splash * .55, p.pierce), i * 90);
+      const jet = p.jet;
+      const dir = (p.returning ? p.from.clone().sub(p.target) : p.target.clone().sub(p.from));
+      jet.rotation.y = Math.atan2(dir.x, dir.z);
+      if (!p.returning) {
+        const progress = Math.min(1, p.elapsed / (p.outDuration || 1.1));
+        jet.position.lerpVectors(p.from, p.target, progress);
+        jet.position.y += Math.sin(progress * Math.PI) * .85;
+        jet.rotation.z = Math.sin(progress * Math.PI) * .32;
+        if (progress > .62 && !p.impacted) {
+          p.impacted = true;
+          for (let i = 0; i < 3; i++) {
+            const ox = (Math.random() - .5) * p.splash * 1.1, oz = (Math.random() - .5) * p.splash * 1.1;
+            setTimeout(() => impactArtillery(p.target.x + ox, p.target.z + oz, p.damage, p.splash * .55, p.pierce), i * 90);
+          }
         }
-      }
-      if (progress >= 1) {
-        p.jet.position.y += 8;
-        world.remove(p.jet); fx.active = false;
+        if (progress >= 1) { p.returning = true; p.elapsed = 0; }
+      } else {
+        // Regreso al portaaviones / punto de origen: el avión nunca desaparece en el aire.
+        const progress = Math.min(1, p.elapsed / (p.backDuration || 1.1));
+        jet.position.lerpVectors(p.target, p.from, progress);
+        jet.position.y += Math.sin(progress * Math.PI) * .55;
+        jet.rotation.z = -Math.sin(progress * Math.PI) * .3;
+        if (progress >= 1) {
+          world.remove(jet); fx.active = false;
+        }
       }
       continue;
     }
@@ -2555,7 +2738,10 @@ function activateAbility(name) {
   }
   state.cash -= ab.cost; ab.cd = ab.max;
   if (name === 'emp') {
-    for (const e of state.enemies) e.slowTimer = Math.max(e.slowTimer, 4.5);
+    for (const e of state.enemies) {
+      e.slowTimer = Math.max(e.slowTimer, 4.5);
+      if (e.type === 'drone') e.repelTimer = Math.max(e.repelTimer, 2.8);
+    }
     makePulse(0, 0, 14); makePulse(0, 3, 14); Sound.emp();
     toast(tr('toast.emp'));
   } else if (name === 'repair') {
@@ -2667,26 +2853,30 @@ function repaintBase(army) {
   if (state.startFlag && state.startFlag.userData.flag) state.startFlag.userData.flag.material = flagMaterial(army);
 }
 function deploy() {
-  state.army = ARMIES[state.selectedArmy];
-  state.cash = state.army.cash;
+  const nextArmy = ARMIES[state.selectedArmy];
+  const freshMatch = !state.deployed || state.gameOver || state.army.id !== nextArmy.id;
+  state.army = nextArmy;
   settings.army = state.selectedArmy; persistSettings();
-  state.deployed = true; state.paused = false;
-  document.getElementById('pauseScreen').classList.add('hidden');
-  repaintBase(state.army);
-  for (const t of state.towers) {
-    const pos = t.group.position.clone();
-    world.remove(t.group);
-    t.group = buildTowerModel(t.type, state.army, t.level);
-    t.group.position.copy(pos); world.add(t.group);
-    t.pivot = t.group.userData.pivot; t.barrels = t.group.userData.barrels || [];
-    t.stats.muzzleY = t.group.userData.muzzleY || t.stats.muzzleY;
+  if (freshMatch) {
+    // Cambiar de facción (o desplegar desde el menú) empieza una partida nueva.
+    resetGame();
+  } else {
+    state.paused = false;
+    document.getElementById('pauseScreen').classList.add('hidden');
   }
+  repaintBase(state.army);
   document.getElementById('armyScreen').classList.add('hidden');
   document.getElementById('hudArmy').textContent = loc(state.army, 'name');
   document.getElementById('hudFlag').textContent = state.army.flag;
-  updateHud(); renderTowerList(); updateInspect(); renderAbilities();
+  updateHud(); renderTowerList(); updateInspect(); renderAbilities(); updatePauseButton();
   Sound.init(); Sound.ui();
-  toast(tr('toast.army', { name: loc(state.army, 'name') }));
+  toast(tr(freshMatch ? 'toast.armyNew' : 'toast.army', { name: loc(state.army, 'name') }));
+}
+function restartGame() {
+  resetGame();
+  setPaused(false);
+  updatePauseButton();
+  toast(tr('toast.restart'));
 }
 function resetGame() {
   for (const t of state.towers) world.remove(t.group);
@@ -2695,7 +2885,7 @@ function resetGame() {
   state.effects.forEach(f => {
     if (f.mesh) world.remove(f.mesh);
     if (f.data && f.data.jet) world.remove(f.data.jet);
-    if (f.data && f.data.mesh && f.active) recycleProjectile(f.data.mesh);
+    if (f.kind !== 'airstrike' && f.data && f.data.mesh && f.active) recycleProjectile(f.data.mesh);
   });
   state.effects = [];
   towerCells.clear();
@@ -2703,7 +2893,7 @@ function resetGame() {
   state.active = false; state.gameOver = false; state.paused = false; state.deployed = true;
   state.speed = 1; state.score = 0; state.spawnQueue = []; state.currentPlan = [];
   state.selectedTower = null; state.buildType = null; state.abilityMode = null;
-  state.spawned = 0;
+  state.spawned = 0; state.spawnTimer = 0;
   for (const ab of Object.values(state.abilities)) ab.cd = 0;
   removeGhost(); placementRing.visible = false;
   document.querySelectorAll('.speed-control button').forEach(x => x.classList.toggle('active', x.dataset.speed === '1'));
@@ -2977,13 +3167,14 @@ document.getElementById('armySwitch').addEventListener('click', () => {
 document.getElementById('waveBtn').addEventListener('click', makeWave);
 document.getElementById('retryBtn').addEventListener('click', resetGame);
 document.getElementById('centerCam').addEventListener('click', () => { target.set(0, 0, .8); targetDistance = DEFAULT_DISTANCE; yaw = 0; toast(tr('toast.camera')); });
-function zoomBy(factor) { targetDistance = THREE.MathUtils.clamp(targetDistance * factor, minDistance, maxDistance); distance = THREE.MathUtils.damp(distance, targetDistance, .4, 1 / 60); updateCamera(); }
+function zoomBy(factor) { targetDistance = THREE.MathUtils.clamp(targetDistance * factor, minDistance, maxDistance); distance = targetDistance; updateCamera(); }
 document.getElementById('zoomIn').addEventListener('click', () => zoomBy(.8));
 document.getElementById('zoomOut').addEventListener('click', () => zoomBy(1.28));
 document.getElementById('cancelBuild').addEventListener('click', () => { state.buildType = null; state.abilityMode = null; removeGhost(); updateInspect(); renderTowerList(); renderAbilities(); });
 document.getElementById('soundBtn').addEventListener('click', () => Sound.toggle(!settings.sound));
 document.getElementById('pauseBtn').addEventListener('click', togglePause);
 document.getElementById('resumeBtn').addEventListener('click', () => setPaused(false));
+document.getElementById('pauseRestartBtn').addEventListener('click', restartGame);
 document.getElementById('settingsBtn').addEventListener('click', openSettings);
 document.getElementById('pauseSettingsBtn').addEventListener('click', openSettings);
 document.getElementById('pauseQuitBtn').addEventListener('click', quitToMenu);
@@ -3094,6 +3285,7 @@ canvas.addEventListener('pointermove', e => {
   if (pointers.size >= 2 && gesture?.kind === 'pinch') {
     const ps = [...pointers.values()], d = Math.hypot(ps[1].x - ps[0].x, ps[1].y - ps[0].y), center = { x: (ps[0].x + ps[1].x) / 2, y: (ps[0].y + ps[1].y) / 2 };
     targetDistance = THREE.MathUtils.clamp(targetDistance * pinchStart / d, minDistance, maxDistance);
+    distance = targetDistance;
     pinchStart = d;
     const dx = center.x - gesture.center.x, dy = center.y - gesture.center.y;
     panPixels(dx, dy); gesture.center = center;
@@ -3147,7 +3339,7 @@ function handleClick(x, y) {
     const t = state.towers.find(v => v.group === root);
     if (t) { selectTower(t); return; }
   }
-  const tower = state.towers.find(t => t.cell.x === c.x && t.cell.z === c.z);
+  const tower = towerCells.get(cellKey(c.x, c.z));
   if (tower) { selectTower(tower); return; }
   state.selectedTower = null; placementRing.visible = false; updateInspect();
 }
@@ -3155,8 +3347,8 @@ canvas.addEventListener('wheel', e => {
   e.preventDefault();
   const before = pointerGround(e.clientX, e.clientY);
   const unit = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 120 : 1;
-  targetDistance = THREE.MathUtils.clamp(targetDistance * Math.exp(e.deltaY * unit * .0026), minDistance, maxDistance);
-  distance = THREE.MathUtils.damp(distance, targetDistance, .45, 1 / 60);
+  targetDistance = THREE.MathUtils.clamp(targetDistance * Math.exp(e.deltaY * unit * .0018), minDistance, maxDistance);
+  distance = targetDistance;
   updateCamera();
   const after = pointerGround(e.clientX, e.clientY);
   if (before && after) { target.add(before.sub(after)); clampTarget(); }
@@ -3191,7 +3383,7 @@ function tick(now) {
   const running = state.deployed && !state.paused && !state.gameOver && !document.hidden;
   const gameDt = running ? dt * state.speed : 0;
   updateKeys(dt);
-  distance = THREE.MathUtils.damp(distance, targetDistance, .34, dt);
+  distance = targetDistance;
   if (cameraShake > 0) {
     cameraShake = Math.max(0, cameraShake - dt);
     const shake = cameraShake * .12;

@@ -2,7 +2,7 @@
 
 Tower defense táctico con Three.js. Funciona en escritorio y como PWA instalable en Android, con soporte sin conexión.
 
-Ocho doctrinas militares, nueve sistemas de torre, dos rutas terrestres con flanqueo, un corredor aéreo y un teatro naval donde desplegar destructores y portaaviones. Cada país usa modelos y nombres inspirados en su equipo real.
+Ocho doctrinas militares, nueve sistemas de torre, una pista terrestre de dos carriles, un corredor aéreo y un teatro naval donde desplegar destructores y portaaviones. Cada país usa modelos y nombres inspirados en su equipo real, y sus multiplicadores cambian daño, alcance y cadencia.
 
 Al entrar se elige idioma con las banderas de España y Estados Unidos. Toda la interfaz, facciones, torres, enemigos, ayudas y avisos están disponibles en español e inglés; el idioma se puede cambiar después desde Ajustes.
 
@@ -33,6 +33,7 @@ No abras `index.html` con doble clic: el service worker y el manifiesto necesita
 | Sonido | `M` | Botón ♪ |
 | Pantalla completa | `F` | Ajustes |
 | Cancelar selección | `Esc` | Botón «Cancelar» |
+| Reiniciar partida | — | Pausa → «Reiniciar partida» |
 | Mover cámara | `WASD` / flechas | Arrastrar con un dedo |
 | Rotar cámara | `Q` / `E` | Dos dedos |
 | Zoom | Rueda | Pellizcar / botones `+` `−` |
@@ -44,8 +45,11 @@ En móvil en vertical el arsenal pasa a una bandeja inferior deslizable. La app 
 - **Intel de oleada:** el panel derecho muestra composición enemiga, blindaje, escalado de HP/daño y nivel de amenaza antes de iniciar cada oleada.
 - **Escalado enemigo:** blindados, MLRS, drones y bombarderos se suman con las oleadas; las unidades veteranas y de élite aparecen más adelante con etiquetas propias.
 - **Prioridad de fuego:** cada torre puede apuntar al primero, al último, al más fuerte o al más cercano.
-- **Apoyo de mando:** ataque aéreo dirigido, EMP que ralentiza y reparación de base, con coste y recarga.
-- **Mar:** destructores y portaaviones solo se colocan en casillas de agua y cubren las rutas terrestres cercanas a la costa.
+- **Apoyo de mando:** ataque aéreo dirigido, EMP que ralentiza y repele drones y reparación de base, con coste y recarga.
+- **Pista única:** los enemigos terrestres comparten una calzada de dos carriles, con separación por carril para no solaparse. Las torres ocupan una celda y los modelos se ajustan a su huella.
+- **Mar:** destructores y portaaviones ocupan una eslora de tres celdas y solo se colocan en agua; cubren la pista terrestre cercana a la costa.
+- **Doctrinas:** los multiplicadores de cada facción afectan al daño, el alcance y la cadencia reales de las torres. Cambiar de facción inicia una partida nueva.
+- **Portaaviones:** cada ataque embarcado despega, impacta y regresa al portaaviones antes de desaparecer.
 
 ## PWA
 

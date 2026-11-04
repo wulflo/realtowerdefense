@@ -24,7 +24,9 @@ flowchart LR
   C --> D[Partida]
   D --> E[Fin de operación]
   E -->|Reintentar| D
-  D -->|Ejército / Salir al menú| B
+  D -->|Reiniciar partida| D
+  D -->|Cambiar de ejército| B
+  D -->|Salir al menú| B
 ```
 
 Al abrir la aplicación siempre aparece `#languageScreen` con las banderas de España y Estados Unidos. La elección se guarda en `localStorage` y se aplica a toda la interfaz antes de mostrar la selección de ejército. Desde Ajustes se puede cambiar el idioma en cualquier momento, incluso en mitad de una partida.
@@ -53,11 +55,11 @@ Ocho facciones con:
 - `bonus` / `bonusEn`: modificador visible en la tarjeta.
 - `weapons` / `weaponsEn`: dotación mostrada en el menú.
 - `cash`: créditos iniciales.
-- `mults`: multiplicadores por tipo de torre.
+- `mults`: multiplicadores por tipo de torre. `armyMods()` los convierte en daño, alcance y cadencia finales.
 - `kit`: variante visual usada por los modelos procedurales.
 - `discount`: descuento opcional en torres (China).
 
-La facción activa se guarda en `state.army` y su índice en `settings.army`.
+La facción activa se guarda en `state.army` y su índice en `settings.army`. Al desplegar una facción distinta a la partida en curso, `deploy()` llama a `resetGame()` y comienza un enfrentamiento nuevo.
 
 ### Equipo por país (`WEAPONS`)
 
@@ -78,7 +80,7 @@ Campos principales:
 - `splash`, `pierce`, `slow`, `salvo` (opcionales).
 - `domain`: `land` o `sea`.
 
-`getCost(type)` aplica el descuento del ejército. `validPlacement()` decide si una celda es válida.
+`getCost(type)` aplica el descuento del ejército. Cada torre tiene una huella: las terrestres ocupan `1×1` y los cascos navales `1×3`. `footprintOf()`, `footprintCells()` y `validPlacement()` comprueban todas las celdas de la huella (límites, agua, pista, base y ocupación) antes de construir o vender.
 
 ### Enemigos (`ENEMIES`)
 
@@ -93,7 +95,9 @@ const WAVE_WEIGHT = { ... };
 
 ### Rutas (`ROUTES`, `AIR_ROUTE`)
 
-Dos rutas terrestres quebradas (`main` y `bypass`) y un corredor aéreo. Cada ruta es una lista de puntos `[x, z]`; `routeLength()` precarga su longitud para calcular el progreso de cada enemigo.
+Una única pista terrestre de dos carriles (`main`) y un corredor aéreo (`AIR_ROUTE`). Cada ruta es una lista de puntos `[x, z]`; `routeLength()` precarga su longitud para calcular el progreso de cada enemigo.
+
+`forEachRouteCell()` rasteriza la pista sobre la cuadrícula para bloquear sus celdas. En el spawn, `lane` alterna entre `-1` y `1`; `enemyLaneOffset()` desplaza visualmente cada unidad hacia su carril y `laneSpeedFactor()` mantiene la separación para que dos enemigos del mismo carril no se solapen.
 
 ### Estado (`state`)
 
@@ -175,9 +179,9 @@ Al cambiar de idioma, `refreshEnemyLabels()` reconstruye los sprites de texto de
 
 - El mapa mide `30 × 18` celdas.
 - `world` es el grupo raíz de la escena.
-- `towerCells` evita solapamientos; `gridCells` marca celdas ocupadas por decoración.
-- `validPlacement()` comprueba límites, agua, caminos, base y celdas libres.
-- Las naves solo pueden colocarse en las dos filas centrales de agua para que el casco no sobresalga de la costa.
+- `towerCells` evita solapamientos y asocia cada celda de la huella con su torre; `gridCells` marca las celdas de la pista.
+- `decorCells` registra árboles, tiendas y hangares. Al construir encima, `clearDecorAt()` los retira para que ningún decorado atraviese la estructura.
+- `validPlacement()` comprueba límites, agua, pista, base y todas las celdas de la huella. Las naves ocupan `1×3` y solo caben en las dos filas centrales de agua; el resto de modelos se ajusta para no invadir la celda vecina.
 
 ### Modelos procedurales
 
@@ -202,11 +206,12 @@ Orden aproximado por frame:
 
 ### Torres y proyectiles
 
-Cada torre combina sus estadísticas base con los multiplicadores del ejército. Al mejorar:
+Cada torre combina sus estadísticas base con `armyMods()`: el multiplicador de facción modula el daño, el alcance y la cadencia (estos dos con menor intensidad). Al mejorar:
 
 - Daño ×1.34.
 - Alcance ×1.07.
 - Cadencia ×0.94.
+- El modelo se reconstruye con detalles visuales adicionales en cada nivel (refuerzos, sensores, misiles, radar, blindaje, anillo dorado y núcleo de energía).
 
 Los tipos de ataque son:
 
@@ -215,9 +220,9 @@ Los tipos de ataque son:
 - Salvas de cohetes.
 - Misiles guiados antiaéreos.
 - Láser continuo con penetración total.
-- Pulso EW que ralentiza.
+- Pulso EW que ralentiza; contra drones activa `repelTimer` y los hace retroceder por la pista.
 - Misiles de crucero navales.
-- Ataque aéreo embarcado del portaaviones.
+- Ataque aéreo embarcado del portaaviones: el avión despega de la cubierta, impacta y regresa al portaaviones antes de retirarse.
 
 ### Prioridades de fuego
 
@@ -231,14 +236,14 @@ La prioridad se guarda en `tower.mode` y se muestra en el panel de inspección.
 
 ### Rangos y dificultad
 
-A partir de ciertas oleadas aparecen enemigos veteranos y de élite, con más HP, daño y recompensa. Los jefes aparecen cada cinco oleadas. El daño recibido por la base depende del tipo de enemigo que alcanza el final de la ruta.
+A partir de ciertas oleadas aparecen enemigos veteranos y de élite, con más HP, daño y recompensa. Los jefes aparecen cada cinco oleadas. `waveScalars()` escala HP, daño y velocidad, `spawnEnemy()` añade blindaje progresivo y `buildWavePlan()` aumenta el número de unidades. El daño recibido por la base depende del tipo de enemigo que alcanza el final de la ruta. Las recompensas por baja y la bonificación de oleada se redujeron para exigir una defensa más planificada.
 
 ### Habilidades de mando
 
 | Habilidad | Tecla | Coste | Efecto |
 | --- | --- | --- | --- |
 | Ataque aéreo | `Z` | 120 | Daño elevado en área sobre un punto elegido. |
-| Pulso EMP | `X` | 90 | Ralentiza a todos los enemigos durante 4,5 s. |
+| Pulso EMP | `X` | 90 | Ralentiza a todos los enemigos durante 4,5 s y repele drones durante 2,8 s. |
 | Reparar base | `C` | 80 | Recupera hasta 22% de integridad. |
 
 ### Oleadas
@@ -262,7 +267,7 @@ Muestra facción, créditos, integridad, oleada, enemigos y amenaza. Los botones
 
 - `#languageScreen`: selector inicial bilingüe.
 - `#armyScreen`: selección de facción y despliegue.
-- `#pauseScreen`: reanudar, ajustes o salir al menú.
+- `#pauseScreen`: reanudar, reiniciar la partida, ajustes o salir al menú.
 - `#defeatScreen`: resultado, récords y reintento.
 - `#settingsScreen`: idioma, calidad, sonido, etiquetas, volumen, pantalla completa, instalación y borrado de progreso.
 - `#updateBanner`: aviso de nueva versión del service worker.
@@ -341,5 +346,9 @@ Checklist manual:
 - Ajustes → Idioma cambia la UI al instante y persiste tras recargar.
 - Las etiquetas 3D de enemigos cambian de idioma sin errores.
 - Construcción, mejora, venta, habilidades, oleadas y derrota muestran textos correctos.
+- Se puede construir en cualquier celda terrestre libre (incluidas las de decoración) y en toda la eslora naval válida; la vista previa ocupa la huella real.
+- Las mejoras cambian el modelo de la torre y no invaden celdas vecinas.
+- El ataque del portaaviones regresa a cubierta y la guerra electrónica hace retroceder a los drones.
+- Pausa → Reiniciar partida deja la partida a cero; cambiar de ejército también inicia una partida nueva.
 - En móvil vertical no hay solapamientos entre arsenal, habilidades y avisos.
 - La consola no muestra errores y el service worker sirve la versión nueva tras el despliegue.
