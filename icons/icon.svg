@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#223027"/>
+      <stop offset="1" stop-color="#111713"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f0d391"/>
+      <stop offset="1" stop-color="#b98f3e"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <circle cx="256" cy="256" r="196" fill="none" stroke="#435044" stroke-width="6" opacity="0.7"/>
+  <g transform="translate(256 256) rotate(45)">
+    <rect x="-122" y="-122" width="244" height="244" rx="14" fill="#202b23" stroke="url(#gold)" stroke-width="12"/>
+    <rect x="-96" y="-96" width="192" height="192" rx="6" fill="none" stroke="#87a65b" stroke-width="3" opacity="0.7"/>
+  </g>
+  <text x="256" y="289" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif" font-weight="bold" font-size="132" letter-spacing="4" fill="url(#gold)">FG</text>
+  <path d="M256 62 L266 88 L292 98 L266 108 L256 134 L246 108 L220 98 L246 88 Z" fill="#d8b15d" opacity="0.9"/>
+  <path d="M256 378 L266 404 L292 414 L266 424 L256 450 L246 424 L220 414 L246 404 Z" fill="#87a65b" opacity="0.75"/>
+</svg>
