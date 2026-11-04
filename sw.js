@@ -9,6 +9,7 @@ const CACHE = `frente-global-${BUILD}`;
 const SHELL = [
   './',
   './index.html',
+  './game.js',
   './manifest.webmanifest',
   './vendor/three.min.js',
   './icons/icon-192.png',

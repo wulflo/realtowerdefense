@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#18211b">
-<meta name="description" content="Tower defense táctico con ocho doctrinas militares. Defiende la línea en Android y escritorio.">
+<meta name="description" content="Tower defense táctico con ocho doctrinas militares, guerra naval y apoyo de mando. Defiende la línea en Android y escritorio.">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -134,6 +134,66 @@ button:focus-visible,select:focus-visible,input:focus-visible,.tower-card:focus-
   .tower-card,.army-card,.side,.hint-toast{transition:none}
 }
 /* ===== Retrato móvil: bandeja de construcción + inspección flotante ===== */
+/* ===== Ampliación táctica: dos rutas, mar, inteligencia y apoyo ===== */
+.tower-list{max-height:calc(100vh - 300px);overflow-y:auto;scrollbar-width:thin}
+.domain-tag{display:inline-block;margin-left:6px;padding:1px 4px;font:700 7px/1.4 var(--font);letter-spacing:.6px;vertical-align:middle;border:1px solid #5d6a58;color:#aeb8a4;background:#1c251e}
+.domain-tag.sea{border-color:#54808a;color:#8fccd8;background:#18272a}
+.tower-card.naval{border-left:2px solid #4e7f88}
+.tower-card.naval:hover{background:#4e7f8814}
+.stat.threat-stat .value{color:#e0a36e}
+.intel-panel{padding:11px 13px 13px;font-size:10px}
+.intel-head{display:flex;align-items:center;justify-content:space-between;gap:8px;font:700 12px var(--display);text-transform:uppercase;letter-spacing:.5px;color:#e9e3ce}
+.intel-head em{font:400 9px var(--font);color:#9ba796;text-transform:none;letter-spacing:0}
+.threat{font:700 9px var(--font);letter-spacing:.7px;padding:3px 6px;border:1px solid #6a7454;color:#cfd7bd;background:#2c382d;white-space:nowrap}
+.threat-baja{border-color:#6d8d5b;color:#b8d59a}
+.threat-media{border-color:#9d8c4c;color:#e4cb7f}
+.threat-alta{border-color:#a16e48;color:#efae79}
+.threat-severa{border-color:#a1574b;color:#ee8f7d}
+.threat-critica,.threat-crítica{border-color:#b14343;color:#ff8b84}
+.intel-sub{color:#8f9b8b;font-size:9px;margin:4px 0 8px;letter-spacing:.2px}
+.intel-list{display:flex;flex-direction:column;gap:3px;margin-bottom:9px}
+.intel-row{display:flex;align-items:center;gap:7px;padding:4px 5px;background:#1a241c;border:1px solid #303c31;min-height:31px}
+.intel-icon{width:20px;height:20px;display:grid;place-items:center;flex:none;font-size:11px;border:1px solid #465044;color:#d9c47a;background:#263027}
+.intel-icon.t2{color:#b9c9a4}.intel-icon.t3{color:#e0a36e}.intel-icon.t4{color:#e08379}.intel-icon.t5{color:#ffb36b;border-color:#8c6a3f}
+.intel-name{flex:1;min-width:0;font-size:10px;color:#d8ddcc;line-height:1.2}
+.intel-name em{display:block;font:400 8px var(--font);color:#8f9b8b;font-style:normal;margin-top:2px}
+.intel-row b{font:700 11px var(--display);color:#e3c16d}
+.intel-routes{display:flex;flex-wrap:wrap;align-items:center;gap:3px 7px;padding:7px 0;border-top:1px solid #334034;border-bottom:1px solid #334034;color:#9eaa97;font-size:9px}
+.intel-routes b{color:#c8d2bd;font-weight:600}
+.intel-abilities{padding-top:8px;font-size:9px;color:#95a08f;line-height:1.5}
+.intel-abilities b{display:block;color:#d7ddca;font:700 10px var(--display);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px}
+.intel-abilities kbd{display:inline-block;background:#2c382d;border:1px solid #4b5948;border-bottom-width:2px;padding:0 4px;font:600 9px var(--font);color:#efe8d4;border-radius:2px}
+.target-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px;padding-top:9px;border-top:1px solid #394438;font-size:10px;color:#bbc1af}
+.target-btn{border:1px solid #67714f;background:#3d4934;padding:6px 9px;font:700 10px var(--display);text-transform:uppercase;letter-spacing:.4px}
+.target-btn:hover{background:#566345;border-color:var(--gold)}
+.ability-bar{position:absolute;left:calc(20px + var(--sal));bottom:calc(88px + var(--sab));display:flex;gap:6px;pointer-events:auto;z-index:3}
+.ability-btn{position:relative;display:flex;align-items:center;gap:7px;min-width:142px;padding:7px 9px;background:rgba(24,33,26,.93);border:1px solid #4b5948;text-align:left;transition:.16s;overflow:hidden}
+.ability-btn:hover{border-color:var(--gold);background:#303b30}
+.ability-btn.active{border-color:#d06d55;background:#4a3029}
+.ability-btn.cooling{opacity:.55;cursor:default}
+.ability-btn:disabled{cursor:default}
+.ab-icon{width:27px;height:27px;display:grid;place-items:center;flex:none;border:1px solid #5b674f;color:#e1c477;font-size:14px;background:#263027}
+.ab-text{display:flex;flex-direction:column;min-width:0;line-height:1.2}
+.ab-text b{font:700 10px var(--display);text-transform:uppercase;letter-spacing:.35px;white-space:nowrap}
+.ab-text em{font:400 8px var(--font);color:#9ca793;font-style:normal;margin-top:2px;white-space:nowrap}
+.ab-cd{position:absolute;right:5px;top:4px;font:700 9px var(--font);color:#f0b081}
+@media(max-width:850px){
+  .ability-btn{min-width:0;padding:6px 7px}
+  .ab-text b{font-size:9px}
+  .ab-text em{display:none}
+  .stat.threat-stat{display:none}
+}
+@media(max-width:570px){
+  .ability-bar{left:calc(7px + var(--sal));bottom:calc(138px + var(--sab));gap:4px}
+  .ability-btn{min-width:0;padding:6px;gap:0}
+  .ab-text{display:none}
+  .ab-icon{width:30px;height:30px;font-size:15px}
+  .ab-cd{right:2px;top:1px;font-size:8px}
+  .tower-list{max-height:none;overflow:visible}
+}
+@media(max-width:570px) and (orientation:portrait){
+  .ability-bar{bottom:calc(160px + var(--sab))}
+}
 @media(max-width:570px) and (orientation:portrait){
   .topbar{gap:2px}
   .army-mini{display:none}
@@ -172,8 +232,28 @@ button:focus-visible,select:focus-visible,input:focus-visible,.tower-card:focus-
   .bottom-right{right:calc(6px + var(--sar));bottom:calc(9px + var(--sab));gap:5px}
   .bottom-right #zoomOut,.bottom-right #zoomIn{display:none}
   .bottom-right .small-btn{font-size:9px;padding:8px 7px;min-height:38px}
-  .hint-toast{top:auto;bottom:calc(160px + var(--sab));font-size:10px;max-width:calc(100vw - 20px)}
+  .hint-toast{top:auto;bottom:calc(210px + var(--sab));font-size:10px;max-width:calc(100vw - 20px)}
   .map-coords{display:none}
+}
+/* ===== Selector de idioma ===== */
+#languageScreen{z-index:10}
+.language-box{width:min(680px,94vw);padding:26px 22px 24px;text-align:center;background:linear-gradient(160deg,rgba(31,41,34,.98),rgba(23,32,26,.98));border:1px solid #5b654e;box-shadow:0 20px 60px #0009;margin:18px}
+.language-eyebrow{font-size:10px;color:var(--gold);letter-spacing:2px;text-transform:uppercase}
+.language-title{font:800 clamp(30px,6vw,46px)/1 var(--display);text-transform:uppercase;letter-spacing:1px;margin:9px 0 7px}
+.language-copy{color:#aab49f;font-size:12px;margin:0 0 20px;line-height:1.5}
+.language-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.language-option{display:flex;flex-direction:column;align-items:center;gap:7px;padding:22px 14px;background:#243028;border:1px solid #4b5948;transition:.16s;min-height:150px;justify-content:center}
+.language-option:hover,.language-option:focus-visible{border-color:var(--gold);background:#303d31;transform:translateY(-2px)}
+.language-option .lang-flag{font-size:58px;line-height:1;filter:drop-shadow(0 6px 10px #0007)}
+.language-option .lang-name{font:700 20px var(--display);letter-spacing:.6px}
+.language-option .lang-sub{font-size:10px;color:#a6b09b;text-transform:uppercase;letter-spacing:1px}
+@media(max-width:570px){
+  .language-box{padding:20px 14px 18px}
+  .language-grid{gap:8px}
+  .language-option{padding:16px 8px;min-height:126px}
+  .language-option .lang-flag{font-size:46px}
+  .language-option .lang-name{font-size:17px}
+  .language-option .lang-sub{font-size:9px}
 }
 </style>
 </head>
@@ -182,464 +262,44 @@ button:focus-visible,select:focus-visible,input:focus-visible,.tower-card:focus-
 <canvas id="view"></canvas><div class="vignette"></div><div class="grain"></div>
 <div class="hud">
   <header class="topbar">
-    <div class="brand"><div class="mark"><span>FG</span></div><div><div class="brand-title">Frente Global</div><div class="brand-sub">Comando de defensa</div></div></div>
+    <div class="brand"><div class="mark"><span>FG</span></div><div><div class="brand-title">Frente Global</div><div class="brand-sub" data-i18n="brand.sub">Comando de defensa</div></div></div>
     <div class="statusbar">
       <div class="army-mini"><span class="flag" id="hudFlag">🇺🇸</span><b id="hudArmy">Fuerza aliada</b></div>
-      <div class="stat money"><div class="label">Créditos</div><div class="value" id="cash">650</div></div>
-      <div class="stat"><div class="label">Integridad</div><div class="value"><span id="baseHp">100</span>%</div></div>
-      <div class="stat"><div class="label">Oleada</div><div class="value" id="waveLabel">00</div></div>
-      <div class="stat"><div class="label">Enemigos</div><div class="value" id="enemyCount">0</div></div>
+      <div class="stat money"><div class="label" data-i18n="stat.credits">Créditos</div><div class="value" id="cash">650</div></div>
+      <div class="stat"><div class="label" data-i18n="stat.integrity">Integridad</div><div class="value"><span id="baseHp">100</span>%</div></div>
+      <div class="stat"><div class="label" data-i18n="stat.wave">Oleada</div><div class="value" id="waveLabel">00</div></div>
+      <div class="stat"><div class="label" data-i18n="stat.enemies">Enemigos</div><div class="value" id="enemyCount">0</div></div>
+      <div class="stat threat-stat"><div class="label" data-i18n="stat.threat">Amenaza</div><div class="value" id="threatLevel">Baja</div></div>
     </div>
-    <div class="top-actions"><button class="small-btn" id="armySwitch" title="Cambiar ejército">Ejército</button><button class="icon-btn" id="centerCam" title="Centrar cámara">⌖</button><button class="icon-btn" id="soundBtn" title="Sonido (M)">♪</button><button class="icon-btn" id="pauseBtn" title="Pausa (P)">❚❚</button><button class="icon-btn" id="fullscreenBtnTop" title="Pantalla completa (F)">⛶</button><button class="icon-btn" id="settingsBtn" title="Ajustes">⚙</button></div>
+    <div class="top-actions"><button class="small-btn" id="armySwitch" data-i18n="action.army" data-i18n-title="action.armyTitle" title="Cambiar ejército">Ejército</button><button class="icon-btn" id="centerCam" data-i18n-title="action.centerTitle" title="Centrar cámara">⌖</button><button class="icon-btn" id="soundBtn" title="Sonido (M)">♪</button><button class="icon-btn" id="pauseBtn" title="Pausa (P)">❚❚</button><button class="icon-btn" id="fullscreenBtnTop" data-i18n-title="action.fullscreen" title="Pantalla completa (F)">⛶</button><button class="icon-btn" id="settingsBtn" data-i18n-title="action.settings" title="Ajustes">⚙</button></div>
   </header>
   <div class="layout">
-    <aside class="side left-panel"><div class="panel-head"><div><div class="kicker">Arsenal de campo</div><div class="panel-title">Construir</div></div><div class="wave-pill" id="buildHint">1-5</div></div><div class="tower-list" id="towerList"></div><div class="tower-hint">Selecciona un sistema y colócalo sobre terreno libre. Esc cancela la selección.</div></aside>
+    <aside class="side left-panel"><div class="panel-head"><div><div class="kicker" data-i18n="build.kicker">Arsenal de campo</div><div class="panel-title" data-i18n="build.title">Construir</div></div><div class="wave-pill" id="buildHint">1-9</div></div><div class="tower-list" id="towerList"></div><div class="tower-hint" data-i18n="build.hint">Sistemas terrestres y navales. Elige uno y colócalo en una casilla libre. Teclas 1–9. Esc cancela.</div></aside>
     <div></div>
-    <aside class="side right-panel" id="inspectPanel"><div class="panel-head"><div><div class="kicker">Control táctico</div><div class="panel-title">Inspección</div></div><div class="wave-pill" id="inspectLevel"></div></div><div id="inspectBody" class="tower-empty">Selecciona una torre del mapa para ver sus parámetros y órdenes disponibles.</div></aside>
+    <aside class="side right-panel" id="inspectPanel"><div class="panel-head"><div><div class="kicker" data-i18n="inspect.kicker">Control táctico</div><div class="panel-title" data-i18n="inspect.title">Inspección</div></div><div class="wave-pill" id="inspectLevel"></div></div><div id="inspectBody" class="tower-empty" data-i18n="inspect.empty">Selecciona una torre del mapa para ver sus parámetros y órdenes disponibles.</div></aside>
   </div>
-  <div class="bottom"><div class="bottom-center"><button class="wave-btn" id="waveBtn">Iniciar oleada</button><div class="speed-control"><button data-speed="1" class="active">×1</button><button data-speed="2">×2</button><button data-speed="3">×3</button></div></div><div class="bottom-right"><button class="icon-btn" id="zoomOut" title="Alejar cámara">−</button><button class="icon-btn" id="zoomIn" title="Acercar cámara">+</button><button class="small-btn" id="cancelBuild">Cancelar</button></div></div>
-  <div class="map-coords" id="mapCoords">SECTOR 07 / CUADRÍCULA 01</div><div class="hint-toast" id="toast"></div>
+  <div class="bottom"><div class="bottom-center"><button class="wave-btn" id="waveBtn" data-i18n="wave.start">Iniciar oleada</button><div class="speed-control"><button data-speed="1" class="active">×1</button><button data-speed="2">×2</button><button data-speed="3">×3</button></div></div><div class="bottom-right"><button class="icon-btn" id="zoomOut" data-i18n-title="zoom.out" title="Alejar cámara">−</button><button class="icon-btn" id="zoomIn" data-i18n-title="zoom.in" title="Acercar cámara">+</button><button class="small-btn" id="cancelBuild" data-i18n="common.cancel">Cancelar</button></div></div>
+  <div class="ability-bar" id="abilityBar"><button class="ability-btn" id="abilityStrike" data-i18n-title="ability.strikeTitle" title="Ataque aéreo (Z) · 120 créditos"><span class="ab-icon">✈</span><span class="ab-text"><b data-i18n="ability.strike">Ataque aéreo</b><em data-i18n="ability.strikeHint">Z · 120 cr</em></span><span class="ab-cd"></span></button><button class="ability-btn" id="abilityEmp" data-i18n-title="ability.empTitle" title="Pulso EMP (X) · 90 créditos"><span class="ab-icon">⌁</span><span class="ab-text"><b data-i18n="ability.emp">Pulso EMP</b><em data-i18n="ability.empHint">X · 90 cr</em></span><span class="ab-cd"></span></button><button class="ability-btn" id="abilityRepair" data-i18n-title="ability.repairTitle" title="Reparar base (C) · 80 créditos"><span class="ab-icon">✚</span><span class="ab-text"><b data-i18n="ability.repair">Reparar base</b><em data-i18n="ability.repairHint">C · 80 cr</em></span><span class="ab-cd"></span></button></div>
+  <div class="map-coords" id="mapCoords" data-i18n="map.sector">SECTOR 07 / CUADRÍCULA 01</div><div class="hint-toast" id="toast"></div>
 </div>
-<section class="veil" id="armyScreen"><div class="selection-shell"><div class="selection-top"><div><div class="selection-eyebrow">Protocolo de despliegue · Operación indefinida</div><h1 class="selection-title">Elige tu fuerza</h1></div><div class="selection-copy">Una ruta. Una posición que mantener.<br>Tu doctrina define cada defensa.</div></div><div class="army-grid" id="armyGrid"></div><div class="selection-footer"><div><div class="selection-note">Los parámetros son valores de equilibrio de juego.</div><div class="record-line" id="menuRecords"><span>Mejor oleada<b id="recordWave">0</b></span><span>Récord<b id="recordScore">0</b></span><span>Partidas<b id="recordRuns">0</b></span></div></div><div class="selection-actions"><button class="small-btn install-btn" id="installBtnMenu" hidden>Instalar app</button><button class="deploy-btn" id="deployBtn">Desplegar fuerza →</button></div></div></div></section>
-<section class="veil hidden" id="defeatScreen"><div class="result-box"><div class="selection-eyebrow">Fin de la operación</div><div class="result-title">Línea perdida</div><p id="defeatText">La base ha caído. Reorganiza tu defensa y vuelve al frente.</p><div class="record-line" id="defeatRecordLine"></div><button class="deploy-btn" id="retryBtn">Reintentar</button></div></section>
-<section class="veil hidden" id="pauseScreen"><div class="result-box pause-box"><div class="selection-eyebrow">Operación en espera</div><div class="result-title">Pausa</div><p>La simulación está detenida. Tu posición se mantiene intacta.</p><div class="pause-actions"><button class="deploy-btn" id="resumeBtn">Reanudar</button><button class="setting-btn" id="pauseSettingsBtn">Ajustes</button><button class="setting-btn danger" id="pauseQuitBtn">Salir al menú</button></div></div></section>
-<section class="veil hidden" id="settingsScreen"><div class="settings-box"><div class="settings-head"><div><div class="kicker">Configuración</div><div class="settings-title">Ajustes</div></div><button class="settings-close" id="closeSettingsBtn">Cerrar</button></div>
-<div class="setting-row"><div class="setting-text">Calidad gráfica<span class="hint" id="qualityHint">Automática según tu dispositivo.</span></div><select id="qualitySelect"><option value="auto">Automática</option><option value="high">Alta</option><option value="medium">Media</option><option value="low">Baja</option></select></div>
-<div class="setting-row"><div class="setting-text">Sonido<span class="hint">Efectos sintetizados, sin descargas.</span></div><button class="setting-btn" id="soundToggle">Activado</button></div>
-<div class="setting-row"><div class="setting-text">Volumen</div><input type="range" id="volumeRange" min="0" max="100" step="1" value="65" aria-label="Volumen"></div>
-<div class="setting-row"><div class="setting-text">Pantalla completa<span class="hint" id="fullscreenHint">Útil en escritorio y Android.</span></div><button class="setting-btn" id="fullscreenBtn">Activar</button></div>
-<div class="setting-row"><div class="setting-text">Instalar aplicación<span class="hint" id="installHint">Añádela a tu pantalla de inicio para jugar sin conexión.</span></div><button class="setting-btn" id="installBtn" hidden>Instalar</button></div>
-<div class="setting-row"><div class="setting-text">Progreso local<span class="hint">Récords y preferencias se guardan en este dispositivo.</span></div><button class="setting-btn danger" id="resetProgressBtn">Borrar récord</button></div>
-<div class="shortcuts"><b>Teclado</b><br><kbd>1</kbd>–<kbd>5</kbd> construir · <kbd>Espacio</kbd> oleada/pausa · <kbd>P</kbd> pausa<br><kbd>M</kbd> sonido · <kbd>F</kbd> pantalla completa · <kbd>Esc</kbd> cancelar<br><kbd>WASD</kbd>/flechas mover cámara · <kbd>Q</kbd><kbd>E</kbd> rotar · rueda zoom<br><b>Táctil:</b> un dedo desplaza, dos dedos hacen zoom, toca para construir.</div>
-<div class="settings-version">Frente Global · v<span id="appVersion">1.0.0</span> · <span id="installMode">navegador</span></div></div></section>
-<div class="update-banner" id="updateBanner" hidden><span>Nueva versión disponible</span><button id="reloadBtn">Actualizar</button></div>
+<section class="veil" id="languageScreen"><div class="language-box"><div class="language-eyebrow" data-i18n="language.eyebrow">Configuración inicial</div><h1 class="language-title" data-i18n="language.title">Elige tu idioma</h1><p class="language-copy" data-i18n="language.copy">Puedes cambiarlo después en Ajustes.</p><div class="language-grid"><button class="language-option" type="button" data-lang="es" aria-label="Español"><span class="lang-flag">🇪🇸</span><span class="lang-name">Español</span><span class="lang-sub" data-i18n="language.esSub">Jugar en español</span></button><button class="language-option" type="button" data-lang="en" aria-label="English"><span class="lang-flag">🇺🇸</span><span class="lang-name">English</span><span class="lang-sub" data-i18n="language.enSub">Play in English</span></button></div></div></section>
+<section class="veil hidden" id="armyScreen"><div class="selection-shell"><div class="selection-top"><div><div class="selection-eyebrow" data-i18n="menu.eyebrow">Protocolo de despliegue · Operación indefinida</div><h1 class="selection-title" data-i18n="menu.title">Elige tu fuerza</h1></div><div class="selection-copy" data-i18n-html="menu.copyHtml">Dos rutas terrestres. Un mar. Un corredor aéreo.<br>Tu doctrina define cada defensa.</div></div><div class="army-grid" id="armyGrid"></div><div class="selection-footer"><div><div class="selection-note" data-i18n="menu.note">Los parámetros son valores de equilibrio de juego.</div><div class="record-line" id="menuRecords"><span><span data-i18n="menu.bestWave">Mejor oleada</span><b id="recordWave">0</b></span><span><span data-i18n="menu.record">Récord</span><b id="recordScore">0</b></span><span><span data-i18n="menu.runs">Partidas</span><b id="recordRuns">0</b></span></div></div><div class="selection-actions"><button class="small-btn install-btn" id="installBtnMenu" data-i18n="menu.install" hidden>Instalar app</button><button class="deploy-btn" id="deployBtn" data-i18n="menu.deploy">Desplegar fuerza →</button></div></div></div></section>
+<section class="veil hidden" id="defeatScreen"><div class="result-box"><div class="selection-eyebrow" data-i18n="defeat.eyebrow">Fin de la operación</div><div class="result-title" data-i18n="defeat.title">Línea perdida</div><p id="defeatText">La base ha caído. Reorganiza tu defensa y vuelve al frente.</p><div class="record-line" id="defeatRecordLine"></div><button class="deploy-btn" id="retryBtn" data-i18n="defeat.retry">Reintentar</button></div></section>
+<section class="veil hidden" id="pauseScreen"><div class="result-box pause-box"><div class="selection-eyebrow" data-i18n="pause.eyebrow">Operación en espera</div><div class="result-title" data-i18n="pause.title">Pausa</div><p data-i18n="pause.text">La simulación está detenida. Tu posición se mantiene intacta.</p><div class="pause-actions"><button class="deploy-btn" id="resumeBtn" data-i18n="pause.resume">Reanudar</button><button class="setting-btn" id="pauseSettingsBtn" data-i18n="pause.settings">Ajustes</button><button class="setting-btn danger" id="pauseQuitBtn" data-i18n="pause.quit">Salir al menú</button></div></div></section>
+<section class="veil hidden" id="settingsScreen"><div class="settings-box"><div class="settings-head"><div><div class="kicker" data-i18n="settings.kicker">Configuración</div><div class="settings-title" data-i18n="settings.title">Ajustes</div></div><button class="settings-close" id="closeSettingsBtn" data-i18n="settings.close">Cerrar</button></div>
+<div class="setting-row"><div class="setting-text"><span data-i18n="settings.language">Idioma</span><span class="hint" data-i18n="settings.languageHint">Cambia el idioma de la interfaz al instante.</span></div><select id="languageSelect"><option value="es">Español</option><option value="en">English</option></select></div>
+<div class="setting-row"><div class="setting-text"><span data-i18n="settings.quality">Calidad gráfica</span><span class="hint" id="qualityHint">Automática según tu dispositivo.</span></div><select id="qualitySelect"><option value="auto" data-i18n="quality.auto">Automática</option><option value="high" data-i18n="quality.high">Alta</option><option value="medium" data-i18n="quality.medium">Media</option><option value="low" data-i18n="quality.low">Baja</option></select></div>
+<div class="setting-row"><div class="setting-text"><span data-i18n="settings.sound">Sonido</span><span class="hint" data-i18n="settings.soundHint">Efectos sintetizados, sin descargas.</span></div><button class="setting-btn" id="soundToggle">Activado</button></div>
+<div class="setting-row"><div class="setting-text"><span data-i18n="settings.labels">Etiquetas enemigas</span><span class="hint" data-i18n="settings.labelsHint">Muestra el tipo y el rango de veterano o élite sobre cada unidad.</span></div><button class="setting-btn" id="labelsToggle">Visibles</button></div>
+<div class="setting-row"><div class="setting-text"><span data-i18n="settings.volume">Volumen</span></div><input type="range" id="volumeRange" min="0" max="100" step="1" value="65" aria-label="Volumen"></div>
+<div class="setting-row"><div class="setting-text"><span data-i18n="settings.fullscreen">Pantalla completa</span><span class="hint" id="fullscreenHint">Útil en escritorio y Android.</span></div><button class="setting-btn" id="fullscreenBtn">Activar</button></div>
+<div class="setting-row"><div class="setting-text"><span data-i18n="settings.install">Instalar aplicación</span><span class="hint" id="installHint">Añádela a tu pantalla de inicio para jugar sin conexión.</span></div><button class="setting-btn" id="installBtn" data-i18n="install.button" hidden>Instalar</button></div>
+<div class="setting-row"><div class="setting-text"><span data-i18n="settings.progress">Progreso local</span><span class="hint" data-i18n="settings.progressHint">Récords y preferencias se guardan en este dispositivo.</span></div><button class="setting-btn danger" id="resetProgressBtn" data-i18n="settings.reset">Borrar récord</button></div>
+<div class="shortcuts" data-i18n-html="settings.shortcutsHtml"><b>Teclado</b><br><kbd>1</kbd>–<kbd>9</kbd> construir · <kbd>Espacio</kbd> oleada/pausa · <kbd>P</kbd> pausa<br><kbd>Z</kbd> ataque aéreo · <kbd>X</kbd> EMP · <kbd>C</kbd> reparar base<br><kbd>M</kbd> sonido · <kbd>F</kbd> pantalla completa · <kbd>Esc</kbd> cancelar<br><kbd>WASD</kbd>/flechas mover cámara · <kbd>Q</kbd><kbd>E</kbd> rotar · rueda zoom<br><b>Táctil:</b> un dedo desplaza, dos dedos hacen zoom, toca para construir.<br><b>Mar:</b> destructores y portaaviones se despliegan en el agua.</div>
+<div class="settings-version">Frente Global · v<span id="appVersion">2.1.0</span> · <span id="installMode">navegador</span></div></div></section>
+<div class="update-banner" id="updateBanner" hidden><span data-i18n="update.available">Nueva versión disponible</span><button id="reloadBtn" data-i18n="update.reload">Actualizar</button></div>
 </main>
 <script src="vendor/three.min.js"></script>
-<script>
-'use strict';
-// Datos de contenido: cada ficha puede extenderse sin cambiar los controladores.
-const ARMIES=[
- {id:'usa',name:'Estados Unidos',flag:'🇺🇸',bonus:'Cadencia +12%',weapons:'M134 Minigun · HIMARS · Patriot · HELIOS · EA-18G',cash:650,color:0x68764a,mults:{gun:1.12,art:1,aa:1.08,laser:1,ew:1},perk:'Cadencia elevada'},
- {id:'china',name:'China',flag:'🇨🇳',bonus:'Torres -10%',weapons:'Type 1130 · PCL-181 · HQ-17 · GuoRong · DWL-002',cash:700,color:0x9a4935,mults:{gun:1,art:1.05,aa:1.05,laser:1.08,ew:1},perk:'Construcción eficiente',discount:.9},
- {id:'russia',name:'Rusia',flag:'🇷🇺',bonus:'Artillería +18%',weapons:'GSh-6-30 · 2S19 Msta · S-400 · Peresvet · Krasukha',cash:650,color:0x647486,mults:{gun:1,art:1.18,aa:1.1,laser:1,ew:1.1},perk:'Artillería devastadora'},
- {id:'israel',name:'Israel',flag:'🇮🇱',bonus:'Láser +25%',weapons:'MAG · Ro’em · Cúpula de Hierro · Iron Beam · Scorpius',cash:650,color:0x7d8b77,mults:{gun:1,art:1,aa:1.08,laser:1.25,ew:1.08},perk:'Energía dirigida mejorada'},
- {id:'uk',name:'Reino Unido',flag:'🇬🇧',bonus:'Antiaéreo +18%',weapons:'Minigun · AS-90 · Sky Sabre · DragonFire · Land Ceptor',cash:650,color:0x586783,mults:{gun:1.05,art:1.08,aa:1.18,laser:1.1,ew:1},perk:'Defensa aérea superior'},
- {id:'france',name:'Francia',flag:'🇫🇷',bonus:'Láser +12% · apoyo',weapons:'Nexter 20 mm · CAESAR · VL MICA · HELMA-P · Brouilleur',cash:680,color:0x596f8a,mults:{gun:1.05,art:1.1,aa:1.05,laser:1.12,ew:1.12},perk:'Doctrina versátil'},
- {id:'korea',name:'Corea del Sur',flag:'🇰🇷',bonus:'Cadencia +8%',weapons:'K6 · K9 Thunder · Cheongung · Laser AA · KJ-100',cash:660,color:0x65745c,mults:{gun:1.08,art:1.1,aa:1.1,laser:1.05,ew:1},perk:'Respuesta rápida'},
- {id:'turkey',name:'Turquía',flag:'🇹🇷',bonus:'EW +20%',weapons:'Korkut · T-155 Fırtına · Hisar · Gökberk · Koral',cash:660,color:0x8c4c42,mults:{gun:1.05,art:1.12,aa:1.08,laser:1.05,ew:1.2},perk:'Guerra electrónica potente'}
-];
-const TOWERS=[
- {id:'gun',name:'Ametralladora',icon:'✣',cost:120,range:4.7,damage:9,rate:.24,targets:['ground'],desc:'Doble cañón de tiro rápido'},
- {id:'art',name:'Artillería',icon:'◉',cost:185,range:6.4,damage:38,rate:2.2,targets:['ground'],splash:1.55,desc:'Obús de alto impacto en área'},
- {id:'aa',name:'Misil antiaéreo',icon:'⌁',cost:165,range:7.2,damage:45,rate:1.5,targets:['air'],desc:'Lanzador guiado contra aeronaves'},
- {id:'laser',name:'Láser',icon:'⌇',cost:210,range:5.7,damage:15,rate:.12,targets:['ground','air'],desc:'Haz continuo de energía dirigida'},
- {id:'ew',name:'Guerra electrónica',icon:'⌘',cost:175,range:4.3,damage:0,rate:.4,targets:['ground','air'],slow:.42,desc:'Pulso de interferencia y ralentización'}
-];
-const ENEMIES={
- infantry:{name:'Infantería',kind:'ground',hp:42,speed:1.18,reward:13,radius:.16,color:0x66714a},
- jeep:{name:'Jeep',kind:'ground',hp:75,speed:1.85,reward:21,radius:.23,color:0x8b7b50},
- tank:{name:'Tanque',kind:'ground',hp:220,speed:.72,reward:34,radius:.34,color:0x576348},
- heli:{name:'Helicóptero',kind:'air',hp:145,speed:1.12,reward:31,radius:.28,color:0x687b70},
- fighter:{name:'Caza',kind:'air',hp:105,speed:2.65,reward:38,radius:.25,color:0x909a9a},
- boss:{name:'Coloso',kind:'ground',hp:1850,speed:.43,reward:260,radius:.72,color:0x46523b,boss:true}
-};
-const MAP={w:30,h:18,cell:1};
-const PATH=[[-15,-6],[-10,-6],[-10,1],[-4,1],[-4,-5],[2,-5],[2,4],[9,4],[9,-1],[15,-1]];
-// Preferencias, récords y calidad gráfica (persistencia local, sin red).
-const APP_VERSION='1.1.0';
-const STORE_SETTINGS='frente-global:settings:v1';
-const STORE_RECORDS='frente-global:records:v1';
-function loadStore(key,fallback){try{const raw=localStorage.getItem(key);if(!raw)return {...fallback};return {...fallback,...JSON.parse(raw)}}catch{return {...fallback}}}
-const settings=loadStore(STORE_SETTINGS,{quality:'auto',sound:true,volume:.65,army:0});
-const records=loadStore(STORE_RECORDS,{bestWave:0,bestScore:0,totalKills:0,plays:0});
-function persistSettings(){try{localStorage.setItem(STORE_SETTINGS,JSON.stringify(settings))}catch{}}
-function persistRecords(){try{localStorage.setItem(STORE_RECORDS,JSON.stringify(records))}catch{}}
-const coarsePointer=matchMedia('(pointer: coarse)').matches;
-const QUALITY_PRESETS={high:{pixel:2,shadows:true,shadow:2048,particles:1.15,label:'Alta'},medium:{pixel:1.5,shadows:true,shadow:1024,particles:.8,label:'Media'},low:{pixel:1,shadows:false,shadow:512,particles:.45,label:'Baja'}};
-if(!QUALITY_PRESETS[settings.quality]&&settings.quality!=='auto')settings.quality='auto';
-if(!Number.isFinite(settings.volume))settings.volume=.65;
-let qualityLevel=settings.quality==='auto'?(coarsePointer?'medium':'high'):settings.quality;
-function quality(){return QUALITY_PRESETS[qualityLevel]||QUALITY_PRESETS.medium}
-const state={army:ARMIES[0],cash:650,hp:100,wave:0,active:false,speed:1,spawnQueue:[],spawnTimer:0,enemies:[],towers:[],effects:[],selectedTower:null,buildType:null,gameOver:false,selectedArmy:Number.isInteger(settings.army)&&ARMIES[settings.army]?settings.army:0,clock:0,score:0,paused:false,deployed:false};
-const canvas=document.getElementById('view');
-const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false,powerPreference:'high-performance'});
-renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,quality().pixel));renderer.setSize(window.innerWidth,window.innerHeight);renderer.shadowMap.enabled=quality().shadows;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputEncoding=THREE.sRGBEncoding;renderer.toneMapping=THREE.LinearToneMapping;renderer.toneMappingExposure=.95;
-const scene=new THREE.Scene();scene.background=new THREE.Color(0x69785f);scene.fog=new THREE.Fog(0x69785f,36,78);
-const camera=new THREE.PerspectiveCamera(45,window.innerWidth/window.innerHeight,.1,140);const target=new THREE.Vector3(0,0,0);let yaw=0;const DEFAULT_DISTANCE=23;let distance=DEFAULT_DISTANCE;let targetDistance=DEFAULT_DISTANCE;const minDistance=10.5,maxDistance=50;const inclination=55*Math.PI/180;
-const hemi=new THREE.HemisphereLight(0xcad6bd,0x2f3628,.5);scene.add(hemi);const sun=new THREE.DirectionalLight(0xffe2b0,1.3);sun.position.set(-11,22,10);sun.castShadow=quality().shadows;sun.shadow.mapSize.set(quality().shadow,quality().shadow);sun.shadow.camera.left=-21;sun.shadow.camera.right=21;sun.shadow.camera.top=20;sun.shadow.camera.bottom=-20;sun.shadow.bias=-.0003;sun.shadow.radius=4;scene.add(sun);
-const mat=(color,rough=.82,metal=0)=>new THREE.MeshStandardMaterial({color,roughness:rough,metalness:metal});
-const camoMaterials=new Map();
-function camoMaterial(color){const base=new THREE.Color(color),key=base.getHexString();if(camoMaterials.has(key))return camoMaterials.get(key);const textureCanvas=document.createElement('canvas');textureCanvas.width=128;textureCanvas.height=128;const ctx=textureCanvas.getContext('2d');const shades=[base.clone().multiplyScalar(.48),base.clone().multiplyScalar(.68),base.clone().lerp(new THREE.Color(0xc0ad7b),.52),base.clone().lerp(new THREE.Color(0x202820),.68)];const css=c=>`#${c.getHexString()}`;ctx.fillStyle=css(shades[0]);ctx.fillRect(0,0,128,128);for(let i=0;i<19;i++){ctx.beginPath();const x=Math.random()*128,y=Math.random()*128,rx=9+Math.random()*24,ry=5+Math.random()*17;ctx.ellipse(x,y,rx,ry,Math.random()*Math.PI,0,Math.PI*2);ctx.fillStyle=css(shades[1+Math.random()*3|0]);ctx.fill()}for(let i=0;i<1700;i++){const value=Math.random(),shade=value>.73?shades[2]:value<.2?shades[3]:shades[0];ctx.fillStyle=css(shade);ctx.globalAlpha=.18+Math.random()*.36;ctx.fillRect(Math.random()*128,Math.random()*128,1+Math.random()*2,1+Math.random()*2)}for(let i=0;i<28;i++){ctx.strokeStyle=css(i%2?shades[1]:shades[3]);ctx.globalAlpha=.3;ctx.lineWidth=1+Math.random();ctx.beginPath();const x=Math.random()*128,y=Math.random()*128;ctx.moveTo(x,y);ctx.lineTo(x+2+Math.random()*9,y-1-Math.random()*3);ctx.stroke()}ctx.globalAlpha=1;const texture=new THREE.CanvasTexture(textureCanvas);texture.wrapS=texture.wrapT=THREE.RepeatWrapping;texture.repeat.set(1.5,1.5);texture.encoding=THREE.sRGBEncoding;texture.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());const material=new THREE.MeshStandardMaterial({map:texture,color:0xffffff,roughness:.92,metalness:.02});camoMaterials.set(key,material);return material}
-function makeNoiseTexture(base,light,dark,blades=false){
- const c=document.createElement('canvas');c.width=c.height=128;const g=c.getContext('2d');
- g.fillStyle=base;g.fillRect(0,0,128,128);
- for(let i=0;i<20;i++){const x=Math.random()*128,y=Math.random()*128,r=8+Math.random()*20;const grad=g.createRadialGradient(x,y,0,x,y,r);grad.addColorStop(0,Math.random()<.5?light:dark);grad.addColorStop(1,'rgba(0,0,0,0)');g.globalAlpha=.05+Math.random()*.11;g.fillStyle=grad;g.beginPath();g.arc(x,y,r,0,Math.PI*2);g.fill()}
- for(let i=0;i<1500;i++){g.globalAlpha=.05+Math.random()*.15;g.fillStyle=Math.random()<.5?light:dark;g.fillRect(Math.random()*128,Math.random()*128,.8+Math.random()*1.4,.8+Math.random()*1.4)}
- if(blades){g.lineCap='round';for(let i=0;i<150;i++){g.globalAlpha=.1+Math.random()*.22;g.strokeStyle=dark;g.lineWidth=.6;g.beginPath();const x=Math.random()*128,y=Math.random()*128;g.moveTo(x,y);g.lineTo(x+(Math.random()-.5)*4,y-2-Math.random()*5);g.stroke()}}
- g.globalAlpha=1;const texture=new THREE.CanvasTexture(c);texture.wrapS=texture.wrapT=THREE.RepeatWrapping;texture.encoding=THREE.sRGBEncoding;texture.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());return texture;
-}
-const mats={grass:[0x56693f,0x5d7044,0x647748,0x51643c,0x697c4d].map(c=>mat(c)),path:[mat(0x7f6c4e),mat(0x8a7655),mat(0x756347)],dark:mat(0x333a30),wood:mat(0x60533d),foliage:[mat(0x29432d),mat(0x2f4c33),mat(0x355338)],rock:mat(0x777967),gold:mat(0xc0a052,.55,.25),white:mat(0xe4ddc9),red:mat(0xb34d3c),black:mat(0x252a25),steel:mat(0x66716c,.52,.45)};
-const world=new THREE.Group();scene.add(world);const gridCells=new Set();const towerCells=new Map();const raycaster=new THREE.Raycaster();const pointer=new THREE.Vector2();let groundHit=null;let ghost=null;let rangeRing=null;let hoverCell=null;let lastSelected=null;let frame=0;let lowFpsTime=0;let effectCursor=0;const tmpObj=new THREE.Object3D();
-function cellKey(x,z){return `${x},${z}`}function worldCell(x,z){return {x:Math.floor(x+MAP.w/2),z:Math.floor(z+MAP.h/2)}}function cellCenter(cx,cz){return {x:cx-MAP.w/2+.5,z:cz-MAP.h/2+.5}}function insideCell(cx,cz){return cx>=0&&cz>=0&&cx<MAP.w&&cz<MAP.h}
-function nearestPath(x,z){let best=1e9;for(let i=0;i<PATH.length-1;i++){const [ax,az]=PATH[i],[bx,bz]=PATH[i+1],dx=bx-ax,dz=bz-az,len2=dx*dx+dz*dz;let t=len2?((x-ax)*dx+(z-az)*dz)/len2:0;t=Math.max(0,Math.min(1,t));const px=ax+dx*t,pz=az+dz*t,d=(x-px)**2+(z-pz)**2;if(d<best)best=d}return Math.sqrt(best)<1.02}
-function buildPathCells(){for(let i=0;i<PATH.length-1;i++){let [x1,z1]=PATH[i],[x2,z2]=PATH[i+1];let dx=Math.sign(x2-x1),dz=Math.sign(z2-z1);let x=x1,z=z1;for(;;){gridCells.add(cellKey(...Object.values(worldCell(x,z))));if(x===x2&&z===z2)break;x+=dx;z+=dz}}}
-buildPathCells();
-function instancedTiles(){
- const geo=new THREE.BoxGeometry(1,.16,1);
- const grassMat=new THREE.MeshStandardMaterial({map:makeNoiseTexture('#a6ab9b','#c6cbb8','#878d7a',true),color:0xffffff,roughness:.97,metalness:0});
- const grass=new THREE.InstancedMesh(geo,grassMat,MAP.w*MAP.h);let n=0;const grassBase=new THREE.Color(0x64744e);
- for(let z=0;z<MAP.h;z++)for(let x=0;x<MAP.w;x++){const c=cellCenter(x,z);tmpObj.position.set(c.x,-.08,c.z);tmpObj.rotation.y=0;tmpObj.scale.set(1,1,1);tmpObj.updateMatrix();grass.setMatrixAt(n,tmpObj.matrix);const color=new THREE.Color(mats.grass[Math.random()*mats.grass.length|0].color).lerp(grassBase,.45);if(Math.random()<.06)color.multiplyScalar(.93);else if(Math.random()<.2)color.multiplyScalar(1.04);grass.setColorAt(n++,color)}
- grass.receiveShadow=true;world.add(grass);
- const pathGeo=new THREE.BoxGeometry(1.015,.18,1.015);let pathItems=[];for(let i=0;i<PATH.length-1;i++){let [x1,z1]=PATH[i],[x2,z2]=PATH[i+1],dx=Math.sign(x2-x1),dz=Math.sign(z2-z1),x=x1,z=z1;for(;;){pathItems.push({x,z});if(x===x2&&z===z2)break;x+=dx;z+=dz}}
- const roadMat=new THREE.MeshStandardMaterial({map:makeNoiseTexture('#c8c3b8','#e6e1d5','#a19a8c',false),color:0xffffff,roughness:.99,metalness:0});
- const road=new THREE.InstancedMesh(pathGeo,roadMat,pathItems.length);
- pathItems.forEach((p,i)=>{tmpObj.position.set(p.x,-.025,p.z);tmpObj.updateMatrix();road.setMatrixAt(i,tmpObj.matrix);road.setColorAt(i,new THREE.Color(mats.path[Math.random()*mats.path.length|0].color).multiplyScalar(1.04))});
- road.receiveShadow=true;world.add(road);
- const shoulder=new THREE.InstancedMesh(new THREE.BoxGeometry(1.18,.14,1.18),mat(0x574c39,.99),pathItems.length);
- pathItems.forEach((p,i)=>{tmpObj.position.set(p.x,-.075,p.z);tmpObj.updateMatrix();shoulder.setMatrixAt(i,tmpObj.matrix)});
- shoulder.receiveShadow=true;world.add(shoulder);
- const rim=new THREE.Mesh(new THREE.BoxGeometry(31.6,.55,19.6),mat(0x555c46));rim.position.y=-.42;rim.receiveShadow=true;world.add(rim);
- const edge=new THREE.Mesh(new THREE.BoxGeometry(30.7,.35,18.7),mat(0x4c5844));edge.position.y=-.3;edge.receiveShadow=true;world.add(edge);
-}
-instancedTiles();
-// Procedural ground flecks and restrained low-poly field props.
-function addMesh(parent,geometry,material,x,y,z,shadow=true){const m=new THREE.Mesh(geometry,material);m.position.set(x,y,z);if(shadow){m.castShadow=true;m.receiveShadow=true}parent.add(m);return m}
-function buildDecor(){
- const rng=Math.random;
- const decorScale=qualityLevel==='low'?.6:1;
- // Terreno exterior y colinas lejanas: el mapa deja de parecer una maqueta flotante.
- const ground=new THREE.Mesh(new THREE.PlaneGeometry(150,110),mat(0x59674a,.99));
- ground.rotation.x=-Math.PI/2;ground.position.y=-.45;ground.receiveShadow=true;world.add(ground);
- const hillMats=[mat(0x48593e),mat(0x526244),mat(0x42523a)];
- for(let i=0;i<30;i++){
-  const angle=i/30*Math.PI*2+rng()*.24,radius=28+rng()*20,height=2.4+rng()*6;
-  const hill=new THREE.Mesh(new THREE.ConeGeometry(4.6+rng()*6.5,height,5+(i%2)),hillMats[i%3]);
-  hill.position.set(Math.cos(angle)*radius,-.4+height/2,Math.sin(angle)*radius*.72);
-  hill.rotation.y=rng()*Math.PI;world.add(hill);
- }
- // Matas de hierba instanciadas (una sola llamada de dibujo).
- const tuftCount=Math.round(420*decorScale);
- const tuft=new THREE.InstancedMesh(new THREE.ConeGeometry(.055,.32,3),mat(0x4a5f3e),tuftCount);
- tuft.castShadow=false;tuft.receiveShadow=false;
- let tufts=0,guard=0;
- while(tufts<tuftCount&&guard++<tuftCount*10){
-  const x=rng()*29-14.5,z=rng()*17-8.5;
-  if(nearestPath(x,z)||Math.abs(x)>14.6||Math.abs(z)>8.6)continue;
-  const cx=Math.floor(x+15),cz=Math.floor(z+9);
-  if(gridCells.has(cellKey(cx,cz)))continue;
-  tmpObj.position.set(x,.16,z);tmpObj.rotation.set(0,rng()*Math.PI,0);tmpObj.scale.set(1,.65+rng()*.95,1);tmpObj.updateMatrix();
-  tuft.setMatrixAt(tufts++,tmpObj.matrix);
- }
- tuft.count=tufts;world.add(tuft);
- // Árboles de tres capas y grupos de rocas.
- const propCount=Math.round(155*decorScale);
- for(let i=0;i<propCount;i++){
-  const x=rng()*28.6-14.3,z=rng()*16.6-8.3;
-  if(nearestPath(x,z))continue;
-  const cx=Math.floor(x+15),cz=Math.floor(z+9);
-  if(gridCells.has(cellKey(cx,cz))||towerCells.has(cellKey(cx,cz)))continue;
-  if(rng()<.68){
-   const h=.7+rng()*1.05,tree=new THREE.Group();tree.position.set(x,0,z);
-   addMesh(tree,new THREE.CylinderGeometry(.07,.13,h*.85,5),mats.wood,0,h*.42,0);
-   for(let j=0;j<3;j++)addMesh(tree,new THREE.ConeGeometry(.48-j*.1,.72,6),mats.foliage[rng()*mats.foliage.length|0],0,h*.6+j*.22,0);
-   world.add(tree);
-  }else{
-   const cluster=1+(rng()<.35?1:0)+(rng()<.15?1:0);
-   for(let j=0;j<cluster;j++){const rock=addMesh(world,new THREE.DodecahedronGeometry(.16+rng()*.24,0),mats.rock,x+(rng()-.5)*.5,.12,z+(rng()-.5)*.5);rock.rotation.set(rng(),rng(),rng());rock.scale.y=.7+rng()*.5}
-  }
- }
- // Cobertizos con puerta, cajas y bidones.
- for(const [x,z] of [[-13,6],[12,7],[-12,-7],[12,-7]]){
-  if(nearestPath(x,z))continue;
-  const b=new THREE.Group();b.position.set(x,0,z);
-  addMesh(b,new THREE.BoxGeometry(1.65,.95,1.25),mat(0x596052),0,.5,0);
-  addMesh(b,new THREE.ConeGeometry(1.18,.62,4),mat(0x4b5148),0,1.28,0).rotation.y=Math.PI/4;
-  addMesh(b,new THREE.BoxGeometry(.46,.66,.05),mat(0x39423a),0,.4,.64);
-  addMesh(b,new THREE.BoxGeometry(.34,.34,.34),mats.wood,.95,.17,.55);
-  addMesh(b,new THREE.BoxGeometry(.28,.28,.28),mats.wood,.95,.17,.15).rotation.y=.4;
-  addMesh(b,new THREE.CylinderGeometry(.16,.16,.44,9),mat(0x59614a),-.95,.22,.5);
-  world.add(b);
- }
- // Posiciones de sacos de arena.
- const sandbagMat=mat(0x6f6143,.97);
- const sandbagLine=(x,z,angle,count)=>{for(let i=0;i<count;i++){const bx=x+Math.cos(angle)*i*.3,bz=z+Math.sin(angle)*i*.3;if(nearestPath(bx,bz))continue;const bag=addMesh(world,new THREE.BoxGeometry(.3,.15,.17),sandbagMat,bx,.1,bz);bag.rotation.y=-angle;bag.rotation.z=Math.sin(angle)*.06}};
- for(const [x,z,a] of [[-12.9,-4.2,0],[11.4,2.6,Math.PI/2],[-2.6,6.4,0],[5.6,-7.2,Math.PI]]){sandbagLine(x,z,a,4);sandbagLine(x+Math.sin(a)*.16,z+Math.cos(a)*.16,a,4)}
- // Cráteres y huellas de vehículos sobre el camino.
- const craterMat=mat(0x504b3b,.99);
- for(let i=0;i<8;i++){
-  const x=rng()*27-13.5,z=rng()*15-7.5;
-  if(nearestPath(x,z))continue;
-  const cx=Math.floor(x+15),cz=Math.floor(z+9);
-  if(gridCells.has(cellKey(cx,cz)))continue;
-  const crater=new THREE.Mesh(new THREE.CircleGeometry(.18+rng()*.3,12),craterMat);
-  crater.rotation.x=-Math.PI/2;crater.position.set(x,.012,z);world.add(crater);
- }
- const trackMat=mat(0x675a43,.99);
- for(let i=0;i<PATH.length-1;i++){
-  const [x1,z1]=PATH[i],[x2,z2]=PATH[i+1],dx=x2-x1,dz=z2-z1,len=Math.hypot(dx,dz),ang=Math.atan2(dx,dz);
-  for(const side of [-.19,.19]){
-   const ox=Math.cos(ang)*side,oz=-Math.sin(ang)*side;
-   const track=addMesh(world,new THREE.BoxGeometry(.065,.012,len*.9),trackMat,(x1+x2)/2+ox,.074,(z1+z2)/2+oz,false);
-   track.rotation.y=ang;track.receiveShadow=true;
-  }
- }
- // Valla perimetral.
- for(let i=0;i<18;i++){let x=-13+i*1.5,z=8.1;if(nearestPath(x,z))continue;addMesh(world,new THREE.BoxGeometry(.09,.6,.09),mats.wood,x,.3,z);if(i<17)addMesh(world,new THREE.BoxGeometry(1.5,.08,.08),mats.wood,x+.75,.4,z)}
-}
-buildDecor();
-function buildBase(){const g=new THREE.Group(),paint=camoMaterial(0x5d694c),armor=mat(0x404a3b),glass=mat(0x91aaa0,.3,.25);addMesh(g,new THREE.BoxGeometry(1.8,.85,1.35),armor,0,.45,0);addMesh(g,new THREE.BoxGeometry(1.63,.67,1.19),paint,0,.48,0);for(let side of [-1,1]){addMesh(g,new THREE.BoxGeometry(.12,.55,.13),mats.gold,side*.77,.5,0);for(let z of [-.42,.42]){const track=addMesh(g,new THREE.CylinderGeometry(.19,.19,.12,10),mats.dark,side*.82,.2,z);track.rotation.z=Math.PI/2;const hub=addMesh(g,new THREE.CylinderGeometry(.08,.08,.13,8),mats.steel,side*.82,.2,z);hub.rotation.z=Math.PI/2}}addMesh(g,new THREE.BoxGeometry(1.2,.35,1),camoMaterial(0x727b5d),0,1.02,0);addMesh(g,new THREE.BoxGeometry(.82,.09,.75),armor,0,1.24,0);addMesh(g,new THREE.CylinderGeometry(.21,.21,.08,12),mats.gold,0,1.32,0);for(let i=0;i<3;i++){const sensor=addMesh(g,new THREE.BoxGeometry(.11,.12,.08),glass,-.32+i*.32,1.16,-.52);sensor.rotation.y=.2}const antenna=addMesh(g,new THREE.CylinderGeometry(.025,.04,.75,6),mats.steel,.58,1.55,-.32);antenna.rotation.z=-.1;addMesh(g,new THREE.SphereGeometry(.07,7,5),mats.red,.58,1.94,-.32);addMesh(g,new THREE.BoxGeometry(.36,.1,.09),mats.red,-.58,1.15,.42);addMesh(g,new THREE.BoxGeometry(.18,.16,.12),mats.gold,.7,1.2,.42);for(let side of [-1,1])addMesh(g,new THREE.BoxGeometry(.08,.28,.09),mats.gold,side*.54,.47,.61);g.position.set(13.5,0,-1);world.add(g);state.base=g;}
-function buildStartFlag(){const g=new THREE.Group();addMesh(g,new THREE.CylinderGeometry(.035,.045,1.7,7),mats.steel,0,.85,0);addMesh(g,new THREE.CylinderGeometry(.09,.13,.12,8),mats.dark,0,.08,0);addMesh(g,new THREE.BoxGeometry(.62,.35,.04),mats.gold,.28,1.42,0);addMesh(g,new THREE.BoxGeometry(.42,.12,.025),mats.red,.26,1.42,-.026);addMesh(g,new THREE.ConeGeometry(.12,.22,4),mats.red,.58,1.42,0).rotation.z=-Math.PI/2;g.position.set(-14.6,.02,-6);world.add(g);}
-buildBase();buildStartFlag();
-function makeGroundGrid(){const geo=new THREE.BufferGeometry();const vertices=[];for(let x=0;x<=MAP.w;x++){const wx=x-MAP.w/2;vertices.push(wx,.014,-MAP.h/2,wx,.014,MAP.h/2)}for(let z=0;z<=MAP.h;z++){const wz=z-MAP.h/2;vertices.push(-MAP.w/2,.014,wz,MAP.w/2,.014,wz)}geo.setAttribute('position',new THREE.Float32BufferAttribute(vertices,3));const lines=new THREE.LineSegments(geo,new THREE.LineBasicMaterial({color:0xe4dfc8,transparent:true,opacity:.22}));lines.visible=false;world.add(lines);return lines}const gridLines=makeGroundGrid();
-function makeRangeRing(){const g=new THREE.RingGeometry(.96,1,72);const m=new THREE.MeshBasicMaterial({color:0x84b65f,transparent:true,opacity:.2,side:THREE.DoubleSide,depthWrite:false});const ring=new THREE.Mesh(g,m);ring.rotation.x=-Math.PI/2;ring.position.y=.12;ring.visible=false;world.add(ring);return ring}const placementRing=makeRangeRing();
-const cursorMat=new THREE.MeshBasicMaterial({color:0xe9e5d4,transparent:true,opacity:.28,side:THREE.DoubleSide,depthWrite:false});const cursorCell=new THREE.Mesh(new THREE.PlaneGeometry(1,1),cursorMat);cursorCell.rotation.x=-Math.PI/2;cursorCell.position.y=.025;cursorCell.visible=false;world.add(cursorCell);
-const targetPlane=new THREE.Plane(new THREE.Vector3(0,1,0),0);const hitPoint=new THREE.Vector3();
-function updateCamera(){const d=distance, horizontal=d*Math.cos(inclination),vertical=d*Math.sin(inclination);camera.position.set(target.x+Math.sin(yaw)*horizontal,target.y+vertical,target.z+Math.cos(yaw)*horizontal);camera.lookAt(target)}updateCamera();
-function pointerGround(clientX,clientY){pointer.x=clientX/window.innerWidth*2-1;pointer.y=-(clientY/window.innerHeight)*2+1;raycaster.setFromCamera(pointer,camera);return raycaster.ray.intersectPlane(targetPlane,hitPoint)?hitPoint.clone():null}
-function updatePointer(clientX,clientY){const p=pointerGround(clientX,clientY);groundHit=p;if(!p)return;const c=worldCell(p.x,p.z);if(!insideCell(c.x,c.z))return;const center=cellCenter(c.x,c.z);hoverCell={cellX:c.x,cellZ:c.z,...center};cursorCell.position.set(center.x,.025,center.z);cursorCell.visible=true;gridLines.visible=true;if(state.buildType){ensureGhost();ghost.position.set(center.x,.08,center.z);ghost.visible=true;const ok=validPlacement(c.x,c.z);cursorMat.color.set(ok?0x8fcb6d:0xdf6653);placementRing.position.set(center.x,.1,center.z);placementRing.material.color.set(ok?0x7fcf6a:0xdf6551);placementRing.visible=true;placementRing.scale.setScalar(TOWERS.find(t=>t.id===state.buildType).range)}else if(ghost)ghost.visible=false}
-function buildTowerModel(type,color,level=1,preview=false){const root=new THREE.Group(),paint=camoMaterial(new THREE.Color(color).lerp(new THREE.Color(0x30372e),.18)),armor=mat(0x414a40),dark=mat(0x303832),metal=mat(0x777f77,.48,.5),glass=mat(0x91aaa0,.3,.25),glow=new THREE.MeshStandardMaterial({color:0x74c9e8,emissive:0x167da2,emissiveIntensity:1.8,roughness:.28});const plate=addMesh(root,new THREE.CylinderGeometry(.48,.53,.2,10),paint,0,.11,0);addMesh(root,new THREE.CylinderGeometry(.28,.35,.17,10),armor,0,.25,0);const concrete=mat(0x5d5f50,.96),sandbag=mat(0x6f6143,.97);addMesh(root,new THREE.CylinderGeometry(.6,.64,.07,12),concrete,0,.035,0);if(qualityLevel!=='low'){const bagCount=8;for(let i=0;i<bagCount;i++){const a=i/bagCount*Math.PI*2,bag=addMesh(root,new THREE.BoxGeometry(.19,.1,.1),sandbag,Math.cos(a)*.52,.095,Math.sin(a)*.52);bag.rotation.y=-a;bag.rotation.z=Math.sin(a)*.07}}let pivot=new THREE.Group();pivot.position.y=.37;root.add(pivot);let barrelParts=[];
- if(type==='gun'){addMesh(pivot,new THREE.BoxGeometry(.65,.28,.5),paint,0,.12,0);addMesh(pivot,new THREE.BoxGeometry(.57,.1,.42),armor,0,.3,.02);addMesh(pivot,new THREE.CylinderGeometry(.24,.27,.25,10),armor,0,.32,0);for(let side of [-1,1]){const b=addMesh(pivot,new THREE.CylinderGeometry(.055,.075,.78,8),metal,side*.1,.38,-.47);b.rotation.x=Math.PI/2;barrelParts.push(b);addMesh(pivot,new THREE.BoxGeometry(.1,.2,.46),paint,side*.25,.13,-.05);const drum=addMesh(pivot,new THREE.CylinderGeometry(.12,.12,.17,8),armor,side*.34,.13,.12);drum.rotation.z=Math.PI/2;addMesh(pivot,new THREE.SphereGeometry(.035,6,5),mats.gold,side*.34,.14,.2)}addMesh(pivot,new THREE.BoxGeometry(.62,.08,.28),paint,0,.31,-.23);addMesh(pivot,new THREE.SphereGeometry(.075,8,6),glass,0,.52,-.1);const muzzle=addMesh(pivot,new THREE.TorusGeometry(.065,.018,5,10),mats.gold,0,.38,-.87);muzzle.rotation.x=Math.PI/2}
- if(type==='art'){addMesh(pivot,new THREE.BoxGeometry(.78,.28,.7),paint,0,.13,0);addMesh(pivot,new THREE.BoxGeometry(.52,.1,.48),armor,0,.31,.05);const elev=new THREE.Group();elev.position.set(0,.35,-.1);pivot.add(elev);const barrel=addMesh(elev,new THREE.CylinderGeometry(.12,.16,1.15,10),metal,0,0,-.34);barrel.rotation.x=.64;addMesh(elev,new THREE.CylinderGeometry(.06,.11,.44,8),armor,0,0,-.05).rotation.x=.64;const muzzle=addMesh(elev,new THREE.CylinderGeometry(.145,.145,.12,10),mats.gold,0,.39,-.87);muzzle.rotation.x=Math.PI/2;for(let side of [-1,1]){const wheel=addMesh(pivot,new THREE.CylinderGeometry(.18,.18,.1,10),dark,side*.39,.13,.12);wheel.rotation.z=Math.PI/2;for(let i=0;i<4;i++){const spoke=addMesh(pivot,new THREE.BoxGeometry(.035,.22,.035),metal,side*.45,.13,.12);spoke.rotation.x=i*Math.PI/2}}for(let i=0;i<Math.min(level,4);i++)addMesh(pivot,new THREE.BoxGeometry(.15,.16,.12),mats.gold,-.28+i*.19,.28,.32);root.userData.elev=elev;}
- if(type==='aa'){addMesh(pivot,new THREE.BoxGeometry(.7,.3,.62),paint,0,.12,0);addMesh(pivot,new THREE.BoxGeometry(.48,.1,.43),armor,0,.3,.05);const rack=new THREE.Group();rack.position.y=.38;pivot.add(rack);for(let s of [-1,1])for(let i=0;i<2;i++){const t=addMesh(rack,new THREE.CylinderGeometry(.105,.11,.8,8),metal,s*.2,.04,-.15-i*.25);t.rotation.x=.22;addMesh(rack,new THREE.CylinderGeometry(.118,.118,.09,8),paint,s*.2,.04,-.3-i*.25).rotation.x=.22;addMesh(rack,new THREE.ConeGeometry(.105,.2,8),mats.gold,s*.2,.04,-.64-i*.25).rotation.x=-Math.PI/2;addMesh(rack,new THREE.SphereGeometry(.035,6,5),glass,s*.2,.14,-.38-i*.25)}addMesh(rack,new THREE.BoxGeometry(.13,.16,.18),mats.gold,0,.1,.34);root.userData.rack=rack}
- if(type==='laser'){addMesh(pivot,new THREE.BoxGeometry(.68,.27,.62),paint,0,.13,0);addMesh(pivot,new THREE.BoxGeometry(.51,.1,.46),armor,0,.31,.04);for(let side of [-1,1])for(let i=0;i<3;i++)addMesh(pivot,new THREE.BoxGeometry(.07,.22,.11),metal,side*(.29+i*.045),.28,.12+i*.15);addMesh(pivot,new THREE.CylinderGeometry(.2,.25,.28,10),armor,0,.33,0);const emitter=addMesh(pivot,new THREE.CylinderGeometry(.12,.19,.56,10),glow,0,.42,-.33);emitter.rotation.x=Math.PI/2;addMesh(pivot,new THREE.SphereGeometry(.14,10,8),glow,0,.42,-.62);const lens=addMesh(pivot,new THREE.TorusGeometry(.15,.025,6,12),mats.gold,0,.42,-.63);lens.rotation.x=Math.PI/2;root.userData.emitter=emitter}
- if(type==='ew'){addMesh(pivot,new THREE.BoxGeometry(.72,.3,.65),paint,0,.13,0);addMesh(pivot,new THREE.BoxGeometry(.48,.1,.43),armor,0,.3,.04);for(let i=0;i<3;i++)addMesh(pivot,new THREE.BoxGeometry(.08,.2,.36),metal,-.2+i*.2,.27,.26);const stem=addMesh(pivot,new THREE.CylinderGeometry(.04,.07,.45,7),metal,0,.44,0);const dish=new THREE.Group();dish.position.y=.69;pivot.add(dish);addMesh(dish,new THREE.SphereGeometry(.38,12,7,0,Math.PI*2,0,Math.PI*.52),metal,0,0,0).rotation.x=Math.PI;addMesh(dish,new THREE.TorusGeometry(.34,.025,5,16),mats.gold,0,0,0).rotation.x=Math.PI/2;addMesh(dish,new THREE.CylinderGeometry(.035,.035,.3,7),mats.gold,0,0,-.24).rotation.x=Math.PI/2;for(let i=0;i<3;i++){const arm=addMesh(dish,new THREE.CylinderGeometry(.018,.018,.32,5),armor,Math.cos(i*Math.PI*2/3)*.17,0,Math.sin(i*Math.PI*2/3)*.17);arm.rotation.z=Math.PI/2}root.userData.dish=dish}
- const rim=addMesh(root,new THREE.TorusGeometry(.4,.035,6,16),mats.gold,0,.24,0);rim.rotation.x=Math.PI/2;for(const [x,z] of [[-.36,-.18],[.36,-.18],[-.36,.18],[.36,.18]])addMesh(root,new THREE.SphereGeometry(.045,6,5),metal,x,.22,z);
- if(level>1){for(let i=0;i<level-1;i++){const a=i/Math.max(1,level-1)*Math.PI*2;addMesh(root,new THREE.BoxGeometry(.12,.2,.12),mats.gold,Math.cos(a)*.4,.28,Math.sin(a)*.4)}}
- root.scale.setScalar(1.56);if(preview){root.traverse(o=>{if(o.isMesh){o.material=o.material.clone();o.material.transparent=true;o.material.opacity=.52;o.material.depthWrite=false;o.castShadow=false}})}root.userData={...root.userData,pivot,barrels:barrelParts,type};return root}
-function ensureGhost(){if(ghost&&ghost.userData.type===state.buildType)return;if(ghost)world.remove(ghost);ghost=buildTowerModel(state.buildType,state.army.color,1,true);world.add(ghost)}
-function validPlacement(cx,cz){if(!insideCell(cx,cz))return false;const key=cellKey(cx,cz);if(gridCells.has(key)||towerCells.has(key))return false;const c=cellCenter(cx,cz);return !nearestPath(c.x,c.z)&&Math.abs(c.x)<14.5&&Math.abs(c.z)<8.5}
-function makeTower(type,cx,cz){const data=TOWERS.find(t=>t.id===type),center=cellCenter(cx,cz);const group=buildTowerModel(type,state.army.color);group.position.set(center.x,0,center.z);world.add(group);const tower={type,data,group,pivot:group.userData.pivot,level:1,cooldown:Math.random()*.2,target:null,cell:{x:cx,z:cz},barrels:group.userData.barrels,stats:{damage:data.damage*state.army.mults[type],range:data.range,rate:data.rate}};state.towers.push(tower);towerCells.set(cellKey(cx,cz),tower);return tower}
-function getCost(type){return Math.ceil(TOWERS.find(t=>t.id===type).cost*(state.army.discount||1))}
-function placeTower(){if(!state.buildType||!hoverCell)return;const {cellX,cellZ}=hoverCell;if(!validPlacement(cellX,cellZ)){Sound.error();toast('Posición no disponible');return}const cost=getCost(state.buildType);if(state.cash<cost){Sound.error();toast('Créditos insuficientes');return}state.cash-=cost;makeTower(state.buildType,cellX,cellZ);state.buildType=null;removeGhost();updateHud();renderTowerList();selectTower(towerCells.get(cellKey(cellX,cellZ)));Sound.build();toast('Sistema desplegado');}
-function removeGhost(){if(ghost){world.remove(ghost);ghost=null}placementRing.visible=false;cursorCell.visible=false;gridLines.visible=false}
-function setBuild(type){if(state.gameOver)return;state.selectedTower=null;state.buildType=type;updateInspect();renderTowerList();ensureGhost();toast(`Coloca: ${TOWERS.find(t=>t.id===type).name}`)}
-function selectTower(tower){state.buildType=null;removeGhost();state.selectedTower=tower;lastSelected=tower;showTowerRange(tower);updateInspect();renderTowerList()}
-function showTowerRange(tower){if(!tower){placementRing.visible=false;return}const c=tower.group.position;placementRing.position.set(c.x,.1,c.z);placementRing.scale.setScalar(tower.stats.range);placementRing.material.color.set(0x88c974);placementRing.visible=true}
-function renderTowerList(){const host=document.getElementById('towerList');host.innerHTML='';for(let i=0;i<TOWERS.length;i++){const t=TOWERS[i],el=document.createElement('div');el.className='tower-card'+(state.buildType===t.id?' selected':'');el.innerHTML=`<div class="tower-icon">${t.icon}</div><div><div class="tower-name">${t.name}</div><div class="tower-meta">${t.desc}</div></div><div class="tower-cost">${getCost(t.id)} ◈</div>`;el.title=`${t.name} · alcance ${t.range}`;el.addEventListener('click',()=>setBuild(t.id));host.appendChild(el)}document.getElementById('buildHint').textContent=state.buildType?'ESC':'1-5'}
-function updateInspect(){const body=document.getElementById('inspectBody'),level=document.getElementById('inspectLevel'),t=state.selectedTower,panel=document.getElementById('inspectPanel');panel.classList.toggle('has-selection',!!t);if(!t){level.textContent='';body.className='tower-empty';body.textContent='Selecciona una torre del mapa para ver sus parámetros y órdenes disponibles.';return}const nextCost=Math.ceil(TOWERS.find(x=>x.id===t.type).cost*(.8+t.level*.48));level.textContent=`NIVEL ${t.level} / 5`;body.className='action-panel';body.innerHTML=`<div class="selected-name">${armyWeapon(t.type)}</div><div class="selected-detail">${t.data.name} · ${targetText(t.data.targets)}</div><div class="meter-line"><span>Daño por impacto</span><b>${Math.round(t.stats.damage)}</b></div><div class="meter"><i style="width:${Math.min(100,t.stats.damage/1.5)}%"></i></div><div class="meter-line"><span>Alcance operativo</span><b>${t.stats.range.toFixed(1)}</b></div><div class="meter"><i style="width:${Math.min(100,t.stats.range*9)}%"></i></div><div class="upgrade-row"><button class="action-btn" id="upgradeTower" ${t.level>=5?'disabled':''}>↑ Mejorar · ${t.level>=5?'MAX':nextCost}</button><button class="action-btn sell" id="sellTower">Vender · +${Math.floor(t.data.cost*.6)}</button></div>`;document.getElementById('upgradeTower').addEventListener('click',upgradeSelected);document.getElementById('sellTower').addEventListener('click',sellSelected)}
-function armyWeapon(type){const list={usa:{gun:'M134 Minigun',art:'HIMARS',aa:'Patriot',laser:'HELIOS',ew:'EA-18G'},china:{gun:'Type 1130',art:'PCL-181',aa:'HQ-17',laser:'GuoRong',ew:'DWL-002'},russia:{gun:'GSh-6-30',art:'2S19 Msta',aa:'S-400',laser:'Peresvet',ew:'Krasukha'},israel:{gun:'MAG',art:'Ro’em',aa:'Cúpula de Hierro',laser:'Iron Beam',ew:'Scorpius'},uk:{gun:'Minigun',art:'AS-90',aa:'Sky Sabre',laser:'DragonFire',ew:'Land Ceptor'},france:{gun:'Nexter 20 mm',art:'CAESAR',aa:'VL MICA',laser:'HELMA-P',ew:'Brouilleur'},korea:{gun:'K6',art:'K9 Thunder',aa:'Cheongung',laser:'Laser AA',ew:'KJ-100'},turkey:{gun:'Korkut',art:'T-155 Fırtına',aa:'Hisar',laser:'Gökberk',ew:'Koral'}};return list[state.army.id][type]}
-function targetText(targets){return targets.length===2?'Tierra y aire':targets[0]==='air'?'Solo aire':'Solo tierra'}
-function upgradeSelected(){const t=state.selectedTower;if(!t||t.level>=5)return;const cost=Math.ceil(t.data.cost*(.8+t.level*.48));if(state.cash<cost){Sound.error();toast('Créditos insuficientes');return}state.cash-=cost;t.level++;t.stats.damage*=1.34;t.stats.range*=1.07;t.stats.rate*=.94;const pos=t.group.position.clone(),old=t.group;world.remove(old);t.group=buildTowerModel(t.type,state.army.color,t.level);t.group.position.copy(pos);world.add(t.group);t.pivot=t.group.userData.pivot;t.barrels=t.group.userData.barrels;showTowerRange(t);updateInspect();updateHud();Sound.upgrade();toast(`Mejora completada · nivel ${t.level}`)}
-function sellSelected(){const t=state.selectedTower;if(!t)return;state.cash+=Math.floor(t.data.cost*.6);world.remove(t.group);towerCells.delete(cellKey(t.cell.x,t.cell.z));state.towers=state.towers.filter(x=>x!==t);state.selectedTower=null;placementRing.visible=false;updateInspect();updateHud();Sound.sell();toast('Sistema vendido · 60% recuperado')}
-const blobShadowGeo=new THREE.CircleGeometry(1,16);const blobShadowMat=new THREE.MeshBasicMaterial({color:0x1c2418,transparent:true,opacity:.3,depthWrite:false});
-function enemyModel(type){const d=ENEMIES[type],g=new THREE.Group(),paint=camoMaterial(d.color),dark=mat(0x303832),armor=mat(0x414a40),steel=mat(0x737d76,.48,.35),metal=steel,glass=mat(0x9db6ad,.35,.3),white=mat(0xd6d0bc);let mover=null;
- if(type==='infantry'){for(let i=0;i<3;i++){const unit=new THREE.Group(),ox=(i-1)*.23;addMesh(unit,new THREE.SphereGeometry(.105,7,6),paint,ox,.42,0);addMesh(unit,new THREE.SphereGeometry(.112,7,5,0,Math.PI*2,0,Math.PI/2),dark,ox,.47,0);addMesh(unit,new THREE.CylinderGeometry(.085,.12,.28,6),paint,ox,.23,0);addMesh(unit,new THREE.BoxGeometry(.1,.18,.12),dark,ox,.25,.14);for(let side of [-1,1]){const arm=addMesh(unit,new THREE.CylinderGeometry(.025,.035,.2,5),paint,ox+side*.12,.25,-.01);arm.rotation.z=side*.38;const leg=addMesh(unit,new THREE.CylinderGeometry(.035,.045,.16,5),dark,ox+side*.045,.075,0);leg.rotation.z=side*.08}addMesh(unit,new THREE.CylinderGeometry(.025,.025,.27,5),dark,ox+.08,.28,-.15).rotation.x=Math.PI/2;addMesh(unit,new THREE.BoxGeometry(.11,.05,.17),mats.gold,ox+.08,.3,-.15);g.add(unit)}}
- if(type==='jeep'){addMesh(g,new THREE.BoxGeometry(.62,.22,.38),paint,0,.25,0);addMesh(g,new THREE.BoxGeometry(.32,.23,.33),glass,0,.46,.02);for(let side of [-1,1]){addMesh(g,new THREE.BoxGeometry(.045,.3,.34),paint,side*.17,.43,.02);addMesh(g,new THREE.CylinderGeometry(.025,.025,.18,5),dark,side*.25,.55,.04).rotation.z=side*.28}addMesh(g,new THREE.BoxGeometry(.72,.1,.12),steel,0,.16,-.25);addMesh(g,new THREE.BoxGeometry(.63,.08,.4),dark,0,.1,0);for(let x of [-.22,.22])for(let z of [-.22,.22]){const wheel=addMesh(g,new THREE.CylinderGeometry(.11,.11,.09,8),dark,x,.12,z);wheel.rotation.z=Math.PI/2;const hub=addMesh(g,new THREE.CylinderGeometry(.045,.045,.095,8),metal,x,.12,z);hub.rotation.z=Math.PI/2}for(let x of [-.22,.22])addMesh(g,new THREE.SphereGeometry(.045,7,5),mats.gold,x,.29,-.22);addMesh(g,new THREE.CylinderGeometry(.025,.025,.38,5),steel,0,.5,-.05).rotation.x=.85}
- if(type==='tank'){addMesh(g,new THREE.BoxGeometry(.78,.23,.56),dark,0,.19,0);for(let s of [-1,1]){addMesh(g,new THREE.BoxGeometry(.84,.24,.12),paint,0,.18,s*.25);for(let i=0;i<5;i++){const wheel=addMesh(g,new THREE.CylinderGeometry(.105,.105,.14,9),dark,s*.39,.18,-.25+i*.125);wheel.rotation.z=Math.PI/2;const hub=addMesh(g,new THREE.CylinderGeometry(.045,.045,.145,8),metal,s*.39,.18,-.25+i*.125);hub.rotation.z=Math.PI/2}for(let i=0;i<3;i++)addMesh(g,new THREE.BoxGeometry(.08,.13,.05),mats.gold,s*.435,.18,-.2+i*.2)}addMesh(g,new THREE.BoxGeometry(.48,.26,.45),paint,0,.42,0);const tur=new THREE.Group();tur.position.y=.55;g.add(tur);addMesh(tur,new THREE.CylinderGeometry(.23,.27,.2,8),paint,0,0,0);addMesh(tur,new THREE.CylinderGeometry(.055,.07,.68,7),steel,0,0,-.39).rotation.x=Math.PI/2;addMesh(tur,new THREE.CylinderGeometry(.09,.1,.08,8),armor,0,.13,.08);addMesh(tur,new THREE.BoxGeometry(.14,.08,.11),mats.gold,.15,.13,.08);mover=tur}
- if(type==='heli'){addMesh(g,new THREE.SphereGeometry(.27,9,7),paint,0,.33,0).scale.set(1.55,.8,1);addMesh(g,new THREE.SphereGeometry(.16,8,6),glass,0,.38,-.25);addMesh(g,new THREE.ConeGeometry(.1,.8,6),paint,0,.4,.58).rotation.x=Math.PI/2;for(let side of [-1,1]){const strut=addMesh(g,new THREE.CylinderGeometry(.025,.025,.32,5),steel,side*.2,.1,.08);strut.rotation.z=side*.22;addMesh(g,new THREE.CylinderGeometry(.025,.025,.72,6),dark,side*.36,.02,0).rotation.z=Math.PI/2;const stub=addMesh(g,new THREE.CylinderGeometry(.035,.035,.32,6),steel,side*.48,.18,.04);stub.rotation.x=Math.PI/2}const tailRotor=new THREE.Group();tailRotor.position.set(0,.43,.87);g.add(tailRotor);addMesh(tailRotor,new THREE.BoxGeometry(.05,.4,.025),dark,0,0,0);addMesh(tailRotor,new THREE.BoxGeometry(.4,.05,.025),dark,0,0,0);const rotor=new THREE.Group();rotor.position.y=.62;g.add(rotor);addMesh(rotor,new THREE.BoxGeometry(1.25,.035,.09),dark,0,0,0);addMesh(rotor,new THREE.BoxGeometry(.09,.035,1.25),dark,0,0,0);addMesh(rotor,new THREE.CylinderGeometry(.09,.12,.11,8),mats.gold,0,0,0);mover=rotor}
- if(type==='fighter'){addMesh(g,new THREE.ConeGeometry(.18,.95,6),steel,0,.3,0).rotation.x=-Math.PI/2;addMesh(g,new THREE.BoxGeometry(1.05,.06,.36),steel,0,.29,-.05);addMesh(g,new THREE.BoxGeometry(.38,.05,.22),dark,0,.32,.32);addMesh(g,new THREE.SphereGeometry(.105,8,6),glass,0,.38,-.08);for(let side of [-1,1]){const engine=addMesh(g,new THREE.CylinderGeometry(.07,.09,.55,7),dark,side*.17,.2,.17);engine.rotation.x=Math.PI/2;addMesh(g,new THREE.CylinderGeometry(.055,.07,.07,7),mats.gold,side*.17,.2,.45).rotation.x=Math.PI/2;const missile=addMesh(g,new THREE.CylinderGeometry(.035,.045,.34,6),paint,side*.4,.22,-.03);missile.rotation.x=Math.PI/2}addMesh(g,new THREE.ConeGeometry(.055,.4,6),mats.red,0,.3,-.56).rotation.x=-Math.PI/2}
- if(type==='boss'){addMesh(g,new THREE.BoxGeometry(1.45,.78,1.05),paint,0,.53,0);addMesh(g,new THREE.BoxGeometry(1.75,.25,1.18),dark,0,.26,0);for(let s of [-1,1]){addMesh(g,new THREE.BoxGeometry(.12,.66,.82),steel,s*.73,.57,0);for(let i=0;i<4;i++){const wheel=addMesh(g,new THREE.CylinderGeometry(.16,.16,.18,9),dark,s*.88,.28,-.38+i*.25);wheel.rotation.z=Math.PI/2;const hub=addMesh(g,new THREE.CylinderGeometry(.07,.07,.19,8),mats.gold,s*.88,.28,-.38+i*.25);hub.rotation.z=Math.PI/2}for(let i=0;i<2;i++)addMesh(g,new THREE.BoxGeometry(.3,.18,.22),armor,s*.68,.83,-.25+i*.42)}const turret=new THREE.Group();turret.position.y=.94;g.add(turret);addMesh(turret,new THREE.CylinderGeometry(.32,.37,.35,9),paint,0,0,0);addMesh(turret,new THREE.BoxGeometry(.56,.13,.38),armor,0,.21,.04);addMesh(turret,new THREE.CylinderGeometry(.09,.11,.8,8),steel,0,0,-.52).rotation.x=Math.PI/2;addMesh(turret,new THREE.CylinderGeometry(.13,.13,.11,9),mats.gold,0,0,-.88).rotation.x=Math.PI/2;addMesh(turret,new THREE.SphereGeometry(.12,8,6),glass,.22,.11,.08);addMesh(g,new THREE.BoxGeometry(.18,.82,.16),mats.gold,-.52,.62,.48);for(let side of [-1,1]){const pod=addMesh(g,new THREE.BoxGeometry(.25,.36,.25),armor,side*.55,.95,.48);pod.rotation.z=side*.16;addMesh(g,new THREE.SphereGeometry(.07,7,5),mats.red,side*.55,1.18,.48)}mover=turret}
- const altitude=type==='fighter'?4.5:type==='heli'?2.8:0;const blob=new THREE.Mesh(blobShadowGeo,blobShadowMat);blob.rotation.x=-Math.PI/2;blob.position.y=-altitude+.02;blob.scale.setScalar(type==='boss'?.78:type==='tank'?.52:.38);g.add(blob);
- const hpbg=new THREE.Sprite(new THREE.SpriteMaterial({color:0x171b17,transparent:true,opacity:.9,depthTest:false}));hpbg.scale.set(type==='boss'?1.5:.72,.09,1);hpbg.position.y=type==='boss'?1.55:1.03;g.add(hpbg);const hpfg=new THREE.Sprite(new THREE.SpriteMaterial({color:0x9b443a,depthTest:false}));hpfg.scale.set(type==='boss'?1.4:.64,.055,1);hpfg.position.set(0,hpbg.position.y,.008);g.add(hpfg);g.scale.setScalar(type==='boss'?1.24:1.5);g.userData={mover,hpfg,hpbg,type};return g}
-function makeWave(){if(state.active||state.gameOver)return;state.wave++;state.active=true;const n=6+state.wave*2;state.spawnQueue=[];if(state.wave%5===0)state.spawnQueue.push({type:'boss',delay:.9});for(let i=0;i<n;i++){let type;if(state.wave<2)type=i%4===0?'jeep':'infantry';else{const roll=Math.random();if(state.wave>=4&&roll>.86)type='fighter';else if(state.wave>=3&&roll>.67)type='heli';else if(roll>.72)type='tank';else if(roll>.4)type='jeep';else type='infantry'}state.spawnQueue.push({type,delay:Math.max(.32,1.15-state.wave*.025)})}state.spawnTimer=.3;document.getElementById('waveBtn').disabled=true;updateHud();Sound.wave();toast(state.wave%5===0?'¡Jefe detectado!':'Oleada entrante')}
-function spawnEnemy(type){const d=ENEMIES[type],model=enemyModel(type),scale=type==='boss'?1:1;const hp=d.hp*(1+Math.max(0,state.wave-1)*.26);const e={type,data:d,model,hp,maxHp:hp,speed:d.speed*(1+Math.min(.3,state.wave*.012)),progress:0,pathIndex:0,reward:d.reward,slowTimer:0,air:d.kind==='air',x:PATH[0][0],z:PATH[0][1]};model.position.set(e.x,0,e.z);if(e.air)model.position.y=type==='fighter'?4.4:2.8;if(type==='boss')model.scale.setScalar(scale);world.add(model);e.maxHp=hp;e.hp=hp;state.enemies.push(e);}
-function updateSpawn(dt){if(!state.active)return;if(state.spawnQueue.length){state.spawnTimer-=dt;if(state.spawnTimer<=0){const item=state.spawnQueue.shift();spawnEnemy(item.type);state.spawnTimer=item.delay}}if(!state.spawnQueue.length&&state.enemies.length===0){state.active=false;document.getElementById('waveBtn').disabled=false;state.cash+=60+state.wave*4;if(state.wave>records.bestWave){records.bestWave=state.wave;persistRecords();updateRecordUI()}Sound.cleared();toast(`Oleada ${state.wave} contenida · bonificación recibida`);updateHud()}}
-function updateEnemy(e,dt){if(e.slowTimer>0)e.slowTimer-=dt;let distanceLeft=e.speed*(e.slowTimer>0?.56:1)*dt;while(distanceLeft>0&&e.pathIndex<PATH.length-1){const next=PATH[e.pathIndex+1],dx=next[0]-e.x,dz=next[1]-e.z,len=Math.hypot(dx,dz);if(distanceLeft>=len){e.x=next[0];e.z=next[1];distanceLeft-=len;e.pathIndex++}else{e.x+=dx/len*distanceLeft;e.z+=dz/len*distanceLeft;distanceLeft=0}}let traveled=0;for(let i=0;i<e.pathIndex;i++)traveled+=Math.hypot(PATH[i+1][0]-PATH[i][0],PATH[i+1][1]-PATH[i][1]);if(e.pathIndex<PATH.length-1)traveled+=Math.hypot(e.x-PATH[e.pathIndex][0],e.z-PATH[e.pathIndex][1]);const routeLength=PATH.slice(1).reduce((sum,p,i)=>sum+Math.hypot(p[0]-PATH[i][0],p[1]-PATH[i][1]),0);e.progress=traveled/routeLength;const altitude=e.type==='fighter'?4.5:e.type==='heli'?2.8:0;e.model.position.set(e.x,altitude,e.z);if(e.data.kind==='ground'&&e.pathIndex<PATH.length-1){const next=PATH[e.pathIndex+1];e.model.rotation.y=Math.atan2(next[0]-e.x,next[1]-e.z)}if(e.model.userData.mover)e.model.userData.mover.rotation.y+=dt*(e.type==='heli'?8:1.4);const ratio=Math.max(0,e.hp/e.maxHp);e.model.userData.hpfg.scale.x=(e.type==='boss'?1.4:.64)*ratio;e.model.userData.hpfg.material.color.set(ratio<.3?0xe17950:0x9b443a);if(e.pathIndex>=PATH.length-1){Sound.leak();state.hp-=e.data.boss?25:e.type==='tank'?12:e.type==='fighter'?8:5;explode(e.x,0,e.z,e.data.boss?0xf0b14f:0xb96a4e,e.data.boss?30:10);removeEnemy(e,false);if(state.hp<=0)endGame()}}
-function acquireTarget(t){let best=null;for(const e of state.enemies){if(!t.data.targets.includes(e.data.kind))continue;const dist=t.group.position.distanceTo(new THREE.Vector3(e.x,e.air?(e.type==='fighter'?4.5:2.8):.5,e.z));if(dist<=t.stats.range&&(!best||e.progress>best.progress))best=e}return best}
-const projectilePool=[];function getProjectile(color=0xffd074){let o=projectilePool.pop();if(!o){o=new THREE.Mesh(new THREE.SphereGeometry(.11,7,6),new THREE.MeshBasicMaterial({color}));world.add(o)}o.material.color.set(color);o.visible=true;return o}function recycleProjectile(o){o.visible=false;projectilePool.push(o)}
-function fire(t,e){
- const type=t.type;
- if(type==='ew'){e.slowTimer=1.25;makePulse(t.group.position.x,t.group.position.z,t.stats.range);Sound.ew();return}
- if(type==='gun'){
-  e.hp-=t.stats.damage;Sound.gun();muzzleFlash(t);
-  const tracer=makeLine(t.group.position.clone().add(new THREE.Vector3(0,.9,0)),new THREE.Vector3(e.x,.5,e.z),0xffd887,.14);
-  setTimeout(()=>{if(tracer.parent)world.remove(tracer)},55);
-  if(t.barrels.length)t.barrels.forEach(b=>{b.position.z+=.08;setTimeout(()=>b.position.z-=.08,65)});
-  if(Math.random()<.35)makeSparks(e.x,.5,e.z,0xffd887,2);
-  if(e.hp<=0)removeEnemy(e,true);
-  return
- }
- if(type==='art'){
-  const shell=getProjectile(0xffc878);
-  Sound.mortar();muzzleFlash(t,1.4);
-  const start=new THREE.Vector3(t.group.position.x,.92,t.group.position.z);
-  shell.position.copy(start);
-  shell.scale.setScalar(.9);
-  state.effects.push({kind:'shell',active:true,life:.82,data:{mesh:shell,target:e,start,elapsed:0,duration:.82,damage:t.stats.damage,splash:t.data.splash}});
-  return
- }
- if(type==='aa'){
-  const missile=getProjectile(0xffc362);
-  Sound.missile();muzzleFlash(t,1.2);
-  missile.position.set(t.group.position.x,.95,t.group.position.z);
-  state.effects.push({kind:'missile',active:true,data:{mesh:missile,target:e,life:2,damage:t.stats.damage}});
- }
-}
-function impactArtillery(x,z,damage,splash){
- for(const enemy of [...state.enemies]){
-  const distanceToImpact=Math.hypot(enemy.x-x,enemy.z-z);
-  if(distanceToImpact<=splash)enemy.hp-=damage*(1-.3*distanceToImpact/splash);
-  if(enemy.hp<=0)removeEnemy(enemy,true);
- }
- explosionEffect(x,.25,z);
-}
-function updateTowers(dt){for(const t of state.towers){t.cooldown-=dt;if(t.type==='ew'&&t.pivot)t.pivot.rotation.y+=dt*.45;let targetEnemy=acquireTarget(t);t.target=targetEnemy;if(targetEnemy){const dx=targetEnemy.x-t.group.position.x,dz=targetEnemy.z-t.group.position.z,desired=Math.atan2(-dx,-dz);let delta=((desired-t.pivot.rotation.y+Math.PI*3)%(Math.PI*2))-Math.PI;t.pivot.rotation.y+=delta*Math.min(1,dt*6);if(t.type==='art'&&t.group.userData.elev)t.group.userData.elev.rotation.x=.42+Math.min(.38,Math.hypot(dx,dz)*.025);if(t.type==='laser'){const from=t.group.position.clone().add(new THREE.Vector3(0,1,0)),to=new THREE.Vector3(targetEnemy.x,targetEnemy.air?(targetEnemy.type==='fighter'?4.5:2.8):.5,targetEnemy.z);beam(from,to,.22);Sound.laser();targetEnemy.hp-=t.stats.damage*dt;if(targetEnemy.hp<=0)removeEnemy(targetEnemy,true)}else if(t.cooldown<=0){fire(t,targetEnemy);t.cooldown=t.stats.rate}}}}
-function makeLine(a,b,color,opacity=1){const geo=new THREE.BufferGeometry().setFromPoints([a,b]);const line=new THREE.Line(geo,new THREE.LineBasicMaterial({color,transparent:true,opacity}));world.add(line);return line}
-function beam(a,b,width=.18){const key='beam';let fx=state.effects.find(x=>x.kind===key&&!x.active);if(!fx){const mesh=new THREE.Mesh(new THREE.CylinderGeometry(.045,.045,1,6),new THREE.MeshBasicMaterial({color:0x62e7ff,transparent:true,opacity:.9}));world.add(mesh);fx={kind:key,mesh,life:0,active:false};state.effects.push(fx)}fx.active=true;fx.life=.06;const d=b.clone().sub(a);fx.mesh.position.copy(a).add(b).multiplyScalar(.5);fx.mesh.scale.set(width,d.length(),width);fx.mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),d.normalize());}
-function makeSparks(x,y,z,color,n){const count=Math.max(2,Math.round(n*quality().particles));for(let i=0;i<count;i++)spawnParticle(x,y,z,color,1.8+Math.random()*1.8,.24+Math.random()*.35)}
-function muzzleFlash(t,size=1){const p=t.group.position.clone();p.y=1.08;let fx=state.effects.find(e=>e.kind==='muzzle'&&!e.active);if(!fx){const mesh=new THREE.Mesh(new THREE.SphereGeometry(.16,6,5),new THREE.MeshBasicMaterial({color:0xffe0a0,transparent:true,opacity:.95,depthWrite:false}));world.add(mesh);fx={kind:'muzzle',mesh,active:false,life:0};state.effects.push(fx)}fx.active=true;fx.life=.08;fx.maxLife=.08;fx.mesh.position.copy(p);fx.mesh.scale.setScalar((.8+Math.random()*.7)*size);fx.mesh.material.opacity=.95;fx.mesh.visible=true}
-function spawnParticle(x,y,z,color,speed,life){let fx=state.effects.find(e=>e.kind==='particle'&&!e.active);if(!fx){const mesh=new THREE.Mesh(new THREE.SphereGeometry(.075,5,4),new THREE.MeshBasicMaterial({color,transparent:true,opacity:1}));world.add(mesh);fx={kind:'particle',mesh,active:false,life:0};state.effects.push(fx)}fx.active=true;fx.life=life;fx.maxLife=life;fx.mesh.position.set(x,y,z);fx.mesh.material.color.set(color);fx.mesh.material.opacity=1;fx.velocity=new THREE.Vector3((Math.random()-.5)*speed,Math.random()*speed*.6,(Math.random()-.5)*speed);fx.mesh.scale.setScalar(.6+Math.random()*1.4)}
-function explode(x,y,z,color=0xe29b54,n=15){const count=Math.max(3,Math.round(n*quality().particles));for(let i=0;i<count;i++)spawnParticle(x,y,z,color,1.3+Math.random()*3,.45+Math.random()*.6);makePulse(x,z,1.4);}
-function explosionEffect(x,y,z){explode(x,y,z,0xf5a753,22);Sound.explosion();const flash=new THREE.Mesh(new THREE.SphereGeometry(.45,8,6),new THREE.MeshBasicMaterial({color:0xffe6ae,transparent:true,opacity:.8}));flash.position.set(x,y,z);world.add(flash);state.effects.push({kind:'flash',mesh:flash,life:.2,maxLife:.2,active:true});cameraShake=.17}
-function makePulse(x,z,scale){let fx=state.effects.find(e=>e.kind==='pulse'&&!e.active);if(!fx){const mesh=new THREE.Mesh(new THREE.RingGeometry(.86,1,24),new THREE.MeshBasicMaterial({color:0x9ecf79,transparent:true,opacity:.7,side:THREE.DoubleSide}));mesh.rotation.x=-Math.PI/2;world.add(mesh);fx={kind:'pulse',mesh,life:0,active:false};state.effects.push(fx)}fx.active=true;fx.life=.38;fx.maxLife=.38;fx.mesh.position.set(x,.12,z);fx.mesh.scale.setScalar(.2);fx.maxScale=scale}
-function removeEnemy(e,killed){if(!state.enemies.includes(e))return;state.enemies=state.enemies.filter(x=>x!==e);world.remove(e.model);if(killed){state.cash+=e.reward;state.score+=e.reward;explode(e.x,e.data.kind==='air'?2:.3,e.z,e.data.boss?0xf1ba56:0xc7834c,e.data.boss?45:9);if(e.data.boss)cameraShake=.48;updateHud()}}
-function updateEffects(dt){
- for(const fx of state.effects){
-  if(!fx.active)continue;
-  if(fx.kind==='missile'){
-   const p=fx.data,e=p.target;
-   if(!e||!state.enemies.includes(e)){recycleProjectile(p.mesh);fx.active=false;continue}
-   const destination=new THREE.Vector3(e.x,e.air?(e.type==='fighter'?4.5:2.8):.5,e.z);
-   const direction=destination.clone().sub(p.mesh.position),distanceToTarget=direction.length(),step=Math.min(distanceToTarget,dt*10);
-   p.mesh.position.add(direction.normalize().multiplyScalar(step));
-   if(Math.random()<.85)spawnParticle(p.mesh.position.x,p.mesh.position.y,p.mesh.position.z,0x77766c,.45,.28);
-   if(step>=distanceToTarget-.08){e.hp-=p.damage;explosionEffect(e.x,destination.y,e.z);recycleProjectile(p.mesh);fx.active=false;if(e.hp<=0)removeEnemy(e,true)}
-   continue
-  }
-  if(fx.kind==='shell'){
-   const p=fx.data,e=p.target;
-   p.elapsed+=dt;
-   const progress=Math.min(1,p.elapsed/p.duration);
-   const destination=new THREE.Vector3(e.x,e.data.kind==='air'?(e.type==='fighter'?4.5:2.8):.35,e.z);
-   p.mesh.position.lerpVectors(p.start,destination,progress);
-   p.mesh.position.y+=Math.sin(progress*Math.PI)*2.7;
-   if(Math.random()<.32)spawnParticle(p.mesh.position.x,p.mesh.position.y,p.mesh.position.z,0x827d6a,.35,.32);
-   if(progress>=1){impactArtillery(destination.x,destination.z,p.damage,p.splash);recycleProjectile(p.mesh);fx.active=false}
-   continue
-  }
-  fx.life-=dt;
-  if(fx.kind==='particle'){fx.mesh.position.addScaledVector(fx.velocity,dt);fx.velocity.y-=2.2*dt;fx.mesh.material.opacity=Math.max(0,fx.life/fx.maxLife);fx.mesh.scale.multiplyScalar(1+dt)}
-  else if(fx.kind==='pulse'){const progress=1-fx.life/fx.maxLife;fx.mesh.scale.setScalar(.2+progress*fx.maxScale);fx.mesh.material.opacity=.7*(1-progress)}
-  else if(fx.kind==='flash'){fx.mesh.scale.multiplyScalar(1+dt*9);fx.mesh.material.opacity=Math.max(0,fx.life/fx.maxLife)}
-  else if(fx.kind==='muzzle'){fx.mesh.material.opacity=Math.max(0,fx.life/fx.maxLife);fx.mesh.scale.multiplyScalar(1+dt*6)}
-  else if(fx.kind==='beam')fx.active=fx.life>0;
-  if(fx.life<=0){fx.active=false;if(fx.mesh&&fx.kind!=='particle'&&fx.kind!=='pulse'&&fx.kind!=='beam')fx.mesh.visible=false}
- }
-}
-let cameraShake=0;function updateHud(){document.getElementById('cash').textContent=Math.floor(state.cash);document.getElementById('baseHp').textContent=Math.max(0,Math.ceil(state.hp));document.getElementById('waveLabel').textContent=String(state.wave).padStart(2,'0');document.getElementById('enemyCount').textContent=state.enemies.length;document.getElementById('hudFlag').textContent=state.army.flag;document.getElementById('hudArmy').textContent=state.army.name}
-let toastTimer;function toast(message){const el=document.getElementById('toast');el.textContent=message;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),1900)}
-function endGame(){if(state.gameOver)return;state.gameOver=true;state.active=false;state.paused=false;document.getElementById('pauseScreen').classList.add('hidden');records.plays++;if(state.score>records.bestScore)records.bestScore=state.score;if(state.wave>records.bestWave)records.bestWave=state.wave;persistRecords();updateRecordUI();document.getElementById('defeatText').textContent=`La base resistió ${state.wave} oleadas y neutralizó ${state.score} créditos en amenazas.`;document.getElementById('defeatRecordLine').innerHTML=`<span>Mejor oleada<b>${records.bestWave}</b></span><span>Récord<b>${records.bestScore}</b></span><span>Partidas<b>${records.plays}</b></span>`;document.getElementById('defeatScreen').classList.remove('hidden');Sound.defeat()}
-function chooseArmy(i){state.selectedArmy=i;document.querySelectorAll('.army-card').forEach((el,n)=>el.classList.toggle('chosen',n===i))}
-function renderArmies(){const grid=document.getElementById('armyGrid');grid.innerHTML='';ARMIES.forEach((a,i)=>{const card=document.createElement('button');card.className='army-card'+(i===state.selectedArmy?' chosen':'');card.innerHTML=`<div class="army-card-head"><span class="army-flag">${a.flag}</span><div><div class="army-title">${a.name}</div><div class="army-bonus">${a.bonus}</div></div></div><div class="army-weapons"><b>Insignia:</b> ${a.weapons}</div>`;card.addEventListener('click',()=>chooseArmy(i));grid.appendChild(card)})}
-function deploy(){state.army=ARMIES[state.selectedArmy];state.cash=state.army.cash;settings.army=state.selectedArmy;persistSettings();state.deployed=true;state.paused=false;document.getElementById('pauseScreen').classList.add('hidden');if(state.base)state.base.traverse(object=>{if(object.isMesh&&object.material.map&&object.material.map.image instanceof HTMLCanvasElement)object.material=camoMaterial(new THREE.Color(state.army.color).lerp(new THREE.Color(0x30372e),.18))});document.getElementById('armyScreen').classList.add('hidden');document.getElementById('hudArmy').textContent=state.army.name;document.getElementById('hudFlag').textContent=state.army.flag;updateHud();renderTowerList();Sound.init();Sound.ui();toast(`${state.army.name} desplegado`)}
-function resetGame(){for(const t of state.towers)world.remove(t.group);for(const e of state.enemies)world.remove(e.model);state.towers=[];state.enemies=[];state.effects.forEach(f=>{if(f.mesh)world.remove(f.mesh)});state.effects=[];towerCells.clear();state.wave=0;state.hp=100;state.cash=state.army.cash;state.active=false;state.gameOver=false;state.paused=false;state.deployed=true;state.speed=1;state.score=0;state.spawnQueue=[];state.selectedTower=null;state.buildType=null;removeGhost();placementRing.visible=false;document.querySelectorAll('.speed-control button').forEach(x=>x.classList.toggle('active',x.dataset.speed==='1'));document.getElementById('defeatScreen').classList.add('hidden');document.getElementById('pauseScreen').classList.add('hidden');document.getElementById('waveBtn').disabled=false;updateInspect();updateHud();renderTowerList();target.set(0,0,0);targetDistance=distance=DEFAULT_DISTANCE;yaw=0;updateCamera();Sound.ui()}
-// ===== Sonido sintetizado (Web Audio, sin archivos externos) =====
-const Sound=(()=>{
- let ctx=null,master=null,noiseBuffer=null;const last={};
- function ensure(){if(!settings.sound)return null;if(!ctx){const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;ctx=new AC();master=ctx.createGain();master.gain.value=settings.volume;master.connect(ctx.destination);noiseBuffer=null}if(ctx.state==='suspended')ctx.resume().catch(()=>{});return ctx}
- function gate(name,ms){const now=performance.now();if(last[name]&&now-last[name]<ms)return false;last[name]=now;return true}
- function tone(freq,dur,type='square',vol=.15,slide=0,delay=0){const c=ensure();if(!c)return;const t0=c.currentTime+delay,osc=c.createOscillator(),gain=c.createGain();osc.type=type;osc.frequency.setValueAtTime(Math.max(20,freq),t0);if(slide)osc.frequency.exponentialRampToValueAtTime(Math.max(20,freq+slide),t0+dur);gain.gain.setValueAtTime(.0001,t0);gain.gain.exponentialRampToValueAtTime(Math.max(.0002,vol),t0+.008);gain.gain.exponentialRampToValueAtTime(.0001,t0+dur);osc.connect(gain);gain.connect(master);osc.start(t0);osc.stop(t0+dur+.02)}
- function noise(dur,vol=.2,cutoff=1000,delay=0){const c=ensure();if(!c)return;if(!noiseBuffer){const len=Math.floor(c.sampleRate);noiseBuffer=c.createBuffer(1,len,c.sampleRate);const data=noiseBuffer.getChannelData(0);for(let i=0;i<len;i++)data[i]=Math.random()*2-1}const t0=c.currentTime+delay,src=c.createBufferSource();src.buffer=noiseBuffer;const filter=c.createBiquadFilter();filter.type='lowpass';filter.frequency.setValueAtTime(cutoff,t0);const gain=c.createGain();gain.gain.setValueAtTime(vol,t0);gain.gain.exponentialRampToValueAtTime(.0001,t0+dur);src.connect(filter);filter.connect(gain);gain.connect(master);src.start(t0);src.stop(t0+Math.min(dur,.99))}
- return {
-  init(){ensure()},
-  setVolume(v){settings.volume=Math.max(0,Math.min(1,v));persistSettings();if(master)master.gain.value=settings.volume},
-  gun(){if(gate('gun',55)){tone(190+Math.random()*40,.05,'square',.09,-110);noise(.04,.07,2600)}},
-  mortar(){if(gate('mortar',120)){tone(92,.18,'sawtooth',.19,-52);noise(.16,.16,520)}},
-  missile(){if(gate('missile',100)){tone(430,.28,'sawtooth',.08,720);noise(.12,.07,1900)}},
-  laser(){if(gate('laser',110))tone(860,.09,'sine',.05,340)},
-  ew(){if(gate('ew',170)){tone(240,.22,'triangle',.07,190);tone(320,.18,'sine',.04,120,.04)}},
-  explosion(){if(gate('boom',85)){noise(.35,.3,700);tone(60,.3,'sine',.2,-25)}},
-  leak(){if(gate('leak',170)){tone(230,.32,'triangle',.16,-130);noise(.18,.1,900)}},
-  build(){tone(320,.08,'square',.12,130);tone(520,.1,'square',.1,110,.08)},
-  sell(){tone(380,.1,'triangle',.11,-160);tone(240,.12,'triangle',.1,-90,.09)},
-  upgrade(){[440,660,880].forEach((f,i)=>tone(f,.12,'square',.08,70,i*.06))},
-  cleared(){[523,659,784].forEach((f,i)=>tone(f,.16,'triangle',.08,30,i*.07))},
-  wave(){tone(140,.5,'sawtooth',.11,130);tone(210,.5,'triangle',.07,170,.08)},
-  defeat(){[330,262,196,131].forEach((f,i)=>tone(f,.38,'triangle',.13,-25,i*.14))},
-  error(){tone(150,.15,'square',.1,-60)},
-  click(){if(gate('click',45))tone(620,.035,'square',.05,90)},
-  ui(){if(gate('ui',60))tone(480,.06,'sine',.06,130)},
-  toggle(on){settings.sound=on;persistSettings();if(on)ensure();updateSoundButton()}
- };
-})();
-// ===== Ajustes, pausa, calidad y pantalla completa =====
-let settingsAutoPaused=false;
-function updateSoundButton(){const b=document.getElementById('soundBtn');if(b){b.textContent=settings.sound?'♪':'🔇';b.classList.toggle('off',!settings.sound);b.title=settings.sound?'Silenciar (M)':'Activar sonido (M)'}const t=document.getElementById('soundToggle');if(t)t.textContent=settings.sound?'Activado':'Silenciado'}
-function updateRecordUI(){const w=document.getElementById('recordWave'),s=document.getElementById('recordScore'),r=document.getElementById('recordRuns');if(w)w.textContent=records.bestWave||0;if(s)s.textContent=records.bestScore||0;if(r)r.textContent=records.plays||0}
-function updatePauseButton(){const b=document.getElementById('pauseBtn');if(!b)return;b.textContent=state.paused?'▶':'❚❚';b.classList.toggle('active',state.paused);b.title=state.paused?'Reanudar (P)':'Pausa (P)'}
-function setPaused(value,options={}){if(!state.deployed||state.gameOver)return;state.paused=!!value;const screen=document.getElementById('pauseScreen');if(screen)screen.classList.toggle('hidden',!(value&&!options.silent));updatePauseButton()}
-function togglePause(){if(!state.deployed||state.gameOver)return;setPaused(!state.paused)}
-function quitToMenu(){resetGame();state.deployed=false;state.paused=false;document.getElementById('pauseScreen').classList.add('hidden');document.getElementById('armyScreen').classList.remove('hidden');renderArmies();updateRecordUI();updatePauseButton()}
-function updateQualityHint(){const hint=document.getElementById('qualityHint');if(!hint)return;const q=quality();hint.textContent=settings.quality==='auto'?`Automática: ${q.label.toLowerCase()} en este dispositivo.`:`Forzada: ${q.label.toLowerCase()}${q.shadows?', con sombras':', sin sombras'}.`}
-function applyGraphicsQuality(){const q=quality();renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,q.pixel));renderer.shadowMap.enabled=q.shadows;sun.castShadow=q.shadows;if(sun.shadow.mapSize.x!==q.shadow){sun.shadow.mapSize.set(q.shadow,q.shadow);if(sun.shadow.map){sun.shadow.map.dispose();sun.shadow.map=null}}resize();updateQualityHint()}
-function setQuality(mode){settings.quality=QUALITY_PRESETS[mode]?mode:'auto';qualityLevel=settings.quality==='auto'?(coarsePointer?'medium':'high'):settings.quality;applyGraphicsQuality();persistSettings();toast(`Calidad gráfica: ${quality().label}`)}
-const fullscreenAvailable=Boolean(document.fullscreenEnabled||document.webkitFullscreenEnabled);
-async function toggleFullscreen(){if(!fullscreenAvailable){toast('Pantalla completa no disponible en este navegador');return}try{if(document.fullscreenElement||document.webkitFullscreenElement){await (document.exitFullscreen?document.exitFullscreen():document.webkitExitFullscreen())}else{const el=document.documentElement,request=el.requestFullscreen||el.webkitRequestFullscreen;if(!request){toast('Pantalla completa no disponible');return}await request.call(el,{navigationUI:'hide'})}}catch{toast('No se pudo activar pantalla completa')}}
-function updateFullscreenUI(){const active=Boolean(document.fullscreenElement||document.webkitFullscreenElement);const top=document.getElementById('fullscreenBtnTop');if(top){top.textContent=active?'🗗':'⛶';top.classList.toggle('active',active);top.title=active?'Salir de pantalla completa (F)':'Pantalla completa (F)'}const btn=document.getElementById('fullscreenBtn');if(btn)btn.textContent=active?'Desactivar':'Activar';const hint=document.getElementById('fullscreenHint');if(hint)hint.textContent=fullscreenAvailable?'Útil en escritorio y Android.':'Tu navegador no permite pantalla completa.'}
-document.addEventListener('fullscreenchange',updateFullscreenUI);document.addEventListener('webkitfullscreenchange',updateFullscreenUI);
-function openSettings(){settingsAutoPaused=false;if(state.deployed&&!state.gameOver&&!state.paused){setPaused(true,{silent:true});settingsAutoPaused=true}syncSettingsUI();document.getElementById('settingsScreen').classList.remove('hidden')}
-function closeSettings(){document.getElementById('settingsScreen').classList.add('hidden');if(settingsAutoPaused){settingsAutoPaused=false;setPaused(false)}}
-function syncSettingsUI(){const q=document.getElementById('qualitySelect');if(q)q.value=settings.quality;const v=document.getElementById('volumeRange');if(v)v.value=Math.round(settings.volume*100);const ver=document.getElementById('appVersion');if(ver)ver.textContent=APP_VERSION;const mode=document.getElementById('installMode');if(mode)mode.textContent=standalone?'instalada':'navegador';updateSoundButton();updateQualityHint();updateInstallUI();updateFullscreenUI()}
-// ===== PWA: instalación y actualizaciones desde GitHub =====
-const standalone=matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
-let deferredPrompt=null,swRegistration=null,waitingWorker=null,refreshing=false;
-function updateInstallUI(){const canInstall=Boolean(deferredPrompt)&&!standalone;['installBtn','installBtnMenu'].forEach(id=>{const b=document.getElementById(id);if(b)b.hidden=!canInstall});const hint=document.getElementById('installHint');if(hint)hint.textContent=canInstall?'Añádela a tu pantalla de inicio para jugar sin conexión.':standalone?'Aplicación instalada. Se actualiza sola al abrirla.':'Abre el menú del navegador y elige «Añadir a pantalla de inicio» para instalar.';const mode=document.getElementById('installMode');if(mode)mode.textContent=standalone?'instalada':'navegador'}
-async function installApp(){if(!deferredPrompt){toast('Usa el menú del navegador → Añadir a pantalla de inicio');return}deferredPrompt.prompt();try{const choice=await deferredPrompt.userChoice;if(choice&&choice.outcome==='accepted')toast('Instalando aplicación…')}catch{}deferredPrompt=null;updateInstallUI()}
-window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();deferredPrompt=event;updateInstallUI()});
-window.addEventListener('appinstalled',()=>{deferredPrompt=null;toast('Aplicación instalada · lista sin conexión');updateInstallUI()});
-function showUpdate(worker){if(!worker)return;waitingWorker=worker;const banner=document.getElementById('updateBanner');if(banner)banner.hidden=false}
-if('serviceWorker' in navigator&&location.protocol!=='file:'){
- window.addEventListener('load',async()=>{try{swRegistration=await navigator.serviceWorker.register('sw.js');if(swRegistration.waiting&&navigator.serviceWorker.controller)showUpdate(swRegistration.waiting);swRegistration.addEventListener('updatefound',()=>{const worker=swRegistration.installing;if(!worker)return;worker.addEventListener('statechange',()=>{if(worker.state==='installed'&&navigator.serviceWorker.controller)showUpdate(worker)})});navigator.serviceWorker.addEventListener('controllerchange',()=>{if(refreshing)return;refreshing=true;location.reload()});const check=()=>swRegistration&&swRegistration.update().catch(()=>{});window.addEventListener('focus',check);setInterval(check,30*60*1000)}catch(error){console.warn('Service worker no disponible',error)}});
-}
-// ===== Eventos de interfaz =====
-document.getElementById('deployBtn').addEventListener('click',deploy);
-document.getElementById('armySwitch').addEventListener('click',()=>{if(state.deployed&&!state.gameOver&&!state.paused)setPaused(true,{silent:true});document.getElementById('armyScreen').classList.remove('hidden');renderArmies()});
-document.getElementById('waveBtn').addEventListener('click',makeWave);
-document.getElementById('retryBtn').addEventListener('click',resetGame);
-document.getElementById('centerCam').addEventListener('click',()=>{target.set(0,0,0);targetDistance=DEFAULT_DISTANCE;yaw=0;toast('Cámara centrada')});
-function zoomBy(factor){targetDistance=THREE.MathUtils.clamp(targetDistance*factor,minDistance,maxDistance);distance=THREE.MathUtils.damp(distance,targetDistance,.4,1/60);updateCamera()}
-document.getElementById('zoomIn').addEventListener('click',()=>zoomBy(.8));
-document.getElementById('zoomOut').addEventListener('click',()=>zoomBy(1.28));
-document.getElementById('cancelBuild').addEventListener('click',()=>{state.buildType=null;removeGhost();renderTowerList()});
-document.getElementById('soundBtn').addEventListener('click',()=>Sound.toggle(!settings.sound));
-document.getElementById('pauseBtn').addEventListener('click',togglePause);
-document.getElementById('resumeBtn').addEventListener('click',()=>setPaused(false));
-document.getElementById('settingsBtn').addEventListener('click',openSettings);
-document.getElementById('pauseSettingsBtn').addEventListener('click',openSettings);
-document.getElementById('pauseQuitBtn').addEventListener('click',quitToMenu);
-document.getElementById('closeSettingsBtn').addEventListener('click',closeSettings);
-document.getElementById('qualitySelect').addEventListener('change',event=>setQuality(event.target.value));
-document.getElementById('soundToggle').addEventListener('click',()=>Sound.toggle(!settings.sound));
-document.getElementById('volumeRange').addEventListener('input',event=>Sound.setVolume(Number(event.target.value)/100));
-document.getElementById('fullscreenBtn').addEventListener('click',toggleFullscreen);
-document.getElementById('fullscreenBtnTop').addEventListener('click',toggleFullscreen);
-document.getElementById('installBtn').addEventListener('click',installApp);
-document.getElementById('installBtnMenu').addEventListener('click',installApp);
-document.getElementById('resetProgressBtn').addEventListener('click',()=>{if(!confirm('¿Borrar los récords guardados en este dispositivo?'))return;records.bestWave=0;records.bestScore=0;records.totalKills=0;records.plays=0;persistRecords();updateRecordUI();toast('Récords borrados');Sound.ui()});
-document.getElementById('reloadBtn').addEventListener('click',()=>{if(waitingWorker){waitingWorker.postMessage({type:'SKIP_WAITING'})}else{location.reload()}});
-document.getElementById('settingsScreen').addEventListener('click',event=>{if(event.target===event.currentTarget)closeSettings()});
-document.addEventListener('click',event=>{if(event.target.closest('button'))Sound.click()});
-document.addEventListener('pointerdown',()=>Sound.init(),{once:true});
-document.addEventListener('keydown',()=>Sound.init(),{once:true});
-document.querySelectorAll('.speed-control button').forEach(b=>b.addEventListener('click',()=>{state.speed=Number(b.dataset.speed);document.querySelectorAll('.speed-control button').forEach(x=>x.classList.toggle('active',x===b));Sound.ui()}));
-renderArmies();renderTowerList();updateHud();updateRecordUI();updateSoundButton();updatePauseButton();updateQualityHint();updateInstallUI();updateFullscreenUI();
-let keys={};
-function isTypingTarget(target){return Boolean(target)&&(/^(INPUT|SELECT|TEXTAREA)$/.test(target.tagName)||target.isContentEditable)}
-window.addEventListener('keydown',e=>{
- const settingsOpen=!document.getElementById('settingsScreen').classList.contains('hidden');
- if(e.key==='Escape'){if(settingsOpen){closeSettings();return}if(state.buildType||state.selectedTower){state.buildType=null;removeGhost();state.selectedTower=null;updateInspect();renderTowerList()}return}
- if(isTypingTarget(e.target)||settingsOpen)return;
- if(!document.getElementById('armyScreen').classList.contains('hidden'))return;
- keys[e.key.toLowerCase()]=true;
- if(/^[1-5]$/.test(e.key)){e.preventDefault();if(state.deployed&&!state.gameOver)setBuild(TOWERS[Number(e.key)-1].id)}
- else if(/^f[1-5]$/i.test(e.key)){e.preventDefault();if(state.deployed&&!state.gameOver)setBuild(TOWERS[Number(e.key[1])-1].id)}
- else if(e.code==='Space'){e.preventDefault();if(!state.deployed||state.gameOver)return;if(state.paused)setPaused(false);else if(state.active)setPaused(true);else makeWave()}
- else{const k=e.key.toLowerCase();if(k==='p'&&!e.repeat)togglePause();else if(k==='m'&&!e.repeat)Sound.toggle(!settings.sound);else if(k==='f'&&!e.repeat)toggleFullscreen();else if(k==='q')yaw+=.1;else if(k==='e')yaw-=.1}
-});
-window.addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
-window.addEventListener('blur',()=>{keys={}});
-document.addEventListener('visibilitychange',()=>{if(document.hidden&&state.deployed&&!state.gameOver&&!state.paused)setPaused(true)});
-let pointers=new Map(),gesture=null,pinchStart=0,lastPointer={x:0,y:0};canvas.addEventListener('contextmenu',e=>e.preventDefault());canvas.addEventListener('pointerdown',e=>{try{canvas.setPointerCapture(e.pointerId)}catch{}pointers.set(e.pointerId,{x:e.clientX,y:e.clientY,type:e.pointerType});lastPointer={x:e.clientX,y:e.clientY};updatePointer(e.clientX,e.clientY);if(pointers.size===2){const ps=[...pointers.values()];pinchStart=Math.hypot(ps[1].x-ps[0].x,ps[1].y-ps[0].y);gesture={kind:'pinch',center:{x:(ps[0].x+ps[1].x)/2,y:(ps[0].y+ps[1].y)/2}};return}if(e.button===1||e.button===2){gesture={kind:e.button===2?'rotate':'pan',x:e.clientX,y:e.clientY,button:e.button};return}if(e.pointerType==='touch'){gesture={kind:'touch',x:e.clientX,y:e.clientY,moved:false};return}gesture={kind:'click',x:e.clientX,y:e.clientY,moved:false}});
-canvas.addEventListener('pointermove',e=>{if(pointers.has(e.pointerId))pointers.set(e.pointerId,{x:e.clientX,y:e.clientY,type:e.pointerType});if(pointers.size>=2&&gesture?.kind==='pinch'){const ps=[...pointers.values()],d=Math.hypot(ps[1].x-ps[0].x,ps[1].y-ps[0].y),center={x:(ps[0].x+ps[1].x)/2,y:(ps[0].y+ps[1].y)/2};targetDistance=THREE.MathUtils.clamp(targetDistance*pinchStart/d,minDistance,maxDistance);pinchStart=d;const dx=center.x-gesture.center.x,dy=center.y-gesture.center.y;panPixels(dx,dy);gesture.center=center;return}if(gesture){const dx=e.clientX-(gesture.x??e.clientX),dy=e.clientY-(gesture.y??e.clientY);if(gesture.kind==='pan'||gesture.kind==='touch'&&gesture.moved){panPixels(dx,dy);gesture.x=e.clientX;gesture.y=e.clientY;gesture.moved=true}else if(gesture.kind==='rotate'){yaw-=dx*.006;gesture.x=e.clientX;gesture.y=e.clientY}else if(gesture.kind==='touch'||gesture.kind==='click'){if(Math.hypot(e.clientX-gesture.x,e.clientY-gesture.y)>7)gesture.moved=true}}lastPointer={x:e.clientX,y:e.clientY};updatePointer(e.clientX,e.clientY)});
-canvas.addEventListener('pointerup',e=>{const g=gesture;pointers.delete(e.pointerId);if(g&&pointers.size===0){if((g.kind==='click'||g.kind==='touch')&&!g.moved)handleClick(e.clientX,e.clientY);gesture=null}else if(pointers.size<2&&gesture?.kind==='pinch')gesture=null});canvas.addEventListener('pointercancel',e=>{pointers.delete(e.pointerId);gesture=null});
-function panPixels(dx,dy){const scale=distance/Math.max(350,window.innerHeight);const right=new THREE.Vector3(Math.cos(yaw),0,-Math.sin(yaw)),forward=new THREE.Vector3(Math.sin(yaw),0,Math.cos(yaw));target.addScaledVector(right,-dx*scale);target.addScaledVector(forward,dy*scale);clampTarget()}
-function handleClick(x,y){const p=pointerGround(x,y);if(!p)return;const c=worldCell(p.x,p.z);if(!insideCell(c.x,c.z))return;if(state.buildType){hoverCell={cellX:c.x,cellZ:c.z,...cellCenter(c.x,c.z)};placeTower();return}const hit=raycaster.intersectObjects(state.towers.map(t=>t.group),true)[0];if(hit){let root=hit.object;while(root.parent&&root.parent!==world)root=root.parent;const t=state.towers.find(v=>v.group===root);if(t){selectTower(t);return}}const tower=state.towers.find(t=>t.cell.x===c.x&&t.cell.z===c.z);if(tower){selectTower(tower);return}state.selectedTower=null;placementRing.visible=false;updateInspect()}
-canvas.addEventListener('wheel',e=>{e.preventDefault();const before=pointerGround(e.clientX,e.clientY);const unit=e.deltaMode===1?16:e.deltaMode===2?120:1;targetDistance=THREE.MathUtils.clamp(targetDistance*Math.exp(e.deltaY*unit*.0026),minDistance,maxDistance);distance=THREE.MathUtils.damp(distance,targetDistance,.45,1/60);updateCamera();const after=pointerGround(e.clientX,e.clientY);if(before&&after){target.add(before.sub(after));clampTarget()}},{passive:false});
-function clampTarget(){target.x=THREE.MathUtils.clamp(target.x,-5.5,5.5);target.z=THREE.MathUtils.clamp(target.z,-3,3)}
-function updateKeys(dt){let dx=0,dz=0;if(keys.w||keys.arrowup)dz-=1;if(keys.s||keys.arrowdown)dz+=1;if(keys.a||keys.arrowleft)dx-=1;if(keys.d||keys.arrowright)dx+=1;if(dx||dz){const right=new THREE.Vector3(Math.cos(yaw),0,-Math.sin(yaw)),forward=new THREE.Vector3(Math.sin(yaw),0,Math.cos(yaw));target.addScaledVector(right,dx*dt*9);target.addScaledVector(forward,dz*dt*9);clampTarget()}}
-function resize(){renderer.setSize(window.innerWidth,window.innerHeight);renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,quality().pixel));camera.aspect=window.innerWidth/window.innerHeight;camera.updateProjectionMatrix()}window.addEventListener('resize',resize);window.addEventListener('orientationchange',()=>setTimeout(resize,150));
-function tick(now){requestAnimationFrame(tick);const dt=Math.min(.05,(now-(tick.last||now))/1000);tick.last=now;state.clock+=dt;frame++;const running=state.deployed&&!state.paused&&!state.gameOver&&!document.hidden;const gameDt=running?dt*state.speed:0;updateKeys(dt);distance=THREE.MathUtils.damp(distance,targetDistance,.34,dt);if(cameraShake>0){cameraShake=Math.max(0,cameraShake-dt);const shake=cameraShake*0.12;camera.position.x+=Math.sin(state.clock*90)*shake;camera.position.y+=Math.cos(state.clock*73)*shake*.45}updateCamera();updateSpawn(gameDt);for(const e of [...state.enemies])updateEnemy(e,gameDt);updateTowers(gameDt);updateEffects(gameDt);if(frame%8===0)updateHud();renderer.render(scene,camera);if(running&&settings.quality==='auto'){if(dt>.045)lowFpsTime+=dt;else lowFpsTime=Math.max(0,lowFpsTime-dt*.5);if(lowFpsTime>4){if(qualityLevel==='high'){qualityLevel='medium';applyGraphicsQuality();toast('Calidad gráfica reducida para mantener la fluidez')}else if(qualityLevel==='medium'){qualityLevel='low';applyGraphicsQuality();toast('Calidad gráfica al mínimo')}lowFpsTime=0}}}
-requestAnimationFrame(tick);
-</script>
+<script src="game.js"></script>
 </body>
 </html>
