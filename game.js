@@ -350,14 +350,14 @@ const JAM_OVERRIDES = {
 // Habilidades especiales de los jefes contra estructuras. Se ejecutan con
 // temporizadores de simulación, por lo que pausar o acelerar no altera el ritmo.
 const BOSS_SKILLS = {
-  smash: { name: 'Golpe sísmico', nameEn: 'Seismic smash', desc: 'Destruye la estructura más débil o le arranca dos niveles', descEn: 'Destroys the weakest structure or strips two levels', icon: '✹', cooldown: 7.5, maxTargets: 1, radius: 2.2, levels: 2, stun: 4, destroyWeak: true },
-  siege: { name: 'Asedio concentrado', nameEn: 'Focused siege', desc: 'Martillea dos estructuras y las deja aturdidas', descEn: 'Hammers two structures and stuns them', icon: '☄', cooldown: 8, maxTargets: 2, radius: 2.4, levels: 2, stun: 3.5 },
-  sabotage: { name: 'Sabotaje', nameEn: 'Sabotage', desc: 'Destruye por completo la estructura de mayor amenaza', descEn: 'Completely destroys the highest-threat structure', icon: '☠', cooldown: 12, maxTargets: 1, radius: 2.2, levels: 9, stun: 0, destroy: true },
-  barrage: { name: 'Barrera de mando', nameEn: 'Command barrage', desc: 'Inhabilita varias estructuras en un área amplia', descEn: 'Disables several structures over a wide area', icon: '✷', cooldown: 8.5, maxTargets: 3, radius: 3.4, levels: 1, stun: 5 },
-  emp: { name: 'Pulso de apagón', nameEn: 'Blackout pulse', desc: 'Inhabilita todas las estructuras cercanas durante varios segundos', descEn: 'Disables every nearby structure for several seconds', icon: '⌁', cooldown: 10, maxTargets: 99, radius: 5.5, levels: 0, stun: 6, areaFromBoss: true },
-  abduct: { name: 'Abducción estructural', nameEn: 'Structural abduction', desc: 'Se lleva una estructura completa del tablero', descEn: 'Removes one structure from the board', icon: '◉', cooldown: 13, maxTargets: 1, radius: 2.2, levels: 9, stun: 0, destroy: true },
-  inferno: { name: 'Infierno de asedio', nameEn: 'Siege inferno', desc: 'Quema varias estructuras y puede destruir las de nivel bajo', descEn: 'Burns several structures and may destroy low-level ones', icon: '🔥', cooldown: 9, maxTargets: 3, radius: 3, levels: 2, stun: 5, destroyWeak: true },
-  judgment: { name: 'Juicio celestial', nameEn: 'Celestial judgment', desc: 'Degrada e inhabilita todas las estructuras del sector', descEn: 'Degrades and disables every structure in the sector', icon: '✦', cooldown: 12, maxTargets: 99, radius: 6.5, levels: 1, stun: 4.5, areaFromBoss: true }
+  smash: { name: 'Golpe sísmico', nameEn: 'Seismic smash', desc: 'Golpea la estructura más cercana y le arranca dos niveles; puede destruirla si está a nivel 1', descEn: 'Hits the nearest structure for two levels; may destroy it at level 1', icon: '✹', cooldown: 7.5, maxTargets: 1, radius: 2.2, levels: 2, stun: 4, destroyWeak: true },
+  siege: { name: 'Asedio concentrado', nameEn: 'Focused siege', desc: 'Martillea las dos estructuras más cercanas y las deja aturdidas', descEn: 'Hammers the two nearest structures and stuns them', icon: '☄', cooldown: 8, maxTargets: 2, radius: 2.4, levels: 2, stun: 3.5 },
+  sabotage: { name: 'Sabotaje', nameEn: 'Sabotage', desc: 'Intenta destruir la estructura más cercana; si no puede, la degrada por completo', descEn: 'Attempts to destroy the nearest structure; if it cannot, strips it completely', icon: '☠', cooldown: 12, maxTargets: 1, radius: 2.2, levels: 9, stun: 0, destroy: true },
+  barrage: { name: 'Barrera de mando', nameEn: 'Command barrage', desc: 'Inhabilita las estructuras más cercanas en un área amplia', descEn: 'Disables the nearest structures over a wide area', icon: '✷', cooldown: 8.5, maxTargets: 3, radius: 3.4, levels: 1, stun: 5 },
+  emp: { name: 'Pulso de apagón', nameEn: 'Blackout pulse', desc: 'Inhabilita las estructuras cercanas al jefe durante varios segundos', descEn: 'Disables structures near the boss for several seconds', icon: '⌁', cooldown: 10, maxTargets: 99, radius: 5.5, levels: 0, stun: 6, areaFromBoss: true },
+  abduct: { name: 'Abducción estructural', nameEn: 'Structural abduction', desc: 'Intenta llevarse la estructura más cercana del tablero', descEn: 'Attempts to abduct the nearest structure', icon: '◉', cooldown: 13, maxTargets: 1, radius: 2.2, levels: 9, stun: 0, destroy: true },
+  inferno: { name: 'Infierno de asedio', nameEn: 'Siege inferno', desc: 'Quema las estructuras más cercanas y puede destruir las de nivel bajo', descEn: 'Burns the nearest structures and may destroy low-level ones', icon: '🔥', cooldown: 9, maxTargets: 3, radius: 3, levels: 2, stun: 5, destroyWeak: true },
+  judgment: { name: 'Juicio celestial', nameEn: 'Celestial judgment', desc: 'Degrada e inhabilita las estructuras más cercanas en un sector amplio', descEn: 'Degrades and disables the nearest structures in a wide sector', icon: '✦', cooldown: 12, maxTargets: 99, radius: 6.5, levels: 1, stun: 4.5, areaFromBoss: true }
 };
 const BOSS_SKILL_BY_ID = {
   cavemenBoss: 'smash', spartanBoss: 'siege', crusaderBoss: 'siege', pirateBoss: 'sabotage',
@@ -520,6 +520,7 @@ const I18N = {
     'toast.strikeSelect': 'Ataque aéreo: selecciona el punto de impacto', 'toast.emp': 'Pulso EMP · amenazas ralentizadas y drones repelidos',
     'toast.repair': 'Base reparada · +{n}% de integridad', 'toast.repairFull': 'La base ya está a integridad completa', 'toast.strikeActive': 'Ataque aéreo en curso',
     'toast.bossSkill': '{name}: {skill}', 'toast.bossDestroy': '¡{name} ha destruido una estructura!',
+    'toast.infiltratorStrike': '¡Un infiltrado ha saboteado una estructura!',
     'toast.army': '{name} desplegado · pista de dos carriles y flota disponibles', 'toast.armyNew': '{name} desplegado · nueva partida iniciada', 'toast.restart': 'Partida reiniciada', 'toast.language': 'Idioma: {language}',
     'toast.camera': 'Cámara centrada', 'toast.recordsCleared': 'Récords borrados', 'toast.quality': 'Calidad gráfica: {level}',
     'toast.qualityReduced': 'Calidad gráfica reducida para mantener la fluidez', 'toast.qualityMinimum': 'Calidad gráfica al mínimo',
@@ -538,6 +539,7 @@ const I18N = {
     'intel.counter': 'Débil ante {name}', 'intel.bossWave': 'Oleada de jefe final',
     'intel.infiltrator': 'Infiltrado', 'intel.infiltrators': 'Infiltrados: {n} · halo violeta',
     'intel.pressure': 'Presión adaptativa ×{x}', 'intel.bossSkill': 'Habilidad de jefe: {name} · {desc}',
+    'intel.siegeCap': 'Asedio limitado (escala con la oleada y tu defensa): hasta {dmg} estructuras · hasta {destroy} destruidas',
     'intel.ewFull': 'EW total', 'intel.ewPartial': 'EW {n}%', 'intel.ewImmune': 'EW inmune',
     'rank.elite': 'ÉLITE', 'rank.veteran': 'VETERANO'
   },
@@ -621,6 +623,7 @@ const I18N = {
     'toast.strikeSelect': 'Airstrike: select the impact point', 'toast.emp': 'EMP pulse · threats slowed and drones repelled',
     'toast.repair': 'Base repaired · +{n}% integrity', 'toast.repairFull': 'Base is already at full integrity', 'toast.strikeActive': 'Airstrike in progress',
     'toast.bossSkill': '{name}: {skill}', 'toast.bossDestroy': '{name} destroyed a structure!',
+    'toast.infiltratorStrike': 'An infiltrator sabotaged a structure!',
     'toast.army': '{name} deployed · two-lane road and fleet available', 'toast.armyNew': '{name} deployed · new match started', 'toast.restart': 'Match restarted', 'toast.language': 'Language: {language}',
     'toast.camera': 'Camera centered', 'toast.recordsCleared': 'Records cleared', 'toast.quality': 'Graphics quality: {level}',
     'toast.qualityReduced': 'Graphics quality reduced to keep frame rate smooth', 'toast.qualityMinimum': 'Graphics quality set to minimum',
@@ -639,6 +642,7 @@ const I18N = {
     'intel.counter': 'Weak vs {name}', 'intel.bossWave': 'Final boss wave',
     'intel.infiltrator': 'Infiltrator', 'intel.infiltrators': 'Infiltrators: {n} · violet halo',
     'intel.pressure': 'Adaptive pressure ×{x}', 'intel.bossSkill': 'Boss ability: {name} · {desc}',
+    'intel.siegeCap': 'Limited siege (scales with wave and defense size): up to {dmg} structures · up to {destroy} destroyed',
     'intel.ewFull': 'EW full', 'intel.ewPartial': 'EW {n}%', 'intel.ewImmune': 'EW immune',
     'rank.elite': 'ELITE', 'rank.veteran': 'VETERAN'
   }
@@ -3774,6 +3778,7 @@ function renderIntel() {
   const extra = state.active ? tr('intel.inProgress') : tr('intel.planned');
   const bossBadge = bossNow ? tr('faction.bossNow') : tr('faction.bossIn', { n: wavesUntilBoss(nextWave) });
   const bossSkill = bossNow ? BOSS_SKILLS[fac.boss.bossSkill] : null;
+  const siegeCap = bossNow ? siegeLimits(nextWave, state.towers.length) : null;
   body.innerHTML = `
     <div class="intel-faction">
       <span class="if-flag">${fac.flag}</span>
@@ -3782,6 +3787,7 @@ function renderIntel() {
     </div>
     <div class="intel-dialog"><span>${fac.flag}</span><p>“${dialogue}”</p></div>
     ${bossSkill ? `<div class="intel-sub boss-skill">${bossSkill.icon} ${tr('intel.bossSkill', { name: loc(bossSkill, 'name'), desc: loc(bossSkill, 'desc') })}</div>` : ''}
+    ${siegeCap ? `<div class="intel-sub">${tr('intel.siegeCap', { dmg: siegeCap.maxDamaged, destroy: siegeCap.maxDestroyed })}</div>` : ''}
     <div class="intel-head"><span>${tr('intel.head', { wave: nextWave, state: extra })}</span><b class="threat threat-${threatClass(nextWave)}">${threatLevel(nextWave)}</b></div>
     <div class="intel-sub">${tr('intel.scaling', { hp: scalars.hp.toFixed(1), dmg: scalars.damage.toFixed(1) })} · ${tr('intel.pressure', { x: (state.active ? (state.wavePressure || 1) : defensePressure()).toFixed(2) })}</div>
     ${infiltratorCount ? `<div class="intel-inf-note">✦ ${tr('intel.infiltrators', { n: infiltratorCount })}</div>` : ''}
@@ -3859,8 +3865,11 @@ function spawnEnemy(type, options = {}) {
     progress: 0, traveled: 0, routeIndex: 0, route, routeLength: routeLength(route), lane,
     reward: Math.max(1, Math.round(d.reward * (rank === 'elite' ? 1.8 : rank === 'veteran' ? 1.25 : 1) * economyScale * (inf ? 1.35 : 1))),
     slowTimer: 0, repelTimer: 0, jam: d.jam || 0, air: isAir, rank, infiltrator: inf, x: route.points[0][0], z: route.points[0][1],
-    structureDamage: (d.structureDamage || 0) * (d.boss ? 1.2 : 0),
+    structureDamage: d.boss ? (d.structureDamage || 0) * 1.2 : (inf ? 6 + Math.min(10, Math.floor(state.wave * .5)) : 0),
     bossAttackTimer: d.boss ? 2.8 : 0,
+    siegeTimer: inf ? 1.6 : 0,
+    // Jefes e infiltrados comparten el mismo sistema de cupo de asedio.
+    siege: (d.boss || inf) ? createSiegeState(type, d.boss) : null,
     attackers: d.boss ? new Map() : null
   };
   model.position.set(e.x, isAir ? ALTITUDE[type] : 0, e.z);
@@ -3989,6 +3998,13 @@ function updateEnemy(e, dt) {
         bossStrikeStructures(e, alt, e.structureDamage >= 35 ? 2 : 1);
       }
     }
+  } else if (e.infiltrator && e.siege && dt > 0) {
+    // Los infiltrados sabotean una sola estructura cercana durante su avance.
+    e.siegeTimer -= dt;
+    if (e.siegeTimer <= 0) {
+      if (e.siege.damaged.size < e.siege.maxDamaged) infiltratorStrike(e, alt);
+      e.siegeTimer = 2.4;
+    }
   }
   if (ud.mover && !e.air && e.type !== 'infantry') ud.mover.rotation.y += dt * (isBoss || e.data.tier >= 3 ? .35 : .15);
   if (ud.rotor) ud.rotor.rotation.y += dt * (jammed ? 46 : 20);
@@ -4057,10 +4073,9 @@ function updateEnemy(e, dt) {
   if (e.routeIndex >= e.route.points.length - 1) {
     Sound.leak();
     if (e.data.boss && e.structureDamage > 0) {
-      // El jefe arrasa las estructuras que le dispararon y las que tenga al lado,
-      // y después golpea la base al llegar al final.
+      // El jefe golpea las estructuras más cercanas que le quedan dentro de su
+      // cupo y después impacta la base al llegar al final.
       bossStrikeStructures(e, alt, 3);
-      damageStructures(e.x, e.z, e.structureDamage);
       state.hp -= e.damage * .45;
       toast(tr('toast.bossArrives', { name: loc(e.data, 'name') }));
     } else {
@@ -4091,68 +4106,146 @@ function applyDamage(e, amount, pierce = 0, towerType = null, sourceTower = null
   return dealt;
 }
 const BOSS_ATTACK_COOLDOWN = 4.2;
+/* Asedio a estructuras. Un jefe o un infiltrado solo puede degradar/destruir un
+   número acotado de estructuras distintas durante toda su vida. El cupo crece
+   con la facción, nunca con el tamaño de la defensa, y la selección de blancos
+   se limita a su radio y prioriza las estructuras más cercanas. */
+const SIEGE_BOSS_RANGE = 8;
+const SIEGE_INFILTRATOR_RANGE = 2.6;
+function siegeLimits(wave = state.wave, towerCount = state.towers.length) {
+  // Poder acumulado de la campaña: sube con cada jefe, también después de
+  // completar la rotación de facciones.
+  const bossTier = Math.max(0, Math.floor((wave - 1) / 5));
+  // Cupo por tamaño de defensa y cupo por poder del jefe. Se toma el menor:
+  // una base grande ofrece más objetivos, pero el jefe nunca supera su tope.
+  const maxDamaged = Math.min(
+    Math.max(2, Math.ceil(towerCount * 0.35)),
+    2 + Math.floor(bossTier / 2) + Math.floor(towerCount / 6)
+  );
+  const maxDestroyed = Math.min(
+    Math.max(1, Math.floor(towerCount * 0.2)),
+    1 + Math.floor(bossTier / 3) + Math.floor(towerCount / 14)
+  );
+  return { maxDamaged, maxDestroyed };
+}
+function createSiegeState(type, boss) {
+  if (boss) {
+    const limits = siegeLimits(state.wave, state.towers.length);
+    return { boss: true, range: SIEGE_BOSS_RANGE, ...limits, damaged: new Set(), destroyed: new Set() };
+  }
+  // Un infiltrado sabotea una única estructura y nunca la destruye.
+  return { boss: false, range: SIEGE_INFILTRATOR_RANGE, maxDamaged: 1, maxDestroyed: 0, damaged: new Set(), destroyed: new Set() };
+}
+function siegeCanDamage(e, t) {
+  const s = e && e.siege;
+  if (!s) return false;
+  // Volver a golpear una estructura ya marcada no consume cupo nuevo.
+  return s.damaged.has(t) || s.damaged.size < s.maxDamaged;
+}
+function siegeCanDestroy(e, t) {
+  const s = e && e.siege;
+  return !!s && s.boss && s.destroyed.size < s.maxDestroyed && siegeCanDamage(e, t);
+}
+function stunTower(t, seconds) {
+  if (!seconds) return;
+  t.disabledUntil = Math.max(t.disabledUntil || 0, state.combatTime + seconds);
+  t.cooldown = Math.max(t.cooldown || 0, 1.2);
+}
+// Aplica un golpe de asedio respetando los cupos. Devuelve el resultado real.
+function siegeHit(e, t, opts = {}) {
+  if (!t || t.destroyed || !e || !e.siege) return { hit: false, damaged: false, destroyed: false };
+  const s = e.siege;
+  const levels = opts.levels || 0;
+  const wantsDamage = !!(opts.destroy || opts.destroyWeak || levels > 0);
+  if (wantsDamage && !siegeCanDamage(e, t)) {
+    // Sin cupo destructivo la habilidad sigue inutilizando, pero ya no borra
+    // estructuras nuevas: el jefe no puede aniquilar toda la defensa.
+    stunTower(t, opts.stun);
+    return { hit: true, damaged: false, destroyed: false };
+  }
+  let destroyed = false;
+  if (opts.destroy && siegeCanDestroy(e, t)) {
+    destroyed = destroyTower(t);
+  } else if (opts.destroyWeak && t.level <= 1 && siegeCanDestroy(e, t)) {
+    destroyed = destroyTower(t);
+  } else if (levels > 0) {
+    const before = t.level;
+    t.level = Math.max(1, t.level - levels);
+    if (t.level < before) {
+      s.damaged.add(t);
+      applyTowerStats(t);
+      refreshTowerModel(t);
+      if (state.selectedTower === t) { showTowerRange(t); updateInspect(); }
+    }
+  }
+  if (destroyed) {
+    s.destroyed.add(t);
+    s.damaged.add(t);
+  } else {
+    stunTower(t, opts.stun);
+  }
+  return { hit: true, damaged: s.damaged.has(t), destroyed };
+}
 function towerThreat(t) {
   const salvo = t.stats.salvo || 1;
   const dps = t.type === 'laser' ? t.stats.damage : (t.stats.damage / Math.max(.05, t.stats.rate)) * salvo;
   return dps + (t.stats.splash || 0) * 5;
 }
-function bossStrikeTargets(e, maxTargets) {
+function bossStrikeTargets(e, maxTargets, radius = SIEGE_BOSS_RANGE) {
   const now = state.combatTime;
-  const recent = [];
-  if (e.attackers) {
-    for (const [t, at] of e.attackers) {
-      if (!state.towers.includes(t) || now - at > 7) continue;
-      const d = Math.hypot(t.group.position.x - e.x, t.group.position.z - e.z);
-      recent.push({ t, d, threat: towerThreat(t) });
-    }
+  const candidates = [];
+  for (const t of state.towers) {
+    if (t.destroyed) continue;
+    const d = Math.hypot(t.group.position.x - e.x, t.group.position.z - e.z);
+    if (d > radius) continue;
+    // La amenaza solo desempata entre estructuras a distancia similar.
+    const at = e.attackers ? e.attackers.get(t) : null;
+    const threat = at != null && now - at <= 7 ? towerThreat(t) : 0;
+    candidates.push({ t, d, threat });
   }
-  // Si no está recibiendo fuego, aplasta lo que tenga al lado.
-  if (!recent.length) {
-    for (const t of state.towers) {
-      const d = Math.hypot(t.group.position.x - e.x, t.group.position.z - e.z);
-      if (d < 6.5) recent.push({ t, d, threat: 0 });
-    }
-  }
-  // Prioriza la estructura que más daño le hace, sin importar lo lejos que esté.
-  recent.sort((a, b) => (b.threat - a.threat) || (a.d - b.d));
-  return recent.slice(0, maxTargets).map(x => x.t);
+  // Prioridad estricta por cercanía: el jefe castiga lo que tiene al lado.
+  candidates.sort((a, b) => (a.d - b.d) || (b.threat - a.threat));
+  return candidates.slice(0, maxTargets).map(x => x.t);
 }
 function bossStrikeStructures(e, alt, maxTargets = 1) {
   const targets = bossStrikeTargets(e, maxTargets);
   if (!targets.length) return false;
   const from = new THREE.Vector3(e.x, (alt || 0) + .75, e.z);
+  let affected = 0;
   for (const target of targets) {
     const to = target.group.position.clone(); to.y += .75;
     const line = makeLine(from, to, 0xff8a4a, .92);
     setTimeout(() => { if (line.parent) world.remove(line); }, 150);
     makeSparks(to.x, to.y, to.z, 0xffa45c, 7);
     explode(to.x, .35, to.z, 0xe07a3f, 7);
-    damageStructures(to.x, to.z, e.structureDamage);
+    const hit = siegeHit(e, target, { levels: e.structureDamage >= 40 ? 2 : 1, stun: 2 });
+    if (hit.damaged || hit.destroyed) affected++;
   }
+  if (!affected) return false;
   toast(tr('toast.bossStructures'));
   cameraShake = Math.min(.42, cameraShake + .09);
   Sound.explosion();
   return true;
 }
-function damageStructures(x, z, amount, levelsLost = amount >= 40 ? 2 : 1, stun = 2, radius = 2.2) {
-  let hit = 0;
-  for (const t of state.towers) {
-    if (t.destroyed) continue;
-    const dx = t.group.position.x - x, dz = t.group.position.z - z;
-    if (Math.hypot(dx, dz) >= radius) continue;
-    const before = t.level;
-    t.level = Math.max(1, t.level - levelsLost);
-    if (t.level < before) {
-      applyTowerStats(t);
-      refreshTowerModel(t);
-      if (state.selectedTower === t) { showTowerRange(t); updateInspect(); }
-    }
-    // Una estructura ya degradada queda aturdida: el jefe sigue siendo una amenaza.
-    t.disabledUntil = Math.max(t.disabledUntil || 0, state.combatTime + stun);
-    t.cooldown = Math.max(t.cooldown || 0, 1.2);
-    hit++;
+function infiltratorStrike(e, alt) {
+  if (!e.siege || e.siege.damaged.size >= e.siege.maxDamaged) return false;
+  const target = bossStrikeTargets(e, 1, e.siege.range)[0];
+  if (!target) return false;
+  const from = new THREE.Vector3(e.x, (alt || 0) + .4, e.z);
+  const to = target.group.position.clone(); to.y += .7;
+  const line = makeLine(from, to, 0xc58cff, .9);
+  setTimeout(() => { if (line.parent) world.remove(line); }, 150);
+  makeSparks(to.x, to.y, to.z, 0xd9a8ff, 5);
+  explode(to.x, .35, to.z, 0x8d5bd7, 4);
+  const hit = siegeHit(e, target, { levels: 1, stun: 1.6 });
+  // El intento consume el cupo aunque la estructura ya estuviera a nivel 1.
+  if (hit.hit) e.siege.damaged.add(target);
+  if (hit.damaged) {
+    toast(tr('toast.infiltratorStrike'));
+    cameraShake = Math.min(.28, cameraShake + .04);
+    Sound.explosion();
   }
-  if (hit > 0) Sound.explosion();
+  return true;
 }
 function destroyTower(t) {
   if (!t || t.destroyed) return false;
@@ -4175,18 +4268,15 @@ function destroyTower(t) {
 // pero no puede ignorar al jefe ni confiar en una muralla estática.
 function useBossSkill(e, alt, skill) {
   if (state.gameOver) return false;
-  const candidates = bossStrikeTargets(e, 99);
+  const candidates = bossStrikeTargets(e, 99, Math.max(SIEGE_BOSS_RANGE, skill.radius || 0));
   if (!candidates.length) return false;
   const primary = candidates[0];
-  const px = primary.group.position.x, pz = primary.group.position.z;
-  const center = skill.areaFromBoss ? { x: e.x, z: e.z } : { x: px, z: pz };
+  const center = skill.areaFromBoss ? { x: e.x, z: e.z } : { x: primary.group.position.x, z: primary.group.position.z };
   let targets = state.towers.filter(t => !t.destroyed && Math.hypot(t.group.position.x - center.x, t.group.position.z - center.z) <= skill.radius);
-  // Si el pulso parte del jefe y no alcanza nada, se ancla al objetivo que le
-  // está disparando para que la habilidad siga siendo relevante.
-  if (!targets.length && skill.areaFromBoss) {
-    targets = state.towers.filter(t => !t.destroyed && Math.hypot(t.group.position.x - px, t.group.position.z - pz) <= skill.radius);
-  }
   if (!targets.length) return false;
+  // El área no cambia la prioridad: primero las estructuras más cercanas al jefe.
+  const distToBoss = t => Math.hypot(t.group.position.x - e.x, t.group.position.z - e.z);
+  targets.sort((a, b) => distToBoss(a) - distToBoss(b));
   targets = targets.slice(0, skill.maxTargets);
   const from = new THREE.Vector3(e.x, (alt || 0) + .75, e.z);
   let destroyed = 0;
@@ -4195,20 +4285,14 @@ function useBossSkill(e, alt, skill) {
     const line = makeLine(from, to, skill.destroy ? 0xff5a3a : 0xff8a4a, .9);
     setTimeout(() => { if (line.parent) world.remove(line); }, 150);
     makeSparks(to.x, to.y, to.z, 0xffa45c, 6);
-    if (skill.destroy || (skill.destroyWeak && target.level <= 1)) {
-      if (destroyTower(target)) destroyed++;
-      continue;
-    }
-    const before = target.level;
-    target.level = Math.max(1, target.level - (skill.levels || 0));
-    if (target.level !== before) {
-      applyTowerStats(target);
-      refreshTowerModel(target);
-      if (state.selectedTower === target) { showTowerRange(target); updateInspect(); }
-    }
-    target.disabledUntil = Math.max(target.disabledUntil || 0, state.combatTime + (skill.stun || 2));
-    target.cooldown = Math.max(target.cooldown || 0, 1.2);
-    explode(to.x, .35, to.z, 0xe07a3f, 6);
+    const hit = siegeHit(e, target, {
+      levels: skill.levels || 0,
+      stun: skill.stun || 2,
+      destroy: !!skill.destroy,
+      destroyWeak: !!skill.destroyWeak
+    });
+    if (hit.destroyed) destroyed++;
+    else explode(to.x, .35, to.z, 0xe07a3f, 6);
   }
   makePulse(center.x, center.z, skill.radius, skill.destroy ? 0xff6a4a : 0xffb060, .5);
   toast(tr('toast.bossSkill', { name: loc(e.data, 'name'), skill: loc(skill, 'name') }));
