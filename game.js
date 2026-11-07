@@ -89,13 +89,13 @@ const WEAPONS = {
 const TOWERS = [
   { id: 'gun', name: 'Ametralladora', nameEn: 'Machine gun', icon: '✣', cost: 120, range: 4.7, damage: 7, rate: .22, targets: ['ground'], desc: 'Tiro rápido de defensa cercana', descEn: 'Rapid-fire close defense', domain: 'land', pierce: .12 },
   { id: 'mortar', name: 'Mortero', nameEn: 'Mortar', icon: '◒', cost: 145, range: 5.2, damage: 18, rate: 1.05, targets: ['ground'], splash: 1.05, desc: 'Fuego indirecto de cadencia media', descEn: 'Medium-rate indirect fire', domain: 'land', pierce: .25 },
-  { id: 'art', name: 'Artillería', nameEn: 'Artillery', icon: '◉', cost: 195, range: 6.6, damage: 35, rate: 2.25, targets: ['ground'], splash: 1.55, desc: 'Obús de alto impacto en área', descEn: 'High-impact area howitzer', domain: 'land', pierce: .35 },
-  { id: 'rocket', name: 'Lanzacohetes', nameEn: 'Rocket launcher', icon: '⌁', cost: 245, range: 7.6, damage: 22, rate: 3.4, targets: ['ground'], splash: 1.5, desc: 'Salva de cohetes de saturación', descEn: 'Saturation rocket salvo', domain: 'land', pierce: .4, salvo: 4 },
+  { id: 'art', name: 'Artillería', nameEn: 'Artillery', icon: '◉', cost: 195, range: 6.8, damage: 38, rate: 2.25, targets: ['ground'], splash: 1.7, desc: 'Obús de alto impacto en área', descEn: 'High-impact area howitzer', domain: 'land', pierce: .35 },
+  { id: 'rocket', name: 'Lanzacohetes', nameEn: 'Rocket launcher', icon: '⌁', cost: 260, range: 7, damage: 16, rate: 3.4, targets: ['ground'], splash: 1.35, desc: 'Salva de cohetes de saturación', descEn: 'Saturation rocket salvo', domain: 'land', pierce: .4, salvo: 4 },
   { id: 'aa', name: 'Misil antiaéreo', nameEn: 'Surface-to-air missile', icon: '⌃', cost: 170, range: 7.4, damage: 40, rate: 1.45, targets: ['air'], desc: 'Lanzador guiado contra aeronaves', descEn: 'Guided launcher against aircraft', domain: 'land', pierce: .2 },
   { id: 'laser', name: 'Láser', nameEn: 'Laser', icon: '⌇', cost: 225, range: 5.8, damage: 14, rate: .12, targets: ['ground', 'air'], desc: 'Haz continuo de energía dirigida', descEn: 'Continuous directed-energy beam', domain: 'land', pierce: 1 },
   { id: 'ew', name: 'Guerra electrónica', nameEn: 'Electronic warfare', icon: '⌘', cost: 180, range: 5.2, damage: 0, rate: .5, targets: ['ground', 'air'], slow: .5, desc: 'Interferencia: ralentiza y repele drones', descEn: 'Jamming: slows and repels drones', domain: 'land', pierce: 0 },
-  { id: 'destroyer', name: 'Destructor', nameEn: 'Destroyer', icon: '⚓', cost: 330, range: 9.2, damage: 60, rate: 2.7, targets: ['ground', 'air'], splash: 1.7, desc: 'Misiles de crucero desde el mar', descEn: 'Cruise missiles from the sea', domain: 'sea', pierce: .55 },
-  { id: 'carrier', name: 'Portaaviones', nameEn: 'Aircraft carrier', icon: '✈', cost: 490, range: 12.5, damage: 55, rate: 5.2, targets: ['ground', 'air'], splash: 2.3, desc: 'Ataque aéreo embarcado de largo alcance', descEn: 'Long-range carrier air strike', domain: 'sea', pierce: .5 }
+  { id: 'destroyer', name: 'Destructor', nameEn: 'Destroyer', icon: '⚓', cost: 360, range: 8.8, damage: 46, rate: 2.9, targets: ['ground', 'air'], splash: 1.55, desc: 'Misiles de crucero desde el mar', descEn: 'Cruise missiles from the sea', domain: 'sea', pierce: .5 },
+  { id: 'carrier', name: 'Portaaviones', nameEn: 'Aircraft carrier', icon: '✈', cost: 520, range: 12, damage: 46, rate: 5.6, targets: ['ground', 'air'], splash: 2.1, desc: 'Ataque aéreo embarcado de largo alcance', descEn: 'Long-range carrier air strike', domain: 'sea', pierce: .45 }
 ];
 
 /* --------------------------------------------------------------- facciones enemigas */
@@ -108,7 +108,7 @@ const ENEMY_FACTIONS = [
     units: [
       { id: 'clubber', name: 'Portagarzos', kind: 'ground', hp: 70, speed: 0.85, reward: 16, radius: .2, color: 0x8b7355, damage: 6, armor: .1, tier: 1, desc: 'Garzó de piedra', counter: 'mortar' },
       { id: 'brute', name: 'Bruto cavernícola', kind: 'ground', hp: 200, speed: 0.6, reward: 32, radius: .3, color: 0x6b5545, damage: 12, armor: .35, tier: 2, desc: 'Fuerza bruta', counter: 'art' },
-      { id: 'shaman', name: 'Chamán', kind: 'ground', hp: 100, speed: 0.9, reward: 24, radius: .22, color: 0x5d4a3a, damage: 5, armor: .08, tier: 2, desc: 'Magia primitiva', counter: 'aa' }
+      { id: 'shaman', name: 'Chamán', kind: 'ground', hp: 100, speed: 0.9, reward: 24, radius: .22, color: 0x5d4a3a, damage: 5, armor: .08, tier: 2, desc: 'Magia primitiva', counter: 'laser' }
     ],
     boss: { id: 'cavemenBoss', name: 'Jefe Cavernícola', kind: 'ground', hp: 3500, speed: 0.5, reward: 450, radius: .85, color: 0x4a352a, damage: 35, armor: .55, tier: 5, desc: 'Jefe de facción', boss: true, structureDamage: 20, counter: 'laser' }
   },
@@ -118,7 +118,7 @@ const ENEMY_FACTIONS = [
     units: [
       { id: 'hoplite', name: 'Hoplita gigante', kind: 'ground', hp: 140, speed: 0.75, reward: 20, radius: .25, color: 0xa67c52, damage: 9, armor: .25, tier: 1, desc: 'Lanza y escudo', counter: 'mortar' },
       { id: 'spartan', name: 'Espartano élite', kind: 'ground', hp: 260, speed: 0.9, reward: 40, radius: .3, color: 0x8b5a3c, damage: 15, armor: .4, tier: 3, desc: 'Guerrero legendario', counter: 'rocket' },
-      { id: 'spearman', name: 'Lancero', kind: 'ground', hp: 110, speed: 1.0, reward: 18, radius: .22, color: 0x9a7048, damage: 8, armor: .18, tier: 1, desc: 'Larga lanza', counter: 'aa' }
+      { id: 'spearman', name: 'Lancero', kind: 'ground', hp: 110, speed: 1.0, reward: 18, radius: .22, color: 0x9a7048, damage: 8, armor: .18, tier: 1, desc: 'Larga lanza', counter: 'gun' }
     ],
     boss: { id: 'spartanBoss', name: 'Rey Espartano', kind: 'ground', hp: 4500, speed: 0.65, reward: 550, radius: .9, color: 0x6b4a2e, damage: 45, armor: .6, tier: 5, desc: 'Jefe de facción', boss: true, structureDamage: 25, counter: 'art' }
   },
@@ -128,7 +128,7 @@ const ENEMY_FACTIONS = [
     units: [
       { id: 'crusader', name: 'Soldado cruzado', kind: 'ground', hp: 100, speed: 0.8, reward: 18, radius: .23, color: 0x8b4513, damage: 8, armor: .15, tier: 1, desc: 'Con bandera y espada', counter: 'rocket' },
       { id: 'knight', name: 'Caballero templario', kind: 'ground', hp: 300, speed: 0.65, reward: 42, radius: .32, color: 0x5a2d0c, damage: 18, armor: .45, tier: 3, desc: 'Blindaje de platesa', counter: 'art' },
-      { id: 'archer', name: 'Arquero cruzado', kind: 'ground', hp: 85, speed: 1.1, reward: 22, radius: .2, color: 0x7a3c10, damage: 7, armor: .05, tier: 1, desc: 'Arco largo', counter: 'aa' }
+      { id: 'archer', name: 'Arquero cruzado', kind: 'ground', hp: 85, speed: 1.1, reward: 22, radius: .2, color: 0x7a3c10, damage: 7, armor: .05, tier: 1, desc: 'Arco largo', counter: 'rocket' }
     ],
     boss: { id: 'crusaderBoss', name: 'Señor Cruzado', kind: 'ground', hp: 5000, speed: 0.7, reward: 600, radius: .95, color: 0x4a1e08, damage: 50, armor: .65, tier: 5, desc: 'Jefe de facción', boss: true, structureDamage: 30, counter: 'laser' }
   },
@@ -138,7 +138,7 @@ const ENEMY_FACTIONS = [
     units: [
       { id: 'cutlass', name: 'Pirata con sable', kind: 'ground', hp: 90, speed: 1.0, reward: 17, radius: .22, color: 0x2c3e50, damage: 7, armor: .1, tier: 1, desc: 'A abordaje', counter: 'gun' },
       { id: 'cannoneer', name: 'Artillero pirata', kind: 'ground', hp: 160, speed: 0.7, reward: 30, radius: .28, color: 0x1a2530, damage: 14, armor: .2, tier: 2, desc: 'Disparo de cañón', counter: 'mortar' },
-      { id: 'buccaneer', name: 'Bucanero', kind: 'ground', hp: 130, speed: 1.2, reward: 26, radius: .24, color: 0x3d4e5f, damage: 10, armor: .12, tier: 2, desc: 'Rápido y peligroso', counter: 'aa' }
+      { id: 'buccaneer', name: 'Bucanero', kind: 'ground', hp: 130, speed: 1.2, reward: 26, radius: .24, color: 0x3d4e5f, damage: 10, armor: .12, tier: 2, desc: 'Rápido y peligroso', counter: 'gun' }
     ],
     boss: { id: 'pirateBoss', name: 'Capitán Pirata', kind: 'ground', hp: 4200, speed: 0.8, reward: 520, radius: .9, color: 0x0f1a25, damage: 40, armor: .5, tier: 5, desc: 'Jefe de facción', boss: true, structureDamage: 28, counter: 'rocket' }
   },
@@ -157,7 +157,7 @@ const ENEMY_FACTIONS = [
     climate: 'templado', tempC: 20, tempF: 68,
     units: [
       { id: 'cyberSoldier', name: 'Soldado cibernético', nameEn: 'Cyber soldier', kind: 'ground', hp: 120, speed: 1.1, reward: 24, radius: .22, color: 0xde2910, damage: 10, armor: .12, tier: 2, desc: 'Refuerzos sintéticos', descEn: 'Synthetic reinforcements', counter: 'ew' },
-      { id: 'droneSoldier', name: 'Soldado dron', nameEn: 'Drone soldier', kind: 'ground', hp: 95, speed: 1.4, reward: 22, radius: .2, color: 0xa11212, damage: 8, armor: .05, tier: 2, desc: 'Unidad aérea terrestre', descEn: 'Ground air unit', counter: 'aa' },
+      { id: 'droneSoldier', name: 'Soldado dron', nameEn: 'Drone soldier', kind: 'ground', hp: 95, speed: 1.4, reward: 22, radius: .2, color: 0xa11212, damage: 8, armor: .05, tier: 2, desc: 'Unidad aérea terrestre', descEn: 'Ground air unit', counter: 'ew' },
       { id: 'mech', name: 'Mecha de combate', nameEn: 'Combat mech', kind: 'ground', hp: 400, speed: 0.65, reward: 55, radius: .4, color: 0x8b1a1a, damage: 25, armor: .5, tier: 4, desc: 'Armas hipertecnológicas', descEn: 'Hyper-tech weapons', counter: 'laser' },
       { id: 'fighter', name: 'Caza furtivo J-31', nameEn: 'J-31 stealth fighter', kind: 'air', hp: 210, speed: 2.6, reward: 48, radius: .26, color: 0x6a7080, damage: 14, armor: .1, tier: 4, desc: 'Caza supersónico furtivo', descEn: 'Supersonic stealth fighter', counter: 'aa' },
       { id: 'bomber', name: 'Bombardero invisible H-20', nameEn: 'H-20 stealth bomber', kind: 'air', hp: 620, speed: 1.1, reward: 96, radius: .48, color: 0x2f3540, damage: 26, armor: .22, tier: 5, desc: 'Ala volante furtiva', descEn: 'Stealth flying wing', counter: 'laser' }
@@ -256,7 +256,7 @@ const ROUTES = [
 ];
 const AIR_ROUTE = { id: 'air', name: 'Corredor aéreo', nameEn: 'Air corridor', points: [[-21, -10], [-14, -11], [-6, -10], [2, -8], [10, -6], [18, -4], [13.5, -1.5]] };
 
-const APP_VERSION = '2.5.0';
+const APP_VERSION = '2.6.0';
 const STORE_SETTINGS = 'frente-global:settings:v1';
 const STORE_RECORDS = 'frente-global:records:v1';
 function loadStore(key, fallback) {
@@ -477,7 +477,7 @@ const state = {
   spawnQueue: [], spawnTimer: 0, spawned: 0, enemies: [], towers: [], effects: [],
   selectedTower: null, buildType: null, abilityMode: null, gameOver: false,
   selectedArmy: Number.isInteger(settings.army) && ARMIES[settings.army] ? settings.army : 0,
-  clock: 0, score: 0, paused: false, deployed: false, base: null,
+  clock: 0, combatTime: 0, score: 0, paused: false, deployed: false, base: null,
   climate: 'templado', tempC: 22,
   waveIntel: [], abilities: {
     strike: { cd: 0, max: 22, cost: 120, name: 'Ataque aéreo', key: 'Z', icon: '✈' },
@@ -2854,12 +2854,13 @@ function enemyModel(type) {
     }
   }
 
-  // Escala general de las miniaturas: presencia clara incluso con la cámara alejada.
-  scale *= 1.12;
+  // Escala general de las miniaturas: proporción creíble frente a estructuras de una celda.
+  // La tropa común se reduce y los jefes conservan una presencia claramente mayor.
+  scale *= d.boss ? .9 : .74;
   const alt = ALTITUDE[type] || 0;
   const isAir = d.kind === 'air';
   const blob = new THREE.Mesh(new THREE.CircleGeometry(1, 20), new THREE.MeshBasicMaterial({ color: 0x10160f, transparent: true, opacity: .32, depthWrite: false }));
-  blob.rotation.x = -Math.PI / 2; blob.position.y = -alt + .02;
+  blob.rotation.x = -Math.PI / 2; blob.position.y = (-alt + .02) / scale;
   blob.scale.setScalar(d.boss ? 1.0 : isAir ? .55 : spec.squad === 2 ? .42 : .34);
   g.add(blob);
 
@@ -2956,6 +2957,28 @@ function armyMods(army, type) {
     rate: 1 / (1 + bias * .35)
   };
 }
+const TOWER_UPGRADE = { damage: 1.34, range: 1.07, rate: .94, maxLevel: 5 };
+function applyTowerStats(t) {
+  const data = t.data;
+  const mods = armyMods(state.army, t.type);
+  const level = Math.max(1, t.level || 1) - 1;
+  t.stats.damage = data.damage * mods.damage * Math.pow(TOWER_UPGRADE.damage, level);
+  t.stats.range = data.range * mods.range * Math.pow(TOWER_UPGRADE.range, level);
+  t.stats.rate = data.rate * mods.rate * Math.pow(TOWER_UPGRADE.rate, level);
+  t.stats.splash = data.splash || 0;
+  t.stats.pierce = data.pierce || 0;
+  t.stats.slow = data.slow || 0;
+  t.stats.salvo = data.salvo || 1;
+}
+function refreshTowerModel(t) {
+  const pos = t.group.position.clone(), old = t.group;
+  world.remove(old);
+  t.group = buildTowerModel(t.type, state.army, t.level);
+  t.group.position.copy(pos); world.add(t.group);
+  t.pivot = t.group.userData.pivot;
+  t.barrels = t.group.userData.barrels || [];
+  t.stats.muzzleY = t.group.userData.muzzleY || t.stats.muzzleY;
+}
 function makeTower(type, cx, cz) {
   const data = TOWERS.find(t => t.id === type);
   const center = cellCenter(cx, cz);
@@ -2964,17 +2987,13 @@ function makeTower(type, cx, cz) {
   world.add(group);
   const cells = footprintCells(cx, cz, data);
   for (const cell of cells) clearDecorAt(cell.x, cell.z);
-  const mods = armyMods(state.army, type);
   const tower = {
     type, data, group, pivot: group.userData.pivot, level: 1,
     cooldown: Math.random() * .2, target: null, cell: { x: cx, z: cz },
     barrels: group.userData.barrels || [], mode: 'first',
-    stats: {
-      damage: data.damage * mods.damage, range: data.range * mods.range, rate: data.rate * mods.rate,
-      splash: data.splash || 0, pierce: data.pierce || 0, slow: data.slow || 0,
-      salvo: data.salvo || 1, muzzleY: group.userData.muzzleY || 1
-    }
+    stats: { muzzleY: group.userData.muzzleY || 1 }
   };
+  applyTowerStats(tower);
   state.towers.push(tower);
   for (const cell of cells) towerCells.set(cellKey(cell.x, cell.z), tower);
   return tower;
@@ -3072,7 +3091,7 @@ function updateInspect() {
     <div class="meter-line"><span>${tr('tower.rate')}</span><b>${(1 / t.stats.rate).toFixed(1)}/s</b></div>
     <div class="meter"><i style="width:${Math.min(100, 24 / t.stats.rate)}%"></i></div>
     <div class="target-row"><span>${tr('tower.priority')}</span><button class="target-btn" id="targetMode">${modeText(t.mode)} ↻</button></div>
-    <div class="upgrade-row"><button class="action-btn" id="upgradeTower" ${t.level >= 5 ? 'disabled' : ''}>${tr('tower.upgrade', { cost: t.level >= 5 ? tr('tower.max') : nextCost })}</button><button class="action-btn sell" id="sellTower">${tr('tower.sell', { cost: Math.floor(t.data.cost * .6) })}</button></div>`;
+    <div class="upgrade-row"><button class="action-btn" id="upgradeTower" ${t.level >= TOWER_UPGRADE.maxLevel ? 'disabled' : ''}>${tr('tower.upgrade', { cost: t.level >= TOWER_UPGRADE.maxLevel ? tr('tower.max') : nextCost })}</button><button class="action-btn sell" id="sellTower">${tr('tower.sell', { cost: Math.floor(t.data.cost * .6) })}</button></div>`;
   document.getElementById('upgradeTower').addEventListener('click', upgradeSelected);
   document.getElementById('sellTower').addEventListener('click', sellSelected);
   document.getElementById('targetMode').addEventListener('click', () => {
@@ -3083,17 +3102,12 @@ function updateInspect() {
 }
 function upgradeSelected() {
   const t = state.selectedTower;
-  if (!t || t.level >= 5) return;
+  if (!t || t.level >= TOWER_UPGRADE.maxLevel) return;
   const cost = Math.ceil(t.data.cost * (.8 + t.level * .48));
   if (state.cash < cost) { Sound.error(); toast(tr('toast.noCredits')); return; }
   state.cash -= cost; t.level++;
-  t.stats.damage *= 1.34; t.stats.range *= 1.07; t.stats.rate *= .94;
-  const pos = t.group.position.clone(), old = t.group;
-  world.remove(old);
-  t.group = buildTowerModel(t.type, state.army, t.level);
-  t.group.position.copy(pos); world.add(t.group);
-  t.pivot = t.group.userData.pivot; t.barrels = t.group.userData.barrels || [];
-  t.stats.muzzleY = t.group.userData.muzzleY || t.stats.muzzleY;
+  applyTowerStats(t);
+  refreshTowerModel(t);
   showTowerRange(t); updateInspect(); updateHud(); Sound.upgrade();
   toast(tr('toast.upgrade', { level: t.level }));
 }
@@ -3234,7 +3248,8 @@ function spawnEnemy(type) {
     progress: 0, traveled: 0, routeIndex: 0, route, routeLength: routeLength(route), lane,
     reward: Math.round(d.reward * (rank === 'elite' ? 1.8 : rank === 'veteran' ? 1.25 : 1) * .9),
     slowTimer: 0, repelTimer: 0, air: isAir, rank, x: route.points[0][0], z: route.points[0][1],
-    structureDamage: d.structureDamage || 0, bossAttackTimer: d.boss ? 3.2 : 0
+    structureDamage: d.structureDamage || 0, bossAttackTimer: d.boss ? 3.2 : 0,
+    attackers: d.boss ? new Map() : null
   };
   model.position.set(e.x, isAir ? ALTITUDE[type] : 0, e.z);
   world.add(model);
@@ -3350,7 +3365,7 @@ function updateEnemy(e, dt) {
   const isBoss = e.data.boss === true;
   if (isBoss && e.structureDamage > 0 && dt > 0) {
     e.bossAttackTimer -= dt;
-    if (e.bossAttackTimer <= 0) { e.bossAttackTimer = 4.2; bossStrikeStructures(e, alt); }
+    if (e.bossAttackTimer <= 0) { e.bossAttackTimer = BOSS_ATTACK_COOLDOWN; bossStrikeStructures(e, alt, e.structureDamage >= 35 ? 2 : 1); }
   }
   if (ud.mover && !e.air && e.type !== 'infantry') ud.mover.rotation.y += dt * (isBoss || e.data.tier >= 3 ? .35 : .15);
   if (ud.rotor) ud.rotor.rotation.y += dt * (jammed ? 46 : 20);
@@ -3405,7 +3420,9 @@ function updateEnemy(e, dt) {
   if (e.routeIndex >= e.route.points.length - 1) {
     Sound.leak();
     if (e.data.boss && e.structureDamage > 0) {
-      // El jefe arrasa estructuras cercanas y golpea la base al llegar al final.
+      // El jefe arrasa las estructuras que le dispararon y las que tenga al lado,
+      // y después golpea la base al llegar al final.
+      bossStrikeStructures(e, alt, 3);
       damageStructures(e.x, e.z, e.structureDamage);
       state.hp -= e.damage * .55;
       toast(tr('toast.bossArrives', { name: loc(e.data, 'name') }));
@@ -3418,50 +3435,83 @@ function updateEnemy(e, dt) {
     if (state.hp <= 0) endGame();
   }
 }
-function applyDamage(e, amount, pierce = 0, towerType = null) {
+function applyDamage(e, amount, pierce = 0, towerType = null, sourceTower = null) {
   if (!e || e.hp <= 0 || !state.enemies.includes(e)) return 0;
   // Counter units: la torre bonifica daño si su tipo es el counter del enemigo.
   let counterMul = 1;
-  if (towerType && e.data.counter === towerType) counterMul = 1.6;
+  if (towerType && e.data.counter === towerType) counterMul = 1.45;
   const armor = Math.max(0, Math.min(.82, (e.armor || 0) - pierce + (e.rank === 'elite' ? .06 : 0)));
   const dealt = amount * (1 - armor) * counterMul;
   e.hp -= dealt;
+  // Los jefes recuerdan qué estructuras les disparan para contraatacar.
+  if (sourceTower && e.data.boss && sourceTower.group) {
+    if (!e.attackers) e.attackers = new Map();
+    e.attackers.set(sourceTower, state.combatTime);
+  }
   if (e.hp <= 0) removeEnemy(e, true);
   return dealt;
 }
-function bossStrikeStructures(e, alt) {
-  let best = null, bestDist = 5.2;
-  for (const t of state.towers) {
-    const d = Math.hypot(t.group.position.x - e.x, t.group.position.z - e.z);
-    if (d < bestDist) { bestDist = d; best = t; }
+const BOSS_ATTACK_COOLDOWN = 4.2;
+function towerThreat(t) {
+  const salvo = t.stats.salvo || 1;
+  const dps = t.type === 'laser' ? t.stats.damage : (t.stats.damage / Math.max(.05, t.stats.rate)) * salvo;
+  return dps + (t.stats.splash || 0) * 5;
+}
+function bossStrikeTargets(e, maxTargets) {
+  const now = state.combatTime;
+  const recent = [];
+  if (e.attackers) {
+    for (const [t, at] of e.attackers) {
+      if (!state.towers.includes(t) || now - at > 7) continue;
+      const d = Math.hypot(t.group.position.x - e.x, t.group.position.z - e.z);
+      recent.push({ t, d, threat: towerThreat(t) });
+    }
   }
-  if (!best) return;
+  // Si no está recibiendo fuego, aplasta lo que tenga al lado.
+  if (!recent.length) {
+    for (const t of state.towers) {
+      const d = Math.hypot(t.group.position.x - e.x, t.group.position.z - e.z);
+      if (d < 6.5) recent.push({ t, d, threat: 0 });
+    }
+  }
+  // Prioriza la estructura que más daño le hace, sin importar lo lejos que esté.
+  recent.sort((a, b) => (b.threat - a.threat) || (a.d - b.d));
+  return recent.slice(0, maxTargets).map(x => x.t);
+}
+function bossStrikeStructures(e, alt, maxTargets = 1) {
+  const targets = bossStrikeTargets(e, maxTargets);
+  if (!targets.length) return false;
   const from = new THREE.Vector3(e.x, (alt || 0) + .75, e.z);
-  const to = best.group.position.clone(); to.y += .75;
-  const line = makeLine(from, to, 0xff8a4a, .92);
-  setTimeout(() => { if (line.parent) world.remove(line); }, 150);
-  makeSparks(to.x, to.y, to.z, 0xffa45c, 7);
-  explode(to.x, .35, to.z, 0xe07a3f, 7);
-  damageStructures(best.group.position.x, best.group.position.z, e.structureDamage);
+  for (const target of targets) {
+    const to = target.group.position.clone(); to.y += .75;
+    const line = makeLine(from, to, 0xff8a4a, .92);
+    setTimeout(() => { if (line.parent) world.remove(line); }, 150);
+    makeSparks(to.x, to.y, to.z, 0xffa45c, 7);
+    explode(to.x, .35, to.z, 0xe07a3f, 7);
+    damageStructures(to.x, to.z, e.structureDamage);
+  }
   toast(tr('toast.bossStructures'));
   cameraShake = Math.min(.42, cameraShake + .09);
   Sound.explosion();
+  return true;
 }
 function damageStructures(x, z, amount) {
   let hit = 0;
+  const levelsLost = amount >= 40 ? 2 : 1;
   for (const t of state.towers) {
     const dx = t.group.position.x - x, dz = t.group.position.z - z;
-    if (Math.hypot(dx, dz) < 2.2) {
-      t.level = Math.max(1, t.level - 1);
-      const pos = t.group.position.clone(), old = t.group;
-      world.remove(old);
-      t.group = buildTowerModel(t.type, state.army, t.level);
-      t.group.position.copy(pos); world.add(t.group);
-      t.pivot = t.group.userData.pivot; t.barrels = t.group.userData.barrels || [];
-      t.stats.muzzleY = t.group.userData.muzzleY || t.stats.muzzleY;
-      t.stats.damage *= .85; t.stats.range *= .95;
-      showTowerRange(t); updateInspect(); hit++;
+    if (Math.hypot(dx, dz) >= 2.2) continue;
+    const before = t.level;
+    t.level = Math.max(1, t.level - levelsLost);
+    if (t.level < before) {
+      applyTowerStats(t);
+      refreshTowerModel(t);
+      showTowerRange(t); updateInspect();
     }
+    // Una estructura ya degradada queda aturdida: el jefe sigue siendo una amenaza.
+    t.disabledUntil = Math.max(t.disabledUntil || 0, state.combatTime + 2);
+    t.cooldown = Math.max(t.cooldown || 0, 1.2);
+    hit++;
   }
   if (hit > 0) Sound.explosion();
 }
@@ -3526,7 +3576,7 @@ function fire(t, e) {
     return;
   }
   if (type === 'gun') {
-    applyDamage(e, t.stats.damage, t.stats.pierce, t.type);
+    applyDamage(e, t.stats.damage, t.stats.pierce, t.type, t);
     Sound.gun(); muzzleFlash(t);
     const tracer = makeLine(start, new THREE.Vector3(e.x, (ALTITUDE[e.type] || 0) + .4, e.z), 0xffd887, .14);
     setTimeout(() => { if (tracer.parent) world.remove(tracer); }, 55);
@@ -3538,14 +3588,14 @@ function fire(t, e) {
     const shell = getProjectile(0xffc878, 'ball');
     Sound.mortar(); muzzleFlash(t, 1.1);
     shell.position.copy(start); shell.scale.setScalar(.75);
-    state.effects.push({ kind: 'shell', active: true, life: .95, data: { mesh: shell, target: e, start, elapsed: 0, duration: .95, damage: t.stats.damage, splash: t.data.splash, pierce: t.stats.pierce, arc: 1.7, towerType: t.type } });
+    state.effects.push({ kind: 'shell', active: true, life: .95, data: { mesh: shell, target: e, start, elapsed: 0, duration: .95, damage: t.stats.damage, splash: t.data.splash, pierce: t.stats.pierce, arc: 1.7, towerType: t.type, sourceTower: t } });
     return;
   }
   if (type === 'art') {
     const shell = getProjectile(0xffc878, 'ball');
     Sound.mortar(); muzzleFlash(t, 1.4);
     shell.position.copy(start); shell.scale.setScalar(.9);
-    state.effects.push({ kind: 'shell', active: true, life: .82, data: { mesh: shell, target: e, start, elapsed: 0, duration: .82, damage: t.stats.damage, splash: t.data.splash, pierce: t.stats.pierce, arc: 2.7, towerType: t.type } });
+    state.effects.push({ kind: 'shell', active: true, life: .82, data: { mesh: shell, target: e, start, elapsed: 0, duration: .82, damage: t.stats.damage, splash: t.data.splash, pierce: t.stats.pierce, arc: 2.7, towerType: t.type, sourceTower: t } });
     return;
   }
   if (type === 'rocket') {
@@ -3558,7 +3608,7 @@ function fire(t, e) {
       state.effects.push({
         kind: 'rocket', active: true, life: 1.2, data: {
           mesh: rocket, start: start.clone(), targetPos: new THREE.Vector3(tx, .4, tz),
-          elapsed: -i * .11, duration: .72, damage: t.stats.damage, splash: t.data.splash, pierce: t.stats.pierce, arc: 1.6, towerType: t.type
+          elapsed: -i * .11, duration: .72, damage: t.stats.damage, splash: t.data.splash, pierce: t.stats.pierce, arc: 1.6, towerType: t.type, sourceTower: t
         }
       });
     }
@@ -3568,7 +3618,7 @@ function fire(t, e) {
     const missile = getProjectile(0xffc362, 'missile');
     Sound.missile(); muzzleFlash(t, 1.2);
     missile.position.copy(start);
-    state.effects.push({ kind: 'missile', active: true, life: 2.2, data: { mesh: missile, target: e, life: 2.2, damage: t.stats.damage, pierce: t.stats.pierce, splash: 0, towerType: t.type } });
+    state.effects.push({ kind: 'missile', active: true, life: 2.2, data: { mesh: missile, target: e, life: 2.2, damage: t.stats.damage, pierce: t.stats.pierce, splash: 0, towerType: t.type, sourceTower: t } });
     return;
   }
   if (type === 'destroyer') {
@@ -3579,7 +3629,7 @@ function fire(t, e) {
       state.effects.push({
         kind: 'cruise', active: true, life: 2.4, data: {
           mesh: missile, target: e, life: 2.4, damage: t.stats.damage, pierce: t.stats.pierce,
-          splash: t.data.splash, delay: i * .18, towerType: t.type
+          splash: t.data.splash, delay: i * .18, towerType: t.type, sourceTower: t
         }
       });
     }
@@ -3604,20 +3654,21 @@ function carrierStrike(t, e) {
     kind: 'airstrike', active: true, life: 6, data: {
       mesh: jet, jet, from: from.clone(), target: target.clone(), elapsed: 0, returning: false,
       outDuration: Math.max(.55, distance / 12), backDuration: Math.max(.55, distance / 10),
-      damage: t.stats.damage, splash: t.data.splash, pierce: t.stats.pierce, impacted: false, towerType: t.type
+      damage: t.stats.damage, splash: t.data.splash, pierce: t.stats.pierce, impacted: false, towerType: t.type, sourceTower: t
     }
   });
 }
-function impactArtillery(x, z, damage, splash, pierce = 0, towerType = null) {
+function impactArtillery(x, z, damage, splash, pierce = 0, towerType = null, sourceTower = null) {
   for (const enemy of [...state.enemies]) {
     const dist = Math.hypot(enemy.x - x, enemy.z - z);
-    if (dist <= splash) applyDamage(enemy, damage * (1 - .3 * dist / splash), pierce, towerType);
+    if (dist <= splash) applyDamage(enemy, damage * (1 - .3 * dist / splash), pierce, towerType, sourceTower);
   }
   explosionEffect(x, .25, z);
 }
 function updateTowers(dt) {
   for (const t of state.towers) {
     t.cooldown -= dt;
+    if (t.disabledUntil && state.combatTime < t.disabledUntil) { t.target = null; continue; }
     if ((t.type === 'ew' || t.type === 'carrier' || t.type === 'destroyer') && t.pivot) t.pivot.rotation.y += dt * .4;
     const target = acquireTarget(t);
     t.target = target;
@@ -3636,7 +3687,7 @@ function updateTowers(dt) {
       const to = new THREE.Vector3(target.x, (ALTITUDE[target.type] || 0) + .45, target.z);
       beam(from, to, .22);
       Sound.laser();
-      applyDamage(target, t.stats.damage * dt, t.stats.pierce, t.type);
+      applyDamage(target, t.stats.damage * dt, t.stats.pierce, t.type, t);
     } else if (t.cooldown <= 0) {
       fire(t, target);
       t.cooldown = t.stats.rate;
@@ -3746,8 +3797,8 @@ function updateEffects(dt) {
       p.mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction.clone().normalize());
       if (Math.random() < .85) spawnParticle(p.mesh.position.x, p.mesh.position.y, p.mesh.position.z, 0x9d9b8d, .45, .28);
       if (step >= dist - .08) {
-        if (p.splash) impactArtillery(destination.x, destination.z, p.damage, p.splash, p.pierce, p.towerType);
-        else { applyDamage(e, p.damage, p.pierce, p.towerType); explosionEffect(e.x, destination.y, e.z); }
+        if (p.splash) impactArtillery(destination.x, destination.z, p.damage, p.splash, p.pierce, p.towerType, p.sourceTower);
+        else { applyDamage(e, p.damage, p.pierce, p.towerType, p.sourceTower); explosionEffect(e.x, destination.y, e.z); }
         recycleProjectile(p.mesh); fx.active = false;
       }
       continue;
@@ -3760,7 +3811,7 @@ function updateEffects(dt) {
       p.mesh.position.lerpVectors(p.start, destination, progress);
       p.mesh.position.y += Math.sin(progress * Math.PI) * (p.arc || 2.2);
       if (Math.random() < .32) spawnParticle(p.mesh.position.x, p.mesh.position.y, p.mesh.position.z, 0x827d6a, .35, .32);
-      if (progress >= 1) { impactArtillery(destination.x, destination.z, p.damage, p.splash, p.pierce, p.towerType); recycleProjectile(p.mesh); fx.active = false; }
+      if (progress >= 1) { impactArtillery(destination.x, destination.z, p.damage, p.splash, p.pierce, p.towerType, p.sourceTower); recycleProjectile(p.mesh); fx.active = false; }
       continue;
     }
     if (fx.kind === 'rocket') {
@@ -3772,7 +3823,7 @@ function updateEffects(dt) {
       p.mesh.position.y += Math.sin(progress * Math.PI) * (p.arc || 1.4);
       const prev = p.mesh.position.clone();
       if (Math.random() < .6) spawnParticle(prev.x, prev.y, prev.z, 0xb9b4a4, .3, .24);
-      if (progress >= 1) { impactArtillery(p.targetPos.x, p.targetPos.z, p.damage, p.splash, p.pierce, p.towerType); recycleProjectile(p.mesh); fx.active = false; }
+      if (progress >= 1) { impactArtillery(p.targetPos.x, p.targetPos.z, p.damage, p.splash, p.pierce, p.towerType, p.sourceTower); recycleProjectile(p.mesh); fx.active = false; }
       continue;
     }
     if (fx.kind === 'airstrike') {
@@ -3790,7 +3841,7 @@ function updateEffects(dt) {
           p.impacted = true;
           for (let i = 0; i < 3; i++) {
             const ox = (Math.random() - .5) * p.splash * 1.1, oz = (Math.random() - .5) * p.splash * 1.1;
-            setTimeout(() => impactArtillery(p.target.x + ox, p.target.z + oz, p.damage, p.splash * .55, p.pierce, p.towerType), i * 90);
+            setTimeout(() => impactArtillery(p.target.x + ox, p.target.z + oz, p.damage, p.splash * .55, p.pierce, p.towerType, p.sourceTower), i * 90);
           }
         }
         if (progress >= 1) { p.returning = true; p.elapsed = 0; }
@@ -4023,6 +4074,7 @@ function resetGame() {
   state.wave = 0; state.hp = 100; state.cash = state.army.cash;
   state.active = false; state.gameOver = false; state.paused = false; state.deployed = true;
   state.speed = 1; state.score = 0; state.spawnQueue = []; state.currentPlan = [];
+  state.combatTime = 0;
   state.selectedTower = null; state.buildType = null; state.abilityMode = null;
   state.spawned = 0; state.spawnTimer = 0;
   for (const ab of Object.values(state.abilities)) ab.cd = 0;
@@ -4521,6 +4573,7 @@ function tick(now) {
   state.clock += dt; frame++;
   const running = state.deployed && !state.paused && !state.gameOver && !document.hidden;
   const gameDt = running ? dt * state.speed : 0;
+  state.combatTime += gameDt;
   updateKeys(dt);
   distance = targetDistance;
   if (cameraShake > 0) {

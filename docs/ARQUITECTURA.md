@@ -80,7 +80,7 @@ Campos principales:
 - `splash`, `pierce`, `slow`, `salvo` (opcionales).
 - `domain`: `land` o `sea`.
 
-`getCost(type)` aplica el descuento del ejército. Cada torre tiene una huella: las terrestres ocupan `1×1` y los cascos navales `1×3`. `footprintOf()`, `footprintCells()` y `validPlacement()` comprueban todas las celdas de la huella (límites, agua, pista, base y ocupación) antes de construir o vender.
+`getCost(type)` aplica el descuento del ejército. Cada torre tiene una huella: las terrestres ocupan `1×1` y los cascos navales `2×2`. `footprintOf()`, `footprintCells()` y `validPlacement()` comprueban todas las celdas de la huella (límites, agua, pista, base y ocupación) antes de construir o vender.
 
 ### Enemigos (`ENEMIES`)
 
@@ -236,7 +236,9 @@ La prioridad se guarda en `tower.mode` y se muestra en el panel de inspección.
 
 ### Rangos y dificultad
 
-A partir de ciertas oleadas aparecen enemigos veteranos y de élite, con más HP, daño y recompensa. Los jefes aparecen cada cinco oleadas. `waveScalars()` escala HP, daño y velocidad, `spawnEnemy()` añade blindaje progresivo y `buildWavePlan()` aumenta el número de unidades. El daño recibido por la base depende del tipo de enemigo que alcanza el final de la ruta. Las recompensas por baja y la bonificación de oleada se redujeron para exigir una defensa más planificada.
+A partir de ciertas oleadas aparecen enemigos veteranos y de élite, con más HP, daño y recompensa. Los jefes aparecen cada cuatro oleadas: cada facción ocupa tres oleadas normales y cierra con su jefe final. `waveScalars()` escala HP, daño y velocidad, `spawnEnemy()` añade blindaje progresivo y `buildWavePlan()` aumenta el número de unidades. El daño recibido por la base depende del tipo de enemigo que alcanza el final de la ruta. Las recompensas por baja y la bonificación de oleada se redujeron para exigir una defensa más planificada.
+
+Los jefes con `structureDamage` registran las torres que les hacen daño y, cada `BOSS_ATTACK_COOLDOWN`, atacan a las de mayor amenaza aunque queden fuera de su alcance; si no han recibido fuego, aplastan lo que tengan alrededor. `damageStructures()` resta niveles (dos si el golpe es muy alto), recalcula las estadísticas con `applyTowerStats()` y deja la torre aturdida durante `state.combatTime + 2`. Al llegar a la base, el jefe golpea primero a sus atacantes. `state.combatTime` avanza solo con la simulación activa, de modo que pausas y cambios de velocidad también detienen estos temporizadores.
 
 ### Habilidades de mando
 

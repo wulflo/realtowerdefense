@@ -49,9 +49,10 @@ En móvil en vertical el arsenal pasa a una bandeja inferior deslizable. La app 
 - **Prioridad de fuego:** cada torre puede apuntar al primero, al último, al más fuerte o al más cercano.
 - **Apoyo de mando:** ataque aéreo dirigido, EMP que ralentiza y repele drones y reparación de base, con coste y recarga.
 - **Pista única:** los enemigos terrestres comparten una calzada de dos carriles, con separación por carril para no solaparse. Las torres ocupan una celda y los modelos se ajustan a su huella.
-- **Mar:** destructores y portaaviones ocupan una eslora de tres celdas y solo se colocan en agua; cubren la pista terrestre cercana a la costa.
+- **Mar:** destructores y portaaviones ocupan una huella de `2×2` celdas y solo se colocan en agua; cubren la pista terrestre cercana a la costa.
 - **Doctrinas:** los multiplicadores de cada facción afectan al daño, el alcance y la cadencia reales de las torres. Cambiar de facción inicia una partida nueva.
 - **Portaaviones:** cada ataque embarcado despega, impacta y regresa al portaaviones antes de desaparecer.
+- **Jefes:** aparecen cada cuatro oleadas (tres de facción y su jefe final). Los jefes castigan con fuego de represalia las estructuras que les disparan, degradan su nivel y las dejan aturdidas unos segundos; al llegar a la base arrasan antes las defensas que los hostigaron.
 
 ## PWA
 
