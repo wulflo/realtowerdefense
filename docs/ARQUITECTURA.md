@@ -80,7 +80,7 @@ Campos principales:
 - `splash`, `pierce`, `slow`, `salvo` (opcionales).
 - `domain`: `land` o `sea`.
 
-`getCost(type)` aplica el descuento del ejército. Cada torre tiene una huella: las terrestres ocupan `1×1` y los cascos navales `2×2`. `footprintOf()`, `footprintCells()` y `validPlacement()` comprueban todas las celdas de la huella (límites, agua, pista, base y ocupación) antes de construir o vender.
+`getCost(type)` aplica el descuento del ejército y la inflación de construcción. `towerCostInflation()` combina tres factores: +3 % por cada estructura desplegada después de las dos primeras, +8 % por cada torre repetida del mismo tipo a partir de la segunda, y hasta +85 % según la oleada. El resultado se interpola con un peso (`weight`) para que `upgradeCost()` sufra la misma inflación a la mitad. `sellValue()` devuelve el 50 % de `tower.invested`, que acumula el coste real de construcción y de cada mejora, no el coste base. Cada torre tiene una huella: las terrestres ocupan `1×1` y los cascos navales `2×2`. `footprintOf()`, `footprintCells()` y `validPlacement()` comprueban todas las celdas de la huella (límites, agua, pista, base y ocupación) antes de construir o vender.
 
 ### Enemigos (`ENEMY_FACTIONS`, `ENEMIES`)
 
@@ -91,9 +91,13 @@ Campos principales:
 - `climate` / `tempC` / `tempF`: clima y temperatura que imponen al frente.
 - `flag` y color de facción.
 
-`ENEMIES` es el índice plano de todas las unidades; `enemyFaction(type)` recupera su facción. Cada facción ocupa `WAVES_PER_FACTION = 4` oleadas normales y cierra con su jefe (`FACTION_CYCLE = 5`), de modo que la rotación completa de las diez facciones dura 50 oleadas. `factionByWave()`, `waveInFaction()`, `isBossWave()` y `wavesUntilBoss()` resuelven el ciclo.
+`ENEMIES` es el índice plano de todas las unidades; `enemyFaction(type)` recupera su facción y cada entrada recibe un `jam` entre 0 y 1. `JAM_BY_FACTION` define la vulnerabilidad base de la facción y `JAM_OVERRIDES` la ajusta por unidad: criaturas, magia, pegasos, pterodáctilos y aviación sin guiado electrónico son inmunes; drones, cibertropas, cazas y naves alienígenas son totalmente vulnerables. `jamFactor(e)` normaliza el valor y lo usan EW, EMP e intel.
 
-`buildWavePlan(wave)` genera una composición determinista con semilla por oleada. Cada entrada es un objeto `{ type, inf }`, donde `inf` marca un infiltrado. La proporción de aire sigue `[.08, .13, .18, .22]` en las cuatro etapas normales y `.28` en la oleada de jefe; siempre incluye al menos una unidad de cada tipo disponible y mezcla el orden para que no lleguen todos los aéreos o terrestres juntos. El tamaño crece hasta 64 unidades en oleadas normales (`round(8 + wave * 1.65)`) y 32 en las de jefe. `waveScalars(wave)` escala HP, daño y velocidad con una curva lineal más un término exponencial suave desde la oleada 10; `threatKey()` / `threatLevel()` calculan el nivel de amenaza.
+Cada facción ocupa `WAVES_PER_FACTION = 4` oleadas normales y cierra con su jefe (`FACTION_CYCLE = 5`), de modo que la rotación completa de las diez facciones dura 50 oleadas. `factionByWave()`, `waveInFaction()`, `isBossWave()` y `wavesUntilBoss()` resuelven el ciclo.
+
+`BOSS_SKILLS` define las habilidades de estructura y `BOSS_SKILL_BY_ID` asigna una a cada jefe: `smash` (golpe sísmico), `siege` (asedio), `sabotage` y `abduct` (destrucción completa), `barrage` (aturdimiento amplio), `emp` (apagón masivo), `inferno` (degradación y destrucción de niveles bajos) y `judgment` (degradación e inhabilitación sectorial). Cada habilidad declara `cooldown`, `maxTargets`, `radius`, `levels`, `stun`, `destroy`, `destroyWeak` y `areaFromBoss`.
+
+`buildWavePlan(wave)` genera una composición determinista con semilla por oleada. Cada entrada es un objeto `{ type, inf }`, donde `inf` marca un infiltrado. La proporción de aire sigue `[.08, .13, .18, .22]` en las cuatro etapas normales y `.28` en la oleada de jefe; siempre incluye al menos una unidad de cada tipo disponible y mezcla el orden para que no lleguen todos los aéreos o terrestres juntos. El tamaño crece hasta 64 unidades en oleadas normales (`round(8 + wave * 1.65)`) y 32 en las de jefe. `waveScalars(wave)` escala HP, daño y velocidad con una curva lineal más términos exponenciales desde las oleadas 10 y 20; `threatKey()` / `threatLevel()` calculan el nivel de amenaza.
 
 `buildInfiltrators(wave, fac, boss, stage, rnd)` construye destacamentos de otra facción a partir de la oleada 6. Aparecen en las etapas 3 y 4 y en la escolta del jefe; la mayoría son terrestres, con una parte aérea, y se generan con la misma semilla que el resto del plan para que el panel de inteligencia coincida con lo que llega. `spawnEnemy(type, { infiltrator: true })` les aplica +20 % HP, +8 % velocidad y daño, +0,03 de blindaje y +35 % de recompensa, y les añade el halo de `addInfiltratorHalo()`.
 
@@ -109,10 +113,11 @@ Una única pista terrestre de dos carriles (`main`) y un corredor aéreo (`AIR_R
 
 Objeto central de la simulación:
 
-- Partida: `wave`, `cash`, `hp`, `score`, `active`, `paused`, `gameOver`, `deployed`, `speed`, `climate`.
-- Entidades: `enemies`, `towers`, `effects`, `spawnQueue`.
+- Partida: `wave`, `cash`, `hp`, `score`, `active`, `paused`, `gameOver`, `deployed`, `speed`, `climate`, `combatTime`.
+- Economía y dificultad: `repairUses` (fatiga de reparación) y `wavePressure` (presión adaptativa congelada al iniciar la oleada).
+- Entidades: `enemies`, `towers`, `effects`, `spawnQueue`. Cada torre guarda `invested` para calcular la venta.
 - Interacción: `selectedTower`, `buildType`, `abilityMode`, `selectedArmy`.
-- Habilidades globales: `strike`, `emp`, `repair`, con coste, recarga y cooldown.
+- Habilidades globales: `strike`, `emp`, `repair`, con coste, recarga y cooldown. `abilityCost()` sustituye el coste fijo de reparación por `repairCost()`.
 - Habilidades por torre: `tower.special` (definición de `TOWER_SPECIALS`) y `tower.specialCd` (recarga restante).
 - Intel: `currentPlan`, `waveIntel`.
 
@@ -230,7 +235,7 @@ Los tipos de ataque son:
 - Salvas de cohetes.
 - Misiles guiados antiaéreos.
 - Láser continuo con penetración total. El emisor usa `glowMaterial()` pero arranca con `emissiveIntensity = 0`; `updateTowers()` lo enciende con un pulso solo mientras hay objetivo y lo apaga en cuanto deja de disparar.
-- Pulso EW que ralentiza; contra drones activa `repelTimer` y los hace retroceder por la pista.
+- Pulso EW que solo adquiere y afecta a unidades con `jam > 0`: ralentiza en proporción a la vulnerabilidad y, con `jam >= 0.5`, activa `repelTimer` y hace retroceder al enemigo por la pista. Las criaturas y la aviación sin guiado electrónico son objetivos inválidos.
 - Misiles de crucero navales.
 - Ataque aéreo embarcado del portaaviones: el avión despega de la cubierta, impacta y regresa al portaaviones antes de retirarse.
 
@@ -256,28 +261,30 @@ La prioridad se guarda en `tower.mode` y se muestra en el panel de inspección.
 
 ### Rangos y dificultad
 
-A partir de la oleada 5 la probabilidad de veteranos crece de forma progresiva y desde la 8 se suman élites, ambas con más HP, daño y recompensa y con etiqueta 3D propia. `buildWavePlan()` aumenta el número de unidades hasta 64 y reduce la cadencia de spawn con la oleada; `waveScalars()` escala HP, daño y velocidad con una curva lineal más un término exponencial suave desde la oleada 10, con topes de velocidad y blindaje. Las aeronaves reciben un 15 % menos de HP para que su amenaza sea la saturación del corredor y no una bolsa de vida imposible de vaciar. `spawnEnemy()` añade blindaje progresivo (hasta +0,16) y aplica los multiplicadores de rango. El daño de fuga se aplica como fracción del ataque (50 % para tropa normal, 45 % para jefes) para que unas pocas fugas produzcan desgaste progresivo en lugar de derrota instantánea. Las recompensas por baja y la bonificación de oleada se reducen deliberadamente para exigir una defensa más planificada.
+A partir de la oleada 5 la probabilidad de veteranos crece de forma progresiva y desde la 8 se suman élites, ambas con más HP, daño y recompensa y con etiqueta 3D propia. `buildWavePlan()` aumenta el número de unidades hasta 64 y reduce la cadencia de spawn con la oleada; `waveScalars()` escala HP, daño y velocidad con una curva lineal más términos exponenciales desde las oleadas 10 y 20, con topes de velocidad y blindaje. Las aeronaves reciben un 15 % menos de HP para que su amenaza sea la saturación del corredor y no una bolsa de vida imposible de vaciar. `spawnEnemy()` añade blindaje progresivo (hasta +0,16), aplica los multiplicadores de rango y multiplica HP y daño por la presión adaptativa. El daño de fuga se aplica como fracción del ataque (50 % para tropa normal, 45 % para jefes) para que unas pocas fugas produzcan desgaste progresivo en lugar de derrota instantánea.
+
+`defenseValue()` suma el coste base de cada torre multiplicado por su nivel; las mejoras pesan un 70 % adicional. `defensePressure()` lo convierte en un multiplicador de 1 a 2,4 a partir de 1.200 créditos de defensa. `makeWave()` congela el valor en `state.wavePressure` antes de generar la cola, de modo que destruir estructuras durante la oleada no reduce la presión de las unidades pendientes. La presión eleva HP y daño y reduce recompensas; el dinero sin gastar no influye. Las recompensas por baja y la bonificación de oleada se reducen además con la oleada para exigir una defensa más planificada.
 
 Los jefes aparecen cada cinco oleadas: cada facción ocupa cuatro oleadas normales y cierra con su jefe final. En `spawnEnemy()` reciben HP según `(.32 + min(1.1, wave * .028)) * 1.2`, daño ×1,3, blindaje +0,1 (con tope 0,86) y `structureDamage` ×1,2, pero avanzan a ×0,7 de su velocidad para dar tiempo a concentrar el fuego.
 
-Los jefes con `structureDamage` registran las torres que les hacen daño y, cada `BOSS_ATTACK_COOLDOWN`, atacan a las de mayor amenaza aunque queden fuera de su alcance; si no han recibido fuego, aplastan lo que tengan alrededor. `damageStructures()` resta niveles (dos si el golpe es muy alto), recalcula las estadísticas con `applyTowerStats()` y deja la torre aturdida durante `state.combatTime + 2`. Al llegar a la base, el jefe golpea primero a sus atacantes. `state.combatTime` avanza solo con la simulación activa, de modo que pausas y cambios de velocidad también detienen estos temporizadores.
+Los jefes registran las torres que les hacen daño y, cada pocos segundos, usan la habilidad asignada en `BOSS_SKILL_BY_ID` sobre las estructuras de mayor amenaza aunque queden fuera de su alcance; si no han recibido fuego, atacan lo que tengan alrededor. `useBossSkill()` aplica la definición de `BOSS_SKILLS`: `damageStructures()` y `destroyTower()` restan niveles, recalcular estadísticas con `applyTowerStats()`, destruyen la estructura si la habilidad lo permite y fijan `disabledUntil` con `state.combatTime`. Las habilidades de área (`emp`, `judgment`) se centran en el jefe y, si no alcanzan nada, se anclan al objetivo que le dispara. Al llegar a la base, el jefe golpea primero a sus atacantes. `state.combatTime` avanza solo con la simulación activa, de modo que pausas y cambios de velocidad también detienen estos temporizadores.
 
 ### Habilidades de mando
 
 | Habilidad | Tecla | Coste | Efecto |
 | --- | --- | --- | --- |
 | Ataque aéreo | `Z` | 120 | Daño elevado en área sobre un punto elegido. |
-| Pulso EMP | `X` | 90 | Ralentiza a todos los enemigos durante 4,5 s y repele drones durante 2,8 s. |
-| Reparar base | `C` | 80 | Recupera hasta 22% de integridad. |
+| Pulso EMP | `X` | 90 | Ralentiza a todos los enemigos; solo los que tienen `jam >= 0.5` pierden el control y retroceden. |
+| Reparar base | `C` | Variable | Recupera hasta 22 % de integridad. `repairCost()` cobra 55 créditos más 4,5 por cada punto perdido y acumula +18 % de fatiga por uso (máximo +250 %); la recarga es de 40 s. |
 
-La barra de apoyo está anclada al pie del arsenal, no flota sobre el mapa. En móvil vertical forma parte de la bandeja inferior.
+La barra de apoyo está anclada al pie del arsenal, no flota sobre el mapa. En móvil vertical forma parte de la bandeja inferior. `updateRepairButton()` mantiene el coste y el estado de la reparación sincronizados con la integridad actual.
 
 ### Oleadas
 
 - `makeWave()` incrementa la oleada, construye el plan y llena la cola de spawn con `{ type, inf, delay }`.
 - Al limpiar una oleada se concede una bonificación y se actualizan los récords.
-- `renderIntel()` muestra la composición prevista o en curso, el escalado, la amenaza, el diálogo de facción, el recuento de infiltrados y una barra de balance aire/tierra.
-- `showWaveBanner()` presenta facción, clima, etapa, número de escoltas, infiltrados y diálogo al iniciar el asalto.
+- `renderIntel()` muestra la composición prevista o en curso, el escalado, la presión adaptativa, la vulnerabilidad EW de cada unidad, la amenaza, el diálogo de facción, la habilidad del jefe, el recuento de infiltrados y una barra de balance aire/tierra.
+- `showWaveBanner()` presenta facción, clima, etapa, número de escoltas, habilidad del jefe, infiltrados y diálogo al iniciar el asalto.
 - Durante una oleada activa no se pueden comprar ni mejorar torres; el arsenal vuelve a habilitarse al limpiarla.
 
 ## 7. Interfaz
@@ -405,7 +412,9 @@ Checklist manual:
 - Construcción, mejora, venta, habilidades, oleadas y derrota muestran textos correctos.
 - Se puede construir en cualquier celda terrestre libre (incluidas las de decoración) y en toda la eslora naval válida; la vista previa ocupa la huella real.
 - Las mejoras cambian el modelo de la torre y no invaden celdas vecinas.
-- El ataque del portaaviones regresa a cubierta y la guerra electrónica hace retroceder a los drones.
+- El ataque del portaaviones regresa a cubierta y la guerra electrónica hace retroceder a los drones, pero ignora a pterodáctilos, pegasos y otras unidades sin guiado electrónico.
+- El coste de las torres sube al construir y repetir tipo, la venta devuelve el 50 % de lo invertido y la reparación encarece con la integridad perdida y la fatiga.
+- Cada jefe usa su habilidad anunciada: degrada, inhabilita o destruye estructuras, y la presión adaptativa se congela al comenzar la oleada.
 - Las oleadas mezclan tierra y aire según la etapa, el diálogo de facción cambia y el aviso de oleada muestra clima y balance.
 - Durante la oleada el arsenal queda bloqueado; al limpiarla vuelve a habilitarse.
 - Las rutas terrestres quedan centradas en las celdas de la calzada y las unidades mantienen desviación 0 respecto a la línea central.

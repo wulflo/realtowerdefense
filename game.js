@@ -93,7 +93,7 @@ const TOWERS = [
   { id: 'rocket', name: 'Lanzacohetes', nameEn: 'Rocket launcher', icon: '⌁', cost: 260, range: 7, damage: 16, rate: 3.4, targets: ['ground'], splash: 1.35, desc: 'Salva de cohetes de saturación', descEn: 'Saturation rocket salvo', domain: 'land', pierce: .4, salvo: 4 },
   { id: 'aa', name: 'Misil antiaéreo', nameEn: 'Surface-to-air missile', icon: '⌃', cost: 170, range: 8.4, damage: 52, rate: 1.15, targets: ['air'], desc: 'Lanzador guiado contra aeronaves', descEn: 'Guided launcher against aircraft', domain: 'land', pierce: .2 },
   { id: 'laser', name: 'Láser', nameEn: 'Laser', icon: '⌇', cost: 225, range: 5.8, damage: 14, rate: .12, targets: ['ground', 'air'], desc: 'Haz continuo de energía dirigida', descEn: 'Continuous directed-energy beam', domain: 'land', pierce: 1 },
-  { id: 'ew', name: 'Guerra electrónica', nameEn: 'Electronic warfare', icon: '⌘', cost: 180, range: 5.2, damage: 0, rate: .5, targets: ['ground', 'air'], slow: .5, desc: 'Interferencia: ralentiza y repele drones', descEn: 'Jamming: slows and repels drones', domain: 'land', pierce: 0 },
+  { id: 'ew', name: 'Guerra electrónica', nameEn: 'Electronic warfare', icon: '⌘', cost: 180, range: 5.2, damage: 0, rate: .5, targets: ['ground', 'air'], slow: .5, desc: 'Interferencia: solo afecta a unidades con guiado electrónico', descEn: 'Jamming: only affects electronically guided units', domain: 'land', pierce: 0 },
   { id: 'destroyer', name: 'Destructor', nameEn: 'Destroyer', icon: '⚓', cost: 360, range: 8.8, damage: 46, rate: 2.9, targets: ['ground', 'air'], splash: 1.55, desc: 'Misiles de crucero desde el mar', descEn: 'Cruise missiles from the sea', domain: 'sea', pierce: .5 },
   { id: 'carrier', name: 'Portaaviones', nameEn: 'Aircraft carrier', icon: '✈', cost: 520, range: 12, damage: 46, rate: 5.6, targets: ['ground', 'air'], splash: 2.1, desc: 'Ataque aéreo embarcado de largo alcance', descEn: 'Long-range carrier air strike', domain: 'sea', pierce: .45 }
 ];
@@ -107,7 +107,7 @@ const TOWER_SPECIALS = {
   rocket: { name: 'Salva total', nameEn: 'Full salvo', desc: 'Descarga completa de cohetes sobre múltiples objetivos', descEn: 'Full rocket volley across multiple targets', icon: '⌁', cost: 120, cooldown: 26 },
   aa: { name: 'Intercepción total', nameEn: 'Total interception', desc: 'Misiles guiados contra todas las aeronaves en alcance', descEn: 'Guided missiles against every aircraft in range', icon: '⌃', cost: 90, cooldown: 20 },
   laser: { name: 'Sobrecarga de haz', nameEn: 'Beam overcharge', desc: 'Barrido de energía dirigida con penetración total', descEn: 'Directed-energy sweep with full penetration', icon: '⌇', cost: 110, cooldown: 22 },
-  ew: { name: 'Apagón electrónico', nameEn: 'Electronic blackout', desc: 'Ralentiza y repele a todos los enemigos del área', descEn: 'Slows and repels every enemy in the area', icon: '⌘', cost: 85, cooldown: 24 },
+  ew: { name: 'Apagón electrónico', nameEn: 'Electronic blackout', desc: 'Ralentiza y repele a las unidades guiadas del área', descEn: 'Slows and repels guided units in the area', icon: '⌘', cost: 85, cooldown: 24 },
   destroyer: { name: 'Bombardeo naval', nameEn: 'Naval bombardment', desc: 'Salva de misiles de crucero contra objetivos múltiples', descEn: 'Cruise missile salvo against multiple targets', icon: '⚓', cost: 140, cooldown: 30 },
   carrier: { name: 'Oleada aérea', nameEn: 'Air wing', desc: 'Tres ataques embarcados simultáneos de largo alcance', descEn: 'Three simultaneous long-range carrier strikes', icon: '✈', cost: 160, cooldown: 34 }
 };
@@ -326,11 +326,56 @@ for (const fac of ENEMY_FACTIONS) {
   if (!fac.boss.nameEn) fac.boss.nameEn = ENEMY_EN[fac.boss.id] || fac.boss.name;
 }
 
+// Vulnerabilidad a la guerra electrónica (0 = inmune, 1 = totalmente expuesta).
+// Solo las unidades que dependen de radio, radar, GPS o sistemas de guiado
+// pueden ser ralentizadas o repelidas por EW. Las criaturas, la magia y las
+// aeronaves puramente mecánicas no se ven afectadas.
+const JAM_BY_FACTION = {
+  cavemen: 0, spartans: 0, crusaders: 0, pirates: .1, wwi: .35,
+  chinaTech: 1, zombies: .05, ufos: 1, demons: .1, celestials: .15
+};
+const JAM_OVERRIDES = {
+  // Fauna, magia y aviación sin electrónica de guiado.
+  pterodactyl: 0, pegasus: 0, gryphon: 0, mutantBat: 0, demonWing: 0,
+  hellBomber: 0, angel: 0, archon: .2, seraph: .25, guardian: .1,
+  // Aviación con electrónica parcial: radio, brújula o navegación inercial.
+  airship: .15, biplane: .25, bomber: .6,
+  // Sistemas modernos dependientes de datos, radar y enlace.
+  cyberSoldier: 1, droneSoldier: 1, mech: 1, fighter: 1,
+  scout: 1, interceptor: 1, mothershipScout: 1, abductor: .8, tripod: 1,
+  // Jefes: solo los tecnológicos son plenamente vulnerables.
+  chinaTechBoss: 1, ufoBoss: 1, pirateBoss: .15, wwiBoss: .3,
+  zombieBoss: 0, demonBoss: .1, celestialBoss: .15
+};
+// Habilidades especiales de los jefes contra estructuras. Se ejecutan con
+// temporizadores de simulación, por lo que pausar o acelerar no altera el ritmo.
+const BOSS_SKILLS = {
+  smash: { name: 'Golpe sísmico', nameEn: 'Seismic smash', desc: 'Destruye la estructura más débil o le arranca dos niveles', descEn: 'Destroys the weakest structure or strips two levels', icon: '✹', cooldown: 7.5, maxTargets: 1, radius: 2.2, levels: 2, stun: 4, destroyWeak: true },
+  siege: { name: 'Asedio concentrado', nameEn: 'Focused siege', desc: 'Martillea dos estructuras y las deja aturdidas', descEn: 'Hammers two structures and stuns them', icon: '☄', cooldown: 8, maxTargets: 2, radius: 2.4, levels: 2, stun: 3.5 },
+  sabotage: { name: 'Sabotaje', nameEn: 'Sabotage', desc: 'Destruye por completo la estructura de mayor amenaza', descEn: 'Completely destroys the highest-threat structure', icon: '☠', cooldown: 12, maxTargets: 1, radius: 2.2, levels: 9, stun: 0, destroy: true },
+  barrage: { name: 'Barrera de mando', nameEn: 'Command barrage', desc: 'Inhabilita varias estructuras en un área amplia', descEn: 'Disables several structures over a wide area', icon: '✷', cooldown: 8.5, maxTargets: 3, radius: 3.4, levels: 1, stun: 5 },
+  emp: { name: 'Pulso de apagón', nameEn: 'Blackout pulse', desc: 'Inhabilita todas las estructuras cercanas durante varios segundos', descEn: 'Disables every nearby structure for several seconds', icon: '⌁', cooldown: 10, maxTargets: 99, radius: 5.5, levels: 0, stun: 6, areaFromBoss: true },
+  abduct: { name: 'Abducción estructural', nameEn: 'Structural abduction', desc: 'Se lleva una estructura completa del tablero', descEn: 'Removes one structure from the board', icon: '◉', cooldown: 13, maxTargets: 1, radius: 2.2, levels: 9, stun: 0, destroy: true },
+  inferno: { name: 'Infierno de asedio', nameEn: 'Siege inferno', desc: 'Quema varias estructuras y puede destruir las de nivel bajo', descEn: 'Burns several structures and may destroy low-level ones', icon: '🔥', cooldown: 9, maxTargets: 3, radius: 3, levels: 2, stun: 5, destroyWeak: true },
+  judgment: { name: 'Juicio celestial', nameEn: 'Celestial judgment', desc: 'Degrada e inhabilita todas las estructuras del sector', descEn: 'Degrades and disables every structure in the sector', icon: '✦', cooldown: 12, maxTargets: 99, radius: 6.5, levels: 1, stun: 4.5, areaFromBoss: true }
+};
+const BOSS_SKILL_BY_ID = {
+  cavemenBoss: 'smash', spartanBoss: 'siege', crusaderBoss: 'siege', pirateBoss: 'sabotage',
+  wwiBoss: 'barrage', chinaTechBoss: 'emp', zombieBoss: 'smash', ufoBoss: 'abduct',
+  demonBoss: 'inferno', celestialBoss: 'judgment'
+};
+
 // Índice plano de todos los tipos (mantiene compatibilidad con código existente)
 const ENEMIES = {};
 for (const fac of ENEMY_FACTIONS) {
+  const bossSkill = BOSS_SKILL_BY_ID[fac.boss.id] || 'siege';
+  fac.boss.bossSkill = bossSkill;
   for (const u of fac.units) ENEMIES[u.id] = { ...u, faction: fac.id, icon: u.icon || (u.kind === 'air' ? '✈' : '▮') };
-  ENEMIES[fac.boss.id] = { ...fac.boss, faction: fac.id, icon: fac.boss.icon || '☠' };
+  ENEMIES[fac.boss.id] = { ...fac.boss, faction: fac.id, icon: fac.boss.icon || '☠', bossSkill };
+}
+for (const type of Object.keys(ENEMIES)) {
+  const d = ENEMIES[type];
+  if (d.jam == null) d.jam = JAM_OVERRIDES[type] != null ? JAM_OVERRIDES[type] : (JAM_BY_FACTION[d.faction] || 0);
 }
 function enemyFaction(type) { return ENEMIES[type] ? ENEMIES[type].faction : null; }
 // Cada facción domina 4 oleadas normales y después aparece su jefe final.
@@ -405,7 +450,7 @@ const I18N = {
     'action.pause': 'Pausa (P)', 'action.resume': 'Reanudar (P)',
     'action.fullscreen': 'Pantalla completa (F)', 'action.exitFullscreen': 'Salir de pantalla completa (F)', 'action.settings': 'Ajustes',
     'build.kicker': 'Arsenal de campo', 'build.title': 'Construir',
-    'build.hint': 'Sistemas terrestres y navales. Elige uno y colócalo en una casilla libre. Teclas 1–9. Esc cancela.',
+    'build.hint': 'Sistemas terrestres y navales. Elige uno y colócalo en una casilla libre. Teclas 1–9. El coste sube con cada estructura y oleada.',
     'build.hintLocked': 'Arsenal bloqueado durante el combate. Compra y mejora entre oleadas.', 'build.lockedShort': 'BLOQUEADO',
     'inspect.kicker': 'Control táctico', 'inspect.title': 'Inspección',
     'inspect.empty': 'Selecciona una torre del mapa para ver sus parámetros y órdenes disponibles.',
@@ -414,12 +459,12 @@ const I18N = {
     'faction.stage': 'Oleada {stage}/{total}', 'faction.bossNow': 'JEFE FINAL', 'faction.bossIn': 'Jefe en {n}',
     'waveBanner.boss': 'JEFE FINAL', 'waveBanner.stage': 'Oleada {stage} de {total}', 'waveBanner.climate': '{climate} · {temp}°C',
     'waveBanner.incoming': 'Nueva facción detectada', 'waveBanner.escorts': 'Escolta: {n} unidades',
-    'waveBanner.infiltrators': 'Infiltrados: {n}',
+    'waveBanner.infiltrators': 'Infiltrados: {n}', 'waveBanner.bossSkill': 'Habilidad: {name}',
     'climate.templado': 'Templado', 'climate.caluroso': 'Caluroso', 'climate.tropical': 'Tropical', 'climate.frío': 'Frío',
     'climate.radiactivo': 'Radiactivo', 'climate.desconocido': 'Desconocido', 'climate.infernal': 'Infernal', 'climate.divino': 'Divino',
     'ability.strike': 'Ataque aéreo', 'ability.strikeHint': 'Z · 120 cr', 'ability.strikeTitle': 'Ataque aéreo (Z) · 120 créditos',
     'ability.emp': 'Pulso EMP', 'ability.empHint': 'X · 90 cr', 'ability.empTitle': 'Pulso EMP (X) · 90 créditos',
-    'ability.repair': 'Reparar base', 'ability.repairHint': 'C · 80 cr', 'ability.repairTitle': 'Reparar base (C) · 80 créditos',
+    'ability.repair': 'Reparar base', 'ability.repairHint': 'C · {cost} cr', 'ability.repairTitle': 'Reparar base (C) · {cost} créditos',
     'map.sector': 'SECTOR 07 / CUADRÍCULA 01',
     'menu.eyebrow': 'Protocolo de despliegue · Operación indefinida', 'menu.title': 'Elige tu fuerza',
     'menu.copyHtml': 'Una pista de dos carriles. Un mar. Un corredor aéreo.<br>Tu doctrina define cada defensa.',
@@ -469,11 +514,12 @@ const I18N = {
     'toast.noPosition': 'Posición no disponible para este sistema', 'toast.noCredits': 'Créditos insuficientes',
     'toast.deployed': 'Sistema desplegado', 'toast.place': 'Coloca: {name}', 'toast.placeSea': 'Coloca en el mar: {name}',
     'toast.priority': 'Prioridad: {mode}', 'toast.upgrade': 'Mejora completada · nivel {level}',
-    'toast.sold': 'Sistema vendido · 60% recuperado', 'toast.waveStart': 'Oleada {wave}: {summary}',
+    'toast.sold': 'Sistema vendido · 50% de la inversión recuperada', 'toast.waveStart': 'Oleada {wave}: {summary}',
     'toast.bossStructures': '¡El jefe está dañando tus estructuras!', 'toast.bossArrives': '¡{name} ha alcanzado el sector!',
     'toast.waveClear': 'Oleada {wave} contenida · bonificación recibida', 'toast.reloading': '{name} recargando · {s} s',
     'toast.strikeSelect': 'Ataque aéreo: selecciona el punto de impacto', 'toast.emp': 'Pulso EMP · amenazas ralentizadas y drones repelidos',
-    'toast.repair': 'Base reparada · +22% de integridad', 'toast.strikeActive': 'Ataque aéreo en curso',
+    'toast.repair': 'Base reparada · +{n}% de integridad', 'toast.repairFull': 'La base ya está a integridad completa', 'toast.strikeActive': 'Ataque aéreo en curso',
+    'toast.bossSkill': '{name}: {skill}', 'toast.bossDestroy': '¡{name} ha destruido una estructura!',
     'toast.army': '{name} desplegado · pista de dos carriles y flota disponibles', 'toast.armyNew': '{name} desplegado · nueva partida iniciada', 'toast.restart': 'Partida reiniciada', 'toast.language': 'Idioma: {language}',
     'toast.camera': 'Cámara centrada', 'toast.recordsCleared': 'Récords borrados', 'toast.quality': 'Calidad gráfica: {level}',
     'toast.qualityReduced': 'Calidad gráfica reducida para mantener la fluidez', 'toast.qualityMinimum': 'Calidad gráfica al mínimo',
@@ -491,6 +537,8 @@ const I18N = {
     'intel.air': 'Aire', 'intel.boss': 'Jefe', 'intel.ground': 'Tierra', 'intel.armor': 'blindaje {n}%',
     'intel.counter': 'Débil ante {name}', 'intel.bossWave': 'Oleada de jefe final',
     'intel.infiltrator': 'Infiltrado', 'intel.infiltrators': 'Infiltrados: {n} · halo violeta',
+    'intel.pressure': 'Presión adaptativa ×{x}', 'intel.bossSkill': 'Habilidad de jefe: {name} · {desc}',
+    'intel.ewFull': 'EW total', 'intel.ewPartial': 'EW {n}%', 'intel.ewImmune': 'EW inmune',
     'rank.elite': 'ÉLITE', 'rank.veteran': 'VETERANO'
   },
   en: {
@@ -503,7 +551,7 @@ const I18N = {
     'action.pause': 'Pause (P)', 'action.resume': 'Resume (P)',
     'action.fullscreen': 'Fullscreen (F)', 'action.exitFullscreen': 'Exit fullscreen (F)', 'action.settings': 'Settings',
     'build.kicker': 'Field arsenal', 'build.title': 'Build',
-    'build.hint': 'Land and naval systems. Pick one and place it on a free tile. Keys 1–9. Esc cancels.',
+    'build.hint': 'Land and naval systems. Pick one and place it on a free tile. Keys 1–9. Cost rises with every structure and wave.',
     'build.hintLocked': 'Arsenal locked during combat. Buy and upgrade between waves.', 'build.lockedShort': 'LOCKED',
     'inspect.kicker': 'Tactical control', 'inspect.title': 'Inspect',
     'inspect.empty': 'Select a tower on the map to view its stats and available orders.',
@@ -512,12 +560,12 @@ const I18N = {
     'faction.stage': 'Wave {stage}/{total}', 'faction.bossNow': 'FINAL BOSS', 'faction.bossIn': 'Boss in {n}',
     'waveBanner.boss': 'FINAL BOSS', 'waveBanner.stage': 'Wave {stage} of {total}', 'waveBanner.climate': '{climate} · {temp}°C',
     'waveBanner.incoming': 'New faction detected', 'waveBanner.escorts': 'Escort: {n} units',
-    'waveBanner.infiltrators': 'Infiltrators: {n}',
+    'waveBanner.infiltrators': 'Infiltrators: {n}', 'waveBanner.bossSkill': 'Ability: {name}',
     'climate.templado': 'Temperate', 'climate.caluroso': 'Hot', 'climate.tropical': 'Tropical', 'climate.frío': 'Cold',
     'climate.radiactivo': 'Radioactive', 'climate.desconocido': 'Unknown', 'climate.infernal': 'Infernal', 'climate.divino': 'Divine',
     'ability.strike': 'Airstrike', 'ability.strikeHint': 'Z · 120 cr', 'ability.strikeTitle': 'Airstrike (Z) · 120 credits',
     'ability.emp': 'EMP pulse', 'ability.empHint': 'X · 90 cr', 'ability.empTitle': 'EMP pulse (X) · 90 credits',
-    'ability.repair': 'Repair base', 'ability.repairHint': 'C · 80 cr', 'ability.repairTitle': 'Repair base (C) · 80 credits',
+    'ability.repair': 'Repair base', 'ability.repairHint': 'C · {cost} cr', 'ability.repairTitle': 'Repair base (C) · {cost} credits',
     'map.sector': 'SECTOR 07 / GRID 01',
     'menu.eyebrow': 'Deployment protocol · Indefinite operation', 'menu.title': 'Choose your force',
     'menu.copyHtml': 'One two-lane road. One sea. One air corridor.<br>Your doctrine shapes every defense.',
@@ -567,11 +615,12 @@ const I18N = {
     'toast.noPosition': 'Position unavailable for this system', 'toast.noCredits': 'Insufficient credits',
     'toast.deployed': 'System deployed', 'toast.place': 'Place: {name}', 'toast.placeSea': 'Place at sea: {name}',
     'toast.priority': 'Priority: {mode}', 'toast.upgrade': 'Upgrade complete · level {level}',
-    'toast.sold': 'System sold · 60% recovered', 'toast.waveStart': 'Wave {wave}: {summary}',
+    'toast.sold': 'System sold · 50% of the investment recovered', 'toast.waveStart': 'Wave {wave}: {summary}',
     'toast.bossStructures': 'The boss is damaging your structures!', 'toast.bossArrives': '{name} reached the sector!',
     'toast.waveClear': 'Wave {wave} contained · bonus received', 'toast.reloading': '{name} reloading · {s} s',
     'toast.strikeSelect': 'Airstrike: select the impact point', 'toast.emp': 'EMP pulse · threats slowed and drones repelled',
-    'toast.repair': 'Base repaired · +22% integrity', 'toast.strikeActive': 'Airstrike in progress',
+    'toast.repair': 'Base repaired · +{n}% integrity', 'toast.repairFull': 'Base is already at full integrity', 'toast.strikeActive': 'Airstrike in progress',
+    'toast.bossSkill': '{name}: {skill}', 'toast.bossDestroy': '{name} destroyed a structure!',
     'toast.army': '{name} deployed · two-lane road and fleet available', 'toast.armyNew': '{name} deployed · new match started', 'toast.restart': 'Match restarted', 'toast.language': 'Language: {language}',
     'toast.camera': 'Camera centered', 'toast.recordsCleared': 'Records cleared', 'toast.quality': 'Graphics quality: {level}',
     'toast.qualityReduced': 'Graphics quality reduced to keep frame rate smooth', 'toast.qualityMinimum': 'Graphics quality set to minimum',
@@ -589,6 +638,8 @@ const I18N = {
     'intel.air': 'Air', 'intel.boss': 'Boss', 'intel.ground': 'Ground', 'intel.armor': 'armor {n}%',
     'intel.counter': 'Weak vs {name}', 'intel.bossWave': 'Final boss wave',
     'intel.infiltrator': 'Infiltrator', 'intel.infiltrators': 'Infiltrators: {n} · violet halo',
+    'intel.pressure': 'Adaptive pressure ×{x}', 'intel.bossSkill': 'Boss ability: {name} · {desc}',
+    'intel.ewFull': 'EW full', 'intel.ewPartial': 'EW {n}%', 'intel.ewImmune': 'EW immune',
     'rank.elite': 'ELITE', 'rank.veteran': 'VETERAN'
   }
 };
@@ -627,11 +678,11 @@ const state = {
   selectedTower: null, buildType: null, abilityMode: null, gameOver: false,
   selectedArmy: Number.isInteger(settings.army) && ARMIES[settings.army] ? settings.army : 0,
   clock: 0, combatTime: 0, score: 0, paused: false, deployed: false, base: null,
-  climate: 'templado', tempC: 22,
+  climate: 'templado', tempC: 22, repairUses: 0, wavePressure: 1,
   waveIntel: [], abilities: {
     strike: { cd: 0, max: 22, cost: 120, name: 'Ataque aéreo', key: 'Z', icon: '✈' },
     emp: { cd: 0, max: 26, cost: 90, name: 'Pulso EMP', key: 'X', icon: '⌁' },
-    repair: { cd: 0, max: 34, cost: 80, name: 'Reparar base', key: 'C', icon: '✚' }
+    repair: { cd: 0, max: 40, cost: 80, name: 'Reparar base', key: 'C', icon: '✚' }
   }
 };
 
@@ -3280,7 +3331,7 @@ function makeTower(type, cx, cz) {
   const cells = footprintCells(cx, cz, data);
   for (const cell of cells) clearDecorAt(cell.x, cell.z);
   const tower = {
-    type, data, group, pivot: group.userData.pivot, level: 1,
+    type, data, group, pivot: group.userData.pivot, level: 1, invested: 0,
     cooldown: Math.random() * .2, target: null, cell: { x: cx, z: cz },
     barrels: group.userData.barrels || [], mode: 'first',
     specialCd: 0, special: TOWER_SPECIALS[type] || null,
@@ -3292,7 +3343,42 @@ function makeTower(type, cx, cz) {
   for (const cell of cells) towerCells.set(cellKey(cell.x, cell.z), tower);
   return tower;
 }
-function getCost(type) { return Math.ceil(TOWERS.find(t => t.id === type).cost * (state.army.discount || 1)); }
+// Coste incremental: cada estructura encarece las siguientes. Repetir el mismo
+// sistema pesa más que diversificar y la inflación de guerra crece con la oleada.
+// Así el jugador puede seguir construyendo, pero llenar el mapa de una sola torre
+// deja de ser la estrategia óptima.
+function towerCostInflation(type, weight = 1) {
+  const total = state.towers.length;
+  const same = state.towers.reduce((n, t) => n + (t.type === type ? 1 : 0), 0);
+  const global = Math.max(0, total - 2) * .03;
+  const repeated = Math.max(0, same - 1) * .08;
+  const wave = Math.min(.85, Math.max(0, state.wave - 1) * .022);
+  const combined = (1 + global + repeated) * (1 + wave);
+  return 1 + (combined - 1) * weight;
+}
+function getCost(type) {
+  const base = TOWERS.find(t => t.id === type).cost;
+  return Math.ceil(base * (state.army.discount || 1) * towerCostInflation(type));
+}
+function upgradeCost(t) {
+  // Mejorar también sufre la inflación, aunque a la mitad: el nivel 5 es una
+  // inversión real y no una compra automática en cuanto sobra dinero.
+  return Math.ceil(t.data.cost * (.9 + t.level * .7) * towerCostInflation(t.type, .55));
+}
+function sellValue(t) {
+  return Math.floor((t.invested || t.data.cost) * .5);
+}
+// Reparar la base cobra por la integridad realmente perdida y acumula fatiga:
+// curar desde muy abajo o insistir varias veces encarece cada uso.
+function repairCost() {
+  const missing = Math.max(0, 100 - state.hp);
+  const base = 55 + missing * 4.5;
+  const fatigue = 1 + Math.min(2.5, (state.repairUses || 0) * .18);
+  return Math.ceil(base * fatigue);
+}
+function abilityCost(name) {
+  return name === 'repair' ? repairCost() : state.abilities[name].cost;
+}
 function placeTower() {
   if (state.active) { Sound.error(); toast(tr('toast.buildLocked')); return; }
   if (!state.buildType || !hoverCell) return;
@@ -3301,9 +3387,10 @@ function placeTower() {
   const cost = getCost(state.buildType);
   if (state.cash < cost) { Sound.error(); toast(tr('toast.noCredits')); return; }
   state.cash -= cost;
-  makeTower(state.buildType, cellX, cellZ);
+  const tower = makeTower(state.buildType, cellX, cellZ);
+  tower.invested = cost;
   state.buildType = null; removeGhost(); updateHud(); renderTowerList();
-  selectTower(towerCells.get(cellKey(cellX, cellZ)));
+  selectTower(tower);
   Sound.build(); toast(tr('toast.deployed'));
 }
 function removeGhost() {
@@ -3376,7 +3463,7 @@ function updateInspect() {
     renderIntel();
     return;
   }
-  const nextCost = Math.ceil(t.data.cost * (.8 + t.level * .48));
+  const nextCost = upgradeCost(t);
   const spec = TOWER_SPECIALS[t.type];
   const climate = climateBadgeInfo();
   level.textContent = tr('tower.level', { level: t.level });
@@ -3397,7 +3484,7 @@ function updateInspect() {
       <button class="action-btn special" id="towerSpecial">${spec.icon} ${loc(spec, 'name')} <em>${tr('tower.specialReady')}</em></button>
       <div class="special-desc">${loc(spec, 'desc')}</div>
     </div>` : ''}
-    <div class="upgrade-row"><button class="action-btn" id="upgradeTower" ${t.level >= TOWER_UPGRADE.maxLevel || state.active ? 'disabled' : ''}>${tr('tower.upgrade', { cost: t.level >= TOWER_UPGRADE.maxLevel ? tr('tower.max') : nextCost })}</button><button class="action-btn sell" id="sellTower">${tr('tower.sell', { cost: Math.floor(t.data.cost * .6) })}</button></div>`;
+    <div class="upgrade-row"><button class="action-btn" id="upgradeTower" ${t.level >= TOWER_UPGRADE.maxLevel || state.active ? 'disabled' : ''}>${tr('tower.upgrade', { cost: t.level >= TOWER_UPGRADE.maxLevel ? tr('tower.max') : nextCost })}</button><button class="action-btn sell" id="sellTower">${tr('tower.sell', { cost: sellValue(t) })}</button></div>`;
   document.getElementById('upgradeTower').addEventListener('click', upgradeSelected);
   document.getElementById('sellTower').addEventListener('click', sellSelected);
   const specialBtn = document.getElementById('towerSpecial');
@@ -3413,9 +3500,10 @@ function upgradeSelected() {
   const t = state.selectedTower;
   if (!t || t.level >= TOWER_UPGRADE.maxLevel) return;
   if (state.active) { Sound.error(); toast(tr('toast.buildLocked')); return; }
-  const cost = Math.ceil(t.data.cost * (.8 + t.level * .48));
+  const cost = upgradeCost(t);
   if (state.cash < cost) { Sound.error(); toast(tr('toast.noCredits')); return; }
   state.cash -= cost; t.level++;
+  t.invested = (t.invested || 0) + cost;
   applyTowerStats(t);
   refreshTowerModel(t);
   showTowerRange(t); updateInspect(); updateHud(); Sound.upgrade();
@@ -3424,18 +3512,19 @@ function upgradeSelected() {
 function sellSelected() {
   const t = state.selectedTower;
   if (!t) return;
-  state.cash += Math.floor(t.data.cost * .6);
+  state.cash += sellValue(t);
   world.remove(t.group);
   for (const cell of footprintCells(t.cell.x, t.cell.z, t.data)) towerCells.delete(cellKey(cell.x, cell.z));
   state.towers = state.towers.filter(x => x !== t);
   state.selectedTower = null; placementRing.visible = false;
-  updateInspect(); updateHud(); Sound.sell(); toast(tr('toast.sold'));
+  updateInspect(); updateHud(); renderTowerList(); Sound.sell(); toast(tr('toast.sold'));
 }
 function specialTargets(t) {
   const px = t.group.position.x, pz = t.group.position.z;
   const py = t.group.position.y + (t.stats.muzzleY || 1);
   return state.enemies.filter(e => {
     if (!t.data.targets.includes(e.data.kind)) return false;
+    if (t.type === 'ew' && jamFactor(e) <= 0) return false;
     const ey = e.air ? (ALTITUDE[e.type] || 2) : .4;
     return Math.hypot(e.x - px, ey - py, e.z - pz) <= t.stats.range;
   });
@@ -3462,8 +3551,9 @@ function activateTowerSpecial(t) {
   Sound.special(ownKind);
   if (ownKind === 'ew') {
     for (const e of targets) {
-      e.slowTimer = Math.max(e.slowTimer, 5.5);
-      if (e.data.kind === 'air' || e.type === 'droneSoldier') e.repelTimer = Math.max(e.repelTimer, 3.4);
+      const jam = jamFactor(e);
+      e.slowTimer = Math.max(e.slowTimer, 3 + 2.5 * jam);
+      if (jam >= .5) e.repelTimer = Math.max(e.repelTimer, 3.4 * jam);
       spawnParticle(e.x, (e.air ? ALTITUDE[e.type] : .5), e.z, 0xb79bff, .8, .5);
     }
   } else if (ownKind === 'laser') {
@@ -3608,10 +3698,23 @@ function waveScalars(wave) {
   // término exponencial suave. Las primeras oleadas enseñan y el resto exige
   // defensas completas sin saltos imposibles.
   return {
-    hp: 1 + Math.max(0, wave - 1) * 0.22 + Math.pow(Math.max(0, wave - 10), 1.35) * 0.05,
-    damage: 1 + Math.max(0, wave - 1) * 0.06 + Math.max(0, wave - 12) * 0.022,
+    hp: 1 + Math.max(0, wave - 1) * 0.22 + Math.pow(Math.max(0, wave - 10), 1.35) * 0.05 + Math.pow(Math.max(0, wave - 20), 1.45) * 0.06,
+    damage: 1 + Math.max(0, wave - 1) * 0.06 + Math.max(0, wave - 12) * 0.022 + Math.max(0, wave - 20) * 0.012,
     speed: 1 + Math.min(0.65, Math.max(0, wave - 1) * 0.015)
   };
+}
+// Valor de la defensa desplegada. No cuenta el dinero sin gastar: castiga la
+// acumulación de estructuras y mejoras, que es lo que realmente rompe la curva.
+function defenseValue() {
+  let value = 0;
+  for (const t of state.towers) value += t.data.cost * (1 + ((t.level || 1) - 1) * .7);
+  return value;
+}
+// Presión adaptativa: el enemigo aprende de una defensa grande. Empieza a
+// notarse tras las primeras torres y tiene tope para que no sea un rubber-band
+// infinito. Se muestra en el panel de inteligencia.
+function defensePressure() {
+  return 1 + Math.min(1.4, Math.max(0, defenseValue() - 1200) / 7500);
 }
 function planCounts(plan) {
   const counts = new Map();
@@ -3657,7 +3760,9 @@ function renderIntel() {
     const counter = d.counter ? TOWERS.find(t => t.id === d.counter) : null;
     const counterHtml = counter ? `<span class="intel-counter">▸ ${tr('intel.counter', { name: loc(counter, 'name') })}</span>` : '';
     const infTag = inf ? `<span class="intel-inf">✦ ${tr('intel.infiltrator')}</span>` : '';
-    return `<div class="intel-row${inf ? ' infiltrator' : ''}"><span class="intel-icon t${d.tier}${counter ? ' countered' : ''}">${d.icon}</span><span class="intel-name">${loc(d, 'name')}${infTag}<em>${kind} · ${tr('intel.armor', { n: Math.round(d.armor * 100) })}${counterHtml}</em></span><b>×${n}</b></div>`;
+    const jam = d.jam || 0;
+    const ew = jam <= 0 ? tr('intel.ewImmune') : jam >= .6 ? tr('intel.ewFull') : tr('intel.ewPartial', { n: Math.round(jam * 100) });
+    return `<div class="intel-row${inf ? ' infiltrator' : ''}"><span class="intel-icon t${d.tier}${counter ? ' countered' : ''}">${d.icon}</span><span class="intel-name">${loc(d, 'name')}${infTag}<em>${kind} · ${tr('intel.armor', { n: Math.round(d.armor * 100) })} · ${ew}${counterHtml}</em></span><b>×${n}</b></div>`;
   }).join('');
   const airCount = plan.reduce((n, entry) => n + (ENEMIES[planType(entry)] && ENEMIES[planType(entry)].kind === 'air' ? 1 : 0), 0);
   const groundCount = plan.length - airCount;
@@ -3668,6 +3773,7 @@ function renderIntel() {
   const dialogue = factionDialogue(fac, nextWave, bossNow);
   const extra = state.active ? tr('intel.inProgress') : tr('intel.planned');
   const bossBadge = bossNow ? tr('faction.bossNow') : tr('faction.bossIn', { n: wavesUntilBoss(nextWave) });
+  const bossSkill = bossNow ? BOSS_SKILLS[fac.boss.bossSkill] : null;
   body.innerHTML = `
     <div class="intel-faction">
       <span class="if-flag">${fac.flag}</span>
@@ -3675,8 +3781,9 @@ function renderIntel() {
       <span class="if-boss">${bossBadge}</span>
     </div>
     <div class="intel-dialog"><span>${fac.flag}</span><p>“${dialogue}”</p></div>
+    ${bossSkill ? `<div class="intel-sub boss-skill">${bossSkill.icon} ${tr('intel.bossSkill', { name: loc(bossSkill, 'name'), desc: loc(bossSkill, 'desc') })}</div>` : ''}
     <div class="intel-head"><span>${tr('intel.head', { wave: nextWave, state: extra })}</span><b class="threat threat-${threatClass(nextWave)}">${threatLevel(nextWave)}</b></div>
-    <div class="intel-sub">${tr('intel.scaling', { hp: scalars.hp.toFixed(1), dmg: scalars.damage.toFixed(1) })}</div>
+    <div class="intel-sub">${tr('intel.scaling', { hp: scalars.hp.toFixed(1), dmg: scalars.damage.toFixed(1) })} · ${tr('intel.pressure', { x: (state.active ? (state.wavePressure || 1) : defensePressure()).toFixed(2) })}</div>
     ${infiltratorCount ? `<div class="intel-inf-note">✦ ${tr('intel.infiltrators', { n: infiltratorCount })}</div>` : ''}
     <div class="intel-balance">
       <div class="ib-labels"><span class="ib-air">✈ ${tr('intel.air')} ${airCount}</span><span class="ib-ground">▮ ${tr('intel.ground')} ${groundCount}</span></div>
@@ -3696,6 +3803,9 @@ function makeWave() {
   applyClimate(fac.climate, fac.tempC);
   Music.syncFaction(); Music.start();
   state.currentPlan = buildWavePlan(state.wave);
+  // Se congela al empezar: destruir torres durante la oleada no reduce la
+  // presión de las unidades que aún quedan por aparecer.
+  state.wavePressure = defensePressure();
   state.spawnQueue = state.currentPlan.map(entry => {
     const type = planType(entry);
     return {
@@ -3716,6 +3826,8 @@ function spawnEnemy(type, options = {}) {
   const d = ENEMIES[type];
   const inf = !!options.infiltrator;
   const scalars = waveScalars(state.wave);
+  const pressure = state.wavePressure || defensePressure();
+  const pressureDamage = 1 + (pressure - 1) * .55;
   const rankRoll = Math.random();
   // Las unidades con rango aparecen de forma progresiva: al principio la tropa
   // es básica y, a partir de la oleada 5, crece la probabilidad de veteranos y
@@ -3731,21 +3843,24 @@ function spawnEnemy(type, options = {}) {
   state.spawned++;
   // Los jefes son más resistentes y golpean más fuerte, pero avanzan un 30 %
   // más despacio para dar tiempo a concentrar el fuego.
-  const hpScale = d.boss ? (.32 + Math.min(1.1, state.wave * .028)) * 1.2 : scalars.hp;
+  const hpScale = (d.boss ? (.32 + Math.min(1.1, state.wave * .028)) * 1.2 : scalars.hp) * pressure;
   // Las aeronaves tienen menos margen de vida: su amenaza real es esquivar la
   // defensa terrestre, no aguantar el fuego antiaéreo.
   const hp = d.hp * hpScale * rankMul * (inf ? 1.2 : 1) * (isAir ? .85 : 1);
   const armorBonus = Math.min(.16, Math.max(0, state.wave - 1) * .008);
+  // La economía también se enfría: las recompensas crecen menos que la amenaza
+  // y la presión adaptativa reduce el ingreso de las defensas enormes.
+  const economyScale = .9 / (1 + Math.max(0, state.wave - 1) * .02) / (1 + (pressure - 1) * .35);
   const e = {
     type, data: d, model, hp, maxHp: hp,
     speed: d.speed * scalars.speed * (d.boss ? .7 : 1) * (inf ? 1.08 : 1),
-    damage: d.damage * scalars.damage * (rank ? 1.12 : 1) * (d.boss ? 1.3 : 1) * (inf ? 1.08 : 1),
+    damage: d.damage * scalars.damage * pressureDamage * (rank ? 1.12 : 1) * (d.boss ? 1.3 : 1) * (inf ? 1.08 : 1),
     armor: Math.min(d.boss ? .86 : .82, d.armor + armorBonus + (d.boss ? .1 : 0) + (inf ? .03 : 0)),
     progress: 0, traveled: 0, routeIndex: 0, route, routeLength: routeLength(route), lane,
-    reward: Math.round(d.reward * (rank === 'elite' ? 1.8 : rank === 'veteran' ? 1.25 : 1) * .9 * (inf ? 1.35 : 1)),
-    slowTimer: 0, repelTimer: 0, air: isAir, rank, infiltrator: inf, x: route.points[0][0], z: route.points[0][1],
+    reward: Math.max(1, Math.round(d.reward * (rank === 'elite' ? 1.8 : rank === 'veteran' ? 1.25 : 1) * economyScale * (inf ? 1.35 : 1))),
+    slowTimer: 0, repelTimer: 0, jam: d.jam || 0, air: isAir, rank, infiltrator: inf, x: route.points[0][0], z: route.points[0][1],
     structureDamage: (d.structureDamage || 0) * (d.boss ? 1.2 : 0),
-    bossAttackTimer: d.boss ? 3.2 : 0,
+    bossAttackTimer: d.boss ? 2.8 : 0,
     attackers: d.boss ? new Map() : null
   };
   model.position.set(e.x, isAir ? ALTITUDE[type] : 0, e.z);
@@ -3773,7 +3888,7 @@ function updateSpawn(dt) {
   if (!state.spawnQueue.length && state.enemies.length === 0) {
     state.active = false;
     document.getElementById('waveBtn').disabled = false;
-    state.cash += 35 + state.wave * 4;
+    state.cash += Math.round(22 + state.wave * 2.4);
     if (state.wave > records.bestWave) { records.bestWave = state.wave; persistRecords(); updateRecordUI(); }
     Sound.cleared();
     toast(tr('toast.waveClear', { wave: state.wave }));
@@ -3862,9 +3977,18 @@ function updateEnemy(e, dt) {
   }
   const ud = e.model.userData;
   const isBoss = e.data.boss === true;
-  if (isBoss && e.structureDamage > 0 && dt > 0) {
+  if (isBoss && dt > 0) {
     e.bossAttackTimer -= dt;
-    if (e.bossAttackTimer <= 0) { e.bossAttackTimer = BOSS_ATTACK_COOLDOWN; bossStrikeStructures(e, alt, e.structureDamage >= 35 ? 2 : 1); }
+    if (e.bossAttackTimer <= 0) {
+      const skill = BOSS_SKILLS[e.data.bossSkill];
+      if (skill) {
+        const used = useBossSkill(e, alt, skill);
+        e.bossAttackTimer = used ? skill.cooldown : 2.4;
+      } else {
+        e.bossAttackTimer = BOSS_ATTACK_COOLDOWN;
+        bossStrikeStructures(e, alt, e.structureDamage >= 35 ? 2 : 1);
+      }
+    }
   }
   if (ud.mover && !e.air && e.type !== 'infantry') ud.mover.rotation.y += dt * (isBoss || e.data.tier >= 3 ? .35 : .15);
   if (ud.rotor) ud.rotor.rotation.y += dt * (jammed ? 46 : 20);
@@ -4010,25 +4134,93 @@ function bossStrikeStructures(e, alt, maxTargets = 1) {
   Sound.explosion();
   return true;
 }
-function damageStructures(x, z, amount) {
+function damageStructures(x, z, amount, levelsLost = amount >= 40 ? 2 : 1, stun = 2, radius = 2.2) {
   let hit = 0;
-  const levelsLost = amount >= 40 ? 2 : 1;
   for (const t of state.towers) {
+    if (t.destroyed) continue;
     const dx = t.group.position.x - x, dz = t.group.position.z - z;
-    if (Math.hypot(dx, dz) >= 2.2) continue;
+    if (Math.hypot(dx, dz) >= radius) continue;
     const before = t.level;
     t.level = Math.max(1, t.level - levelsLost);
     if (t.level < before) {
       applyTowerStats(t);
       refreshTowerModel(t);
-      showTowerRange(t); updateInspect();
+      if (state.selectedTower === t) { showTowerRange(t); updateInspect(); }
     }
     // Una estructura ya degradada queda aturdida: el jefe sigue siendo una amenaza.
-    t.disabledUntil = Math.max(t.disabledUntil || 0, state.combatTime + 2);
+    t.disabledUntil = Math.max(t.disabledUntil || 0, state.combatTime + stun);
     t.cooldown = Math.max(t.cooldown || 0, 1.2);
     hit++;
   }
   if (hit > 0) Sound.explosion();
+}
+function destroyTower(t) {
+  if (!t || t.destroyed) return false;
+  t.destroyed = true;
+  const x = t.group.position.x, z = t.group.position.z;
+  world.remove(t.group);
+  for (const cell of footprintCells(t.cell.x, t.cell.z, t.data)) towerCells.delete(cellKey(cell.x, cell.z));
+  state.towers = state.towers.filter(x => x !== t);
+  if (state.selectedTower === t) {
+    state.selectedTower = null; placementRing.visible = false; updateInspect();
+  }
+  explode(x, .7, z, 0xe07a3f, 18);
+  makePulse(x, z, 1.6, 0xff8a4a, .45);
+  updateHud();
+  if (!state.active) renderTowerList();
+  return true;
+}
+// Cada jefe tiene una habilidad propia. Las de destrucción son raras y las de
+// inutilización son más frecuentes: el jugador puede reconstruir entre oleadas,
+// pero no puede ignorar al jefe ni confiar en una muralla estática.
+function useBossSkill(e, alt, skill) {
+  if (state.gameOver) return false;
+  const candidates = bossStrikeTargets(e, 99);
+  if (!candidates.length) return false;
+  const primary = candidates[0];
+  const px = primary.group.position.x, pz = primary.group.position.z;
+  const center = skill.areaFromBoss ? { x: e.x, z: e.z } : { x: px, z: pz };
+  let targets = state.towers.filter(t => !t.destroyed && Math.hypot(t.group.position.x - center.x, t.group.position.z - center.z) <= skill.radius);
+  // Si el pulso parte del jefe y no alcanza nada, se ancla al objetivo que le
+  // está disparando para que la habilidad siga siendo relevante.
+  if (!targets.length && skill.areaFromBoss) {
+    targets = state.towers.filter(t => !t.destroyed && Math.hypot(t.group.position.x - px, t.group.position.z - pz) <= skill.radius);
+  }
+  if (!targets.length) return false;
+  targets = targets.slice(0, skill.maxTargets);
+  const from = new THREE.Vector3(e.x, (alt || 0) + .75, e.z);
+  let destroyed = 0;
+  for (const target of targets) {
+    const to = target.group.position.clone(); to.y += .7;
+    const line = makeLine(from, to, skill.destroy ? 0xff5a3a : 0xff8a4a, .9);
+    setTimeout(() => { if (line.parent) world.remove(line); }, 150);
+    makeSparks(to.x, to.y, to.z, 0xffa45c, 6);
+    if (skill.destroy || (skill.destroyWeak && target.level <= 1)) {
+      if (destroyTower(target)) destroyed++;
+      continue;
+    }
+    const before = target.level;
+    target.level = Math.max(1, target.level - (skill.levels || 0));
+    if (target.level !== before) {
+      applyTowerStats(target);
+      refreshTowerModel(target);
+      if (state.selectedTower === target) { showTowerRange(target); updateInspect(); }
+    }
+    target.disabledUntil = Math.max(target.disabledUntil || 0, state.combatTime + (skill.stun || 2));
+    target.cooldown = Math.max(target.cooldown || 0, 1.2);
+    explode(to.x, .35, to.z, 0xe07a3f, 6);
+  }
+  makePulse(center.x, center.z, skill.radius, skill.destroy ? 0xff6a4a : 0xffb060, .5);
+  toast(tr('toast.bossSkill', { name: loc(e.data, 'name'), skill: loc(skill, 'name') }));
+  if (destroyed) toast(tr('toast.bossDestroy', { name: loc(e.data, 'name') }));
+  cameraShake = Math.min(.42, cameraShake + .1);
+  Sound.explosion();
+  updateHud();
+  return true;
+}
+function jamFactor(e) {
+  const value = e.jam != null ? e.jam : (e.data && e.data.jam);
+  return Math.max(0, Math.min(1, value || 0));
 }
 function acquireTarget(t) {
   let best = null, bestScore = -Infinity;
@@ -4036,6 +4228,9 @@ function acquireTarget(t) {
   const py = t.group.position.y + (t.stats.muzzleY || 1);
   for (const e of state.enemies) {
     if (!t.data.targets.includes(e.data.kind)) continue;
+    // EW solo adquiere objetivos con electrónica de guiado. Las criaturas y
+    // unidades puramente mecánicas no son objetivos válidos.
+    if (t.type === 'ew' && jamFactor(e) <= 0) continue;
     const ey = e.air ? ALTITUDE[e.type] : .4;
     const dist = Math.hypot(e.x - px, ey - py, e.z - pz);
     if (dist > t.stats.range) continue;
@@ -4090,13 +4285,15 @@ function fire(t, e) {
   const start = new THREE.Vector3(t.group.position.x, t.group.position.y + (t.stats.muzzleY || 1), t.group.position.z);
   if (type === 'ew') {
     for (const enemy of state.enemies) {
-      if (Math.hypot(enemy.x - t.group.position.x, enemy.z - t.group.position.z) <= t.stats.range) {
-        enemy.slowTimer = Math.max(enemy.slowTimer, 1.6);
-        // La guerra electrónica secuestra los drones: retroceden por la pista.
-        if (enemy.data.kind === 'air' || enemy.type === 'droneSoldier') {
-          enemy.repelTimer = Math.max(enemy.repelTimer, 2);
-          enemy.slowTimer = Math.max(enemy.slowTimer, 2.4);
-        }
+      if (Math.hypot(enemy.x - t.group.position.x, enemy.z - t.group.position.z) > t.stats.range) continue;
+      const jam = jamFactor(enemy);
+      if (jam <= 0) continue;
+      // Solo la electrónica de guiado sufre el ataque. Un pterodáctilo, un
+      // pegaso o un bombardero mágico no pueden ser "confundidos".
+      enemy.slowTimer = Math.max(enemy.slowTimer, 1.2 + .8 * jam);
+      if (jam >= .5) {
+        enemy.repelTimer = Math.max(enemy.repelTimer, 2 * jam);
+        enemy.slowTimer = Math.max(enemy.slowTimer, 1.8 + .6 * jam);
       }
     }
     makePulse(t.group.position.x, t.group.position.z, t.stats.range); Sound.ew();
@@ -4196,6 +4393,7 @@ function impactArtillery(x, z, damage, splash, pierce = 0, towerType = null, sou
 }
 function updateTowers(dt) {
   for (const t of state.towers) {
+    if (t.destroyed) continue;
     t.cooldown -= dt;
     if (t.specialCd > 0) t.specialCd = Math.max(0, t.specialCd - dt);
     // El brillo del emisor láser decae en cuanto deja de haber objetivo.
@@ -4430,24 +4628,33 @@ function activateAbility(name) {
   if (!ab || state.gameOver) return;
   const abName = tr('ability.' + name);
   if (ab.cd > 0) { Sound.error(); toast(tr('toast.reloading', { name: abName, s: Math.ceil(ab.cd) })); return; }
-  if (state.cash < ab.cost) { Sound.error(); toast(tr('toast.noCredits')); return; }
+  if (name === 'repair' && state.hp >= 99.5) { Sound.error(); toast(tr('toast.repairFull')); return; }
+  const cost = abilityCost(name);
+  if (state.cash < cost) { Sound.error(); toast(tr('toast.noCredits')); return; }
   if (name === 'strike') {
     state.abilityMode = 'strike'; state.buildType = null; state.selectedTower = null;
     removeGhost(); updateInspect(); renderTowerList(); renderAbilities();
     toast(tr('toast.strikeSelect')); Sound.ui();
     return;
   }
-  state.cash -= ab.cost; ab.cd = ab.max;
+  state.cash -= cost; ab.cd = ab.max;
   if (name === 'emp') {
+    // El pulso aturde a todo el mundo, pero solo las unidades con electrónica
+    // de guiado pierden el control y retroceden.
     for (const e of state.enemies) {
-      e.slowTimer = Math.max(e.slowTimer, 4.5);
-      if (e.data.kind === 'air' || e.type === 'droneSoldier') e.repelTimer = Math.max(e.repelTimer, 2.8);
+      const jam = e.jam || 0;
+      e.slowTimer = Math.max(e.slowTimer, 2.2 + 2.3 * jam);
+      if (jam >= .5) e.repelTimer = Math.max(e.repelTimer, 2.8 * jam);
     }
     makePulse(0, 0, 14); makePulse(0, 3, 14); Sound.emp();
     toast(tr('toast.emp'));
   } else if (name === 'repair') {
-    state.hp = Math.min(100, state.hp + 22); Sound.upgrade();
-    toast(tr('toast.repair'));
+    const missing = Math.max(0, 100 - state.hp);
+    const restored = Math.min(22, missing);
+    state.hp = Math.min(100, state.hp + restored);
+    state.repairUses++;
+    Sound.upgrade();
+    toast(tr('toast.repair', { n: Math.round(restored) }));
   }
   updateHud(); renderAbilities();
 }
@@ -4501,12 +4708,13 @@ function showWaveBanner(fac, boss) {
   const infCount = (state.currentPlan || []).filter(planInf).length;
   const dialogue = factionDialogue(fac, state.wave, boss);
   const speaker = boss ? loc(fac.boss, 'name') : loc(fac, 'name');
+  const bossSkill = boss ? BOSS_SKILLS[fac.boss.bossSkill] : null;
   el.className = 'wave-banner show' + (boss ? ' boss' : '');
   el.innerHTML = `
     <div class="wb-flag">${fac.flag}</div>
     <div class="wb-kicker">${boss ? tr('waveBanner.boss') : tr('waveBanner.incoming')}</div>
     <div class="wb-title">${loc(fac, 'name')}</div>
-    <div class="wb-meta"><span>${tr('waveBanner.stage', { stage, total: FACTION_CYCLE })}</span><b>${tr('waveBanner.climate', { climate: tr('climate.' + fac.climate), temp: fac.tempC })}</b>${boss ? `<span>${tr('waveBanner.escorts', { n: escorts })}</span>` : ''}${infCount ? `<span class="wb-inf">✦ ${tr('waveBanner.infiltrators', { n: infCount })}</span>` : ''}</div>
+    <div class="wb-meta"><span>${tr('waveBanner.stage', { stage, total: FACTION_CYCLE })}</span><b>${tr('waveBanner.climate', { climate: tr('climate.' + fac.climate), temp: fac.tempC })}</b>${boss ? `<span>${tr('waveBanner.escorts', { n: escorts })}</span>` : ''}${bossSkill ? `<span>${bossSkill.icon} ${tr('waveBanner.bossSkill', { name: loc(bossSkill, 'name') })}</span>` : ''}${infCount ? `<span class="wb-inf">✦ ${tr('waveBanner.infiltrators', { n: infCount })}</span>` : ''}</div>
     <div class="wb-dialog"><span>${fac.flag} ${speaker}:</span> “${dialogue}”</div>
     <div class="wb-bar"><i></i></div>`;
   clearTimeout(waveBannerTimer);
@@ -4536,6 +4744,15 @@ function updateHud() {
     else if (isBossWave(nextWave)) wb.textContent = tr('wave.startBoss', { name: loc(fac, 'name') });
     else wb.textContent = tr('wave.startFac', { name: loc(fac, 'name') });
   }
+  updateRepairButton(document.getElementById('abilityRepair'));
+}
+function updateRepairButton(btn) {
+  if (!btn) return;
+  const full = state.hp >= 99.5;
+  const hint = btn.querySelector('.ab-text em');
+  if (hint) hint.textContent = full ? tr('tower.max') : tr('ability.repairHint', { cost: repairCost() });
+  btn.title = full ? tr('toast.repairFull') : tr('ability.repairTitle', { cost: repairCost() });
+  btn.classList.toggle('full', full);
 }
 function renderAbilities() {
   const map = { strike: 'abilityStrike', emp: 'abilityEmp', repair: 'abilityRepair' };
@@ -4549,6 +4766,7 @@ function renderAbilities() {
     btn.disabled = cooling || state.gameOver;
     const cd = btn.querySelector('.ab-cd');
     if (cd) cd.textContent = cooling ? `${Math.ceil(ab.cd)}s` : '';
+    if (key === 'repair') updateRepairButton(btn);
   }
 }
 function endGame() {
@@ -4629,7 +4847,7 @@ function resetGame() {
   state.wave = 0; state.hp = 100; state.cash = state.army.cash;
   state.active = false; state.gameOver = false; state.paused = false; state.deployed = true;
   state.speed = 1; state.score = 0; state.spawnQueue = []; state.currentPlan = [];
-  state.combatTime = 0;
+  state.combatTime = 0; state.repairUses = 0; state.wavePressure = 1;
   state.selectedTower = null; state.buildType = null; state.abilityMode = null;
   state.spawned = 0; state.spawnTimer = 0;
   for (const ab of Object.values(state.abilities)) ab.cd = 0;
