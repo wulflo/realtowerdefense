@@ -141,6 +141,9 @@ button:focus-visible,select:focus-visible,input:focus-visible,.tower-card:focus-
 .tower-card.naval{border-left:2px solid #4e7f88}
 .tower-card.naval:hover{background:#4e7f8814}
 .stat.threat-stat .value{color:#e0a36e}
+.stat.climate-stat .value{color:#7fb3d5}
+.stat.faction-stat .value{color:#d8b15d;display:flex;align-items:center;gap:6px}
+.stat.faction-stat .value span{font:600 16px var(--display)}
 .intel-panel{padding:11px 13px 13px;font-size:10px}
 .intel-head{display:flex;align-items:center;justify-content:space-between;gap:8px;font:700 12px var(--display);text-transform:uppercase;letter-spacing:.5px;color:#e9e3ce}
 .intel-head em{font:400 9px var(--font);color:#9ba796;text-transform:none;letter-spacing:0}
@@ -270,6 +273,8 @@ button:focus-visible,select:focus-visible,input:focus-visible,.tower-card:focus-
       <div class="stat"><div class="label" data-i18n="stat.wave">Oleada</div><div class="value" id="waveLabel">00</div></div>
       <div class="stat"><div class="label" data-i18n="stat.enemies">Enemigos</div><div class="value" id="enemyCount">0</div></div>
       <div class="stat threat-stat"><div class="label" data-i18n="stat.threat">Amenaza</div><div class="value" id="threatLevel">Baja</div></div>
+      <div class="stat climate-stat"><div class="label" data-i18n="stat.climate">Clima</div><div class="value" id="climateLabel">—</div></div>
+      <div class="stat faction-stat"><div class="label" data-i18n="stat.faction">Facción</div><div class="value" id="factionLabel"><span id="factionFlag">—</span> <span id="factionName">—</span></div></div>
     </div>
     <div class="top-actions"><button class="small-btn" id="armySwitch" data-i18n="action.army" data-i18n-title="action.armyTitle" title="Cambiar ejército">Ejército</button><button class="icon-btn" id="centerCam" data-i18n-title="action.centerTitle" title="Centrar cámara">⌖</button><button class="icon-btn" id="soundBtn" title="Sonido (M)">♪</button><button class="icon-btn" id="pauseBtn" title="Pausa (P)">❚❚</button><button class="icon-btn" id="fullscreenBtnTop" data-i18n-title="action.fullscreen" title="Pantalla completa (F)">⛶</button><button class="icon-btn" id="settingsBtn" data-i18n-title="action.settings" title="Ajustes">⚙</button></div>
   </header>

@@ -1,5 +1,7 @@
 # Frente Global
 
+Juega en línea: https://wulflo.github.io/realtowerdefense/
+
 Tower defense táctico con Three.js. Funciona en escritorio y como PWA instalable en Android, con soporte sin conexión.
 
 Ocho doctrinas militares, nueve sistemas de torre, una pista terrestre de dos carriles, un corredor aéreo y un teatro naval donde desplegar destructores y portaaviones. Cada país usa modelos y nombres inspirados en su equipo real, y sus multiplicadores cambian daño, alcance y cadencia.
