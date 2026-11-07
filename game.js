@@ -91,7 +91,7 @@ const TOWERS = [
   { id: 'mortar', name: 'Mortero', nameEn: 'Mortar', icon: '◒', cost: 145, range: 5.2, damage: 18, rate: 1.05, targets: ['ground'], splash: 1.05, desc: 'Fuego indirecto de cadencia media', descEn: 'Medium-rate indirect fire', domain: 'land', pierce: .25 },
   { id: 'art', name: 'Artillería', nameEn: 'Artillery', icon: '◉', cost: 195, range: 6.8, damage: 38, rate: 2.25, targets: ['ground'], splash: 1.7, desc: 'Obús de alto impacto en área', descEn: 'High-impact area howitzer', domain: 'land', pierce: .35 },
   { id: 'rocket', name: 'Lanzacohetes', nameEn: 'Rocket launcher', icon: '⌁', cost: 260, range: 7, damage: 16, rate: 3.4, targets: ['ground'], splash: 1.35, desc: 'Salva de cohetes de saturación', descEn: 'Saturation rocket salvo', domain: 'land', pierce: .4, salvo: 4 },
-  { id: 'aa', name: 'Misil antiaéreo', nameEn: 'Surface-to-air missile', icon: '⌃', cost: 170, range: 7.4, damage: 40, rate: 1.45, targets: ['air'], desc: 'Lanzador guiado contra aeronaves', descEn: 'Guided launcher against aircraft', domain: 'land', pierce: .2 },
+  { id: 'aa', name: 'Misil antiaéreo', nameEn: 'Surface-to-air missile', icon: '⌃', cost: 170, range: 8.4, damage: 52, rate: 1.15, targets: ['air'], desc: 'Lanzador guiado contra aeronaves', descEn: 'Guided launcher against aircraft', domain: 'land', pierce: .2 },
   { id: 'laser', name: 'Láser', nameEn: 'Laser', icon: '⌇', cost: 225, range: 5.8, damage: 14, rate: .12, targets: ['ground', 'air'], desc: 'Haz continuo de energía dirigida', descEn: 'Continuous directed-energy beam', domain: 'land', pierce: 1 },
   { id: 'ew', name: 'Guerra electrónica', nameEn: 'Electronic warfare', icon: '⌘', cost: 180, range: 5.2, damage: 0, rate: .5, targets: ['ground', 'air'], slow: .5, desc: 'Interferencia: ralentiza y repele drones', descEn: 'Jamming: slows and repels drones', domain: 'land', pierce: 0 },
   { id: 'destroyer', name: 'Destructor', nameEn: 'Destroyer', icon: '⚓', cost: 360, range: 8.8, damage: 46, rate: 2.9, targets: ['ground', 'air'], splash: 1.55, desc: 'Misiles de crucero desde el mar', descEn: 'Cruise missiles from the sea', domain: 'sea', pierce: .5 },
@@ -235,62 +235,62 @@ const ENEMY_FACTIONS = [
 // y una línea especial para su jefe final.
 const FACTION_DIALOGUES = {
   cavemen: {
-    lines: ['Fuego, piedra y garrotes. Vuestra base caerá.', 'La tribu ha despertado... y tiene hambre.', 'El chamán ha leído vuestro final en los huesos.'],
-    linesEn: ['Fire, stone and clubs. Your base will fall.', 'The tribe has awakened... and it is hungry.', 'The shaman has read your end in the bones.'],
+    lines: ['Fuego, piedra y garrotes. Vuestra base caerá.', 'La tribu ha despertado... y tiene hambre.', 'El chamán ha leído vuestro final en los huesos.', 'El suelo retumba bajo mil pies descalzos. No hay muro que detenga la estampida.'],
+    linesEn: ['Fire, stone and clubs. Your base will fall.', 'The tribe has awakened... and it is hungry.', 'The shaman has read your end in the bones.', 'The ground rumbles under a thousand bare feet. No wall stops the stampede.'],
     boss: 'La montaña tiembla. El Jefe Cavernícola marcha a la cabeza.',
     bossEn: 'The mountain trembles. The Caveman Chief marches at the front.'
   },
   spartans: {
-    lines: ['Esto no es una batalla. Es una lección de disciplina.', 'Nuestros escudos no conocen la retirada.', 'Cada lanza espartana busca un hueco en vuestra línea.'],
-    linesEn: ['This is not a battle. It is a lesson in discipline.', 'Our shields know no retreat.', 'Every Spartan spear seeks a gap in your line.'],
+    lines: ['Esto no es una batalla. Es una lección de disciplina.', 'Nuestros escudos no conocen la retirada.', 'Cada lanza espartana busca un hueco en vuestra línea.', 'Formad la falange. Ni el acero ni el miedo romperán nuestra línea.'],
+    linesEn: ['This is not a battle. It is a lesson in discipline.', 'Our shields know no retreat.', 'Every Spartan spear seeks a gap in your line.', 'Form the phalanx. Neither steel nor fear will break our line.'],
     boss: 'El Rey Espartano ha desenvainado. Que los cobardes huyan.',
     bossEn: 'The Spartan King has drawn his blade. Let cowards flee.'
   },
   crusaders: {
-    lines: ['La fe es nuestra armadura. Vuestra base será el altar.', 'Los estandartes avanzan bajo un cielo de acero.', 'No pedimos clemencia. No la concedemos.'],
-    linesEn: ['Faith is our armor. Your base shall be the altar.', 'The banners advance under a steel sky.', 'We ask no mercy. We grant none.'],
+    lines: ['La fe es nuestra armadura. Vuestra base será el altar.', 'Los estandartes avanzan bajo un cielo de acero.', 'No pedimos clemencia. No la concedemos.', 'Las reliquias han sido despertadas. Marchad hasta la última muralla.'],
+    linesEn: ['Faith is our armor. Your base shall be the altar.', 'The banners advance under a steel sky.', 'We ask no mercy. We grant none.', 'The relics have been awakened. March to the last wall.'],
     boss: 'El Señor Cruzado alza la espada. La cruzada final comienza.',
     bossEn: 'The Crusader Lord raises his sword. The final crusade begins.'
   },
   pirates: {
-    lines: ['Vuestro oro y vuestra pólvora ya tienen dueño.', 'Cargad los cañones. Saquearemos hasta el último muro.', 'El capitán ha puesto precio a vuestra bandera.'],
-    linesEn: ['Your gold and powder already have an owner.', 'Load the cannons. We will plunder every last wall.', 'The captain has put a price on your flag.'],
+    lines: ['Vuestro oro y vuestra pólvora ya tienen dueño.', 'Cargad los cañones. Saquearemos hasta el último muro.', 'El capitán ha puesto precio a vuestra bandera.', 'La marea sube y con ella nuestra flota. Saquearemos hasta el amanecer.'],
+    linesEn: ['Your gold and powder already have an owner.', 'Load the cannons. We will plunder every last wall.', 'The captain has put a price on your flag.', 'The tide rises, and our fleet with it. We will plunder until dawn.'],
     boss: 'El Capitán Pirata iza la calavera. ¡Abordaje!',
     bossEn: 'The Pirate Captain raises the skull. Board them!'
   },
   wwi: {
-    lines: ['La artillería pesada abre el camino. Mantened la formación.', 'Vuestra línea está a tiro. Ajustad las miras.', '1918 ha llegado a este frente con acero y gas.'],
-    linesEn: ['Heavy artillery clears the way. Hold formation.', 'Your line is in range. Adjust your sights.', '1918 has reached this front with steel and gas.'],
+    lines: ['La artillería pesada abre el camino. Mantened la formación.', 'Vuestra línea está a tiro. Ajustad las miras.', '1918 ha llegado a este frente con acero y gas.', 'El frente se ha estabilizado. Ahora traed los obuses de asedio.'],
+    linesEn: ['Heavy artillery clears the way. Hold formation.', 'Your line is in range. Adjust your sights.', '1918 has reached this front with steel and gas.', 'The front has stabilized. Now bring up the siege howitzers.'],
     boss: 'El Sargento Pershing ordena el asalto final. Que retumbe el frente.',
     bossEn: 'Sergeant Pershing orders the final assault. Let the front thunder.'
   },
   chinaTech: {
-    lines: ['Redes neuronales ya han simulado vuestra derrota.', 'Drones y mechas avanzan en sincronía perfecta.', 'La tecnología no duda. La carne sí.'],
-    linesEn: ['Neural networks have already simulated your defeat.', 'Drones and mechs advance in perfect sync.', 'Technology does not hesitate. Flesh does.'],
+    lines: ['Redes neuronales ya han simulado vuestra derrota.', 'Drones y mechas avanzan en sincronía perfecta.', 'La tecnología no duda. La carne sí.', 'Los datos confirman vuestra fatiga. La siguiente simulación termina en derrota.'],
+    linesEn: ['Neural networks have already simulated your defeat.', 'Drones and mechs advance in perfect sync.', 'Technology does not hesitate. Flesh does.', 'The data confirms your fatigue. The next simulation ends in defeat.'],
     boss: 'El Comandante Mecha ha despertado. Iniciad el protocolo de aniquilación.',
     bossEn: 'The Mech Commander has awakened. Initiate annihilation protocol.'
   },
   zombies: {
-    lines: ['La horda no siente dolor. Solo hambre.', 'El aire radiactivo ya está aquí. Corred, si podéis.', 'Cada caído se levanta. Vuestra munición no es infinita.'],
-    linesEn: ['The horde feels no pain. Only hunger.', 'Radioactive air is here. Run, if you can.', 'Every fallen soldier rises. Your ammo is not infinite.'],
+    lines: ['La horda no siente dolor. Solo hambre.', 'El aire radiactivo ya está aquí. Corred, si podéis.', 'Cada caído se levanta. Vuestra munición no es infinita.', 'La horda ha aprendido vuestros patrones. No volveréis a sorprendernos.'],
+    linesEn: ['The horde feels no pain. Only hunger.', 'Radioactive air is here. Run, if you can.', 'Every fallen soldier rises. Your ammo is not infinite.', 'The horde has learned your patterns. You will not surprise us again.'],
     boss: 'El Zombie Colosal arrasa el horizonte. La horda ruge.',
     bossEn: 'The Colossal Zombie blots the horizon. The horde roars.'
   },
   ufos: {
-    lines: ['Hemos catalogado vuestras defensas. Son... pintorescas.', 'El cielo pertenece a quienes lo comprenden.', 'La abducción comenzará por vuestra base.'],
-    linesEn: ['We have catalogued your defenses. They are... quaint.', 'The sky belongs to those who understand it.', 'The abduction will begin with your base.'],
+    lines: ['Hemos catalogado vuestras defensas. Son... pintorescas.', 'El cielo pertenece a quienes lo comprenden.', 'La abducción comenzará por vuestra base.', 'Nuestros sensores detectan grietas en vuestro cielo. La invasión se acelera.'],
+    linesEn: ['We have catalogued your defenses. They are... quaint.', 'The sky belongs to those who understand it.', 'The abduction will begin with your base.', 'Our sensors detect cracks in your sky. The invasion accelerates.'],
     boss: 'La Nave Madre alienígena ha entrado en órbita baja. No hay refugio.',
     bossEn: 'The Alien Mothership has entered low orbit. There is no shelter.'
   },
   demons: {
-    lines: ['El abismo ha abierto sus puertas. Vuestra base huele a miedo.', 'Legiones de fuego han cruzado el velo. No hay vuelta atrás.', 'Cada alma en esa base arderá en nuestro nombre.'],
-    linesEn: ['The abyss has opened its gates. Your base smells of fear.', 'Fire legions have crossed the veil. There is no going back.', 'Every soul in that base will burn in our name.'],
+    lines: ['El abismo ha abierto sus puertas. Vuestra base huele a miedo.', 'Legiones de fuego han cruzado el velo. No hay vuelta atrás.', 'Cada alma en esa base arderá en nuestro nombre.', 'Los sellos se debilitan. Pronto caminaremos bajo vuestro sol.'],
+    linesEn: ['The abyss has opened its gates. Your base smells of fear.', 'Fire legions have crossed the veil. There is no going back.', 'Every soul in that base will burn in our name.', 'The seals weaken. Soon we will walk under your sun.'],
     boss: 'El Señor de la Guerra Infernal desciende. Las murallas se agrietan.',
     bossEn: 'The Infernal Warlord descends. The walls crack.'
   },
   celestials: {
-    lines: ['La luz no negocia con la oscuridad de vuestras máquinas.', 'Hemos visto el fin de vuestros siglos y no os incluye.', 'Nuestro coro no canta victorias. Pronuncia juicios.'],
-    linesEn: ['Light does not negotiate with the darkness of your machines.', 'We have seen the end of your centuries, and you are not in it.', 'Our choir does not sing victories. It pronounces judgment.'],
+    lines: ['La luz no negocia con la oscuridad de vuestras máquinas.', 'Hemos visto el fin de vuestros siglos y no os incluye.', 'Nuestro coro no canta victorias. Pronuncia juicios.', 'El juicio se acerca. Cada torre que alzáis es un pecado que anotamos.'],
+    linesEn: ['Light does not negotiate with the darkness of your machines.', 'We have seen the end of your centuries, and you are not in it.', 'Our choir does not sing victories. It pronounces judgment.', 'Judgment approaches. Every tower you raise is a sin we record.'],
     boss: 'El Ser Supremo desciende. Todo lo que alzasteis será humo.',
     bossEn: 'The Supreme Being descends. Everything you raised shall become smoke.'
   }
@@ -333,8 +333,8 @@ for (const fac of ENEMY_FACTIONS) {
   ENEMIES[fac.boss.id] = { ...fac.boss, faction: fac.id, icon: fac.boss.icon || '☠' };
 }
 function enemyFaction(type) { return ENEMIES[type] ? ENEMIES[type].faction : null; }
-// Cada facción domina 3 oleadas normales y después aparece su jefe final.
-const WAVES_PER_FACTION = 3;
+// Cada facción domina 4 oleadas normales y después aparece su jefe final.
+const WAVES_PER_FACTION = 4;
 const FACTION_CYCLE = WAVES_PER_FACTION + 1;
 function factionIndexForWave(wave) {
   const w = Math.max(1, wave | 0);
@@ -378,7 +378,7 @@ for (const route of ROUTES) {
 }
 const AIR_ROUTE = { id: 'air', name: 'Corredor aéreo', nameEn: 'Air corridor', points: [[-21, -10], [-14, -11], [-6, -10], [2, -8], [10, -6], [18, -4], [13.5, -1.5]] };
 
-const APP_VERSION = '2.7.0';
+const APP_VERSION = '2.8.0';
 const STORE_SETTINGS = 'frente-global:settings:v1';
 const STORE_RECORDS = 'frente-global:records:v1';
 function loadStore(key, fallback) {
@@ -414,6 +414,7 @@ const I18N = {
     'faction.stage': 'Oleada {stage}/{total}', 'faction.bossNow': 'JEFE FINAL', 'faction.bossIn': 'Jefe en {n}',
     'waveBanner.boss': 'JEFE FINAL', 'waveBanner.stage': 'Oleada {stage} de {total}', 'waveBanner.climate': '{climate} · {temp}°C',
     'waveBanner.incoming': 'Nueva facción detectada', 'waveBanner.escorts': 'Escolta: {n} unidades',
+    'waveBanner.infiltrators': 'Infiltrados: {n}',
     'climate.templado': 'Templado', 'climate.caluroso': 'Caluroso', 'climate.tropical': 'Tropical', 'climate.frío': 'Frío',
     'climate.radiactivo': 'Radiactivo', 'climate.desconocido': 'Desconocido', 'climate.infernal': 'Infernal', 'climate.divino': 'Divino',
     'ability.strike': 'Ataque aéreo', 'ability.strikeHint': 'Z · 120 cr', 'ability.strikeTitle': 'Ataque aéreo (Z) · 120 créditos',
@@ -489,6 +490,7 @@ const I18N = {
     'intel.support': 'Apoyo de mando', 'intel.supportHtml': '<kbd>Z</kbd> ataque aéreo · <kbd>X</kbd> EMP · <kbd>C</kbd> reparar',
     'intel.air': 'Aire', 'intel.boss': 'Jefe', 'intel.ground': 'Tierra', 'intel.armor': 'blindaje {n}%',
     'intel.counter': 'Débil ante {name}', 'intel.bossWave': 'Oleada de jefe final',
+    'intel.infiltrator': 'Infiltrado', 'intel.infiltrators': 'Infiltrados: {n} · halo violeta',
     'rank.elite': 'ÉLITE', 'rank.veteran': 'VETERANO'
   },
   en: {
@@ -510,6 +512,7 @@ const I18N = {
     'faction.stage': 'Wave {stage}/{total}', 'faction.bossNow': 'FINAL BOSS', 'faction.bossIn': 'Boss in {n}',
     'waveBanner.boss': 'FINAL BOSS', 'waveBanner.stage': 'Wave {stage} of {total}', 'waveBanner.climate': '{climate} · {temp}°C',
     'waveBanner.incoming': 'New faction detected', 'waveBanner.escorts': 'Escort: {n} units',
+    'waveBanner.infiltrators': 'Infiltrators: {n}',
     'climate.templado': 'Temperate', 'climate.caluroso': 'Hot', 'climate.tropical': 'Tropical', 'climate.frío': 'Cold',
     'climate.radiactivo': 'Radioactive', 'climate.desconocido': 'Unknown', 'climate.infernal': 'Infernal', 'climate.divino': 'Divine',
     'ability.strike': 'Airstrike', 'ability.strikeHint': 'Z · 120 cr', 'ability.strikeTitle': 'Airstrike (Z) · 120 credits',
@@ -585,6 +588,7 @@ const I18N = {
     'intel.support': 'Command support', 'intel.supportHtml': '<kbd>Z</kbd> airstrike · <kbd>X</kbd> EMP · <kbd>C</kbd> repair',
     'intel.air': 'Air', 'intel.boss': 'Boss', 'intel.ground': 'Ground', 'intel.armor': 'armor {n}%',
     'intel.counter': 'Weak vs {name}', 'intel.bossWave': 'Final boss wave',
+    'intel.infiltrator': 'Infiltrator', 'intel.infiltrators': 'Infiltrators: {n} · violet halo',
     'rank.elite': 'ELITE', 'rank.veteran': 'VETERAN'
   }
 };
@@ -3075,12 +3079,20 @@ function enemyModel(type) {
 
   // Barras y etiqueta con tamaño constante en pantalla, independiente de la escala.
   const ui = 1 / scale;
-  const hpbg = new THREE.Sprite(new THREE.SpriteMaterial({ color: 0x141812, transparent: true, opacity: .92, depthTest: false }));
-  hpbg.scale.set((d.boss ? 1.3 : .7) * ui, .08 * ui, 1); hpbg.position.y = labelY;
-  g.add(hpbg);
-  const hpfg = new THREE.Sprite(new THREE.SpriteMaterial({ color: 0x9b443a, depthTest: false }));
-  hpfg.scale.set((d.boss ? 1.2 : .64) * ui, .048 * ui, 1); hpfg.position.set(0, labelY, .008);
-  g.add(hpfg);
+  // Grupo de UI contrarrotado: la barra permanece horizontal aunque el modelo
+  // gire para seguir la ruta. Sin esto el relleno se desplazaría en profundidad
+  // al caminar en vertical y quedaría tapado por el fondo.
+  const bar = new THREE.Group();
+  bar.position.y = labelY;
+  g.add(bar);
+  const hpbg = new THREE.Sprite(new THREE.SpriteMaterial({ color: 0x141812, transparent: true, opacity: .92, depthTest: false, depthWrite: false }));
+  hpbg.scale.set((d.boss ? 1.3 : .7) * ui, .08 * ui, 1); hpbg.position.y = 0;
+  hpbg.renderOrder = 3;
+  bar.add(hpbg);
+  const hpfg = new THREE.Sprite(new THREE.SpriteMaterial({ color: 0x9b443a, transparent: true, depthTest: false, depthWrite: false }));
+  hpfg.scale.set((d.boss ? 1.2 : .64) * ui, .048 * ui, 1); hpfg.position.set(0, 0, .008);
+  hpfg.renderOrder = 4;
+  bar.add(hpfg);
   const label = labelSprite(loc(d, 'name'), enemyLabelAccent(type));
   label.scale.set((d.boss ? 1.75 : 1.18) * ui, (d.boss ? .33 : .225) * ui, 1);
   label.position.y = labelY + .2 * ui;
@@ -3088,13 +3100,34 @@ function enemyModel(type) {
   g.add(label);
   g.scale.setScalar(scale);
   g.userData = {
-    mover: null, hpbg, hpfg, label, type, legs: walk, walk, flap, ring,
+    mover: null, bar, hpbg, hpfg, label, type, legs: walk, walk, flap, ring,
     rotor: null, tailRotor: null, propeller: null, labelY, ui,
     hpW: (d.boss ? 1.2 : .64) * ui,
     hpBgW: (d.boss ? 1.3 : .7) * ui, hpBgH: .08 * ui, hpFgH: .048 * ui,
     labelW: (d.boss ? 1.75 : 1.18) * ui, labelH: (d.boss ? .33 : .225) * ui
   };
   return g;
+}
+
+function addInfiltratorHalo(model) {
+  const y = (model.userData.labelY || 1.3) * .55;
+  const halo = new THREE.Group();
+  const outer = new THREE.Mesh(
+    cacheGeo('infHaloOuter', () => new THREE.TorusGeometry(.46, .03, 6, 32)),
+    new THREE.MeshBasicMaterial({ color: 0x6ee7ff, transparent: true, opacity: .8, depthWrite: false, blending: THREE.AdditiveBlending })
+  );
+  outer.rotation.x = Math.PI / 2; outer.position.y = y; outer.renderOrder = 2;
+  halo.add(outer);
+  const inner = new THREE.Mesh(
+    cacheGeo('infHaloInner', () => new THREE.TorusGeometry(.33, .018, 6, 26)),
+    new THREE.MeshBasicMaterial({ color: 0xc084fc, transparent: true, opacity: .6, depthWrite: false, blending: THREE.AdditiveBlending })
+  );
+  inner.rotation.x = Math.PI / 2; inner.position.y = y; inner.renderOrder = 2;
+  halo.add(inner);
+  model.add(halo);
+  model.userData.infilHalo = halo;
+  model.userData.infilRings = [outer, inner];
+  return halo;
 }
 
 function buildFighterProp(color = 0x828a8a) {
@@ -3493,16 +3526,40 @@ function updateSelectedSpecialButton() {
 }
 
 /* ------------------------------------------------------------ oleadas e IA */
+function planType(entry) { return typeof entry === 'string' ? entry : entry.type; }
+function planInf(entry) { return typeof entry === 'string' ? false : !!entry.inf; }
+// Destacamentos de otra facción que se cuelan en la oleada. Se generan de forma
+// determinista para que la vista de inteligencia coincida con lo que llega.
+function buildInfiltrators(wave, fac, boss, stage, rnd) {
+  const index = factionIndexForWave(wave);
+  const others = ENEMY_FACTIONS.filter(f => f.id !== fac.id);
+  const src = others[(index + stage) % others.length];
+  const pool = src.units.filter(u => !u.boss);
+  const air = pool.filter(u => u.kind === 'air');
+  const ground = pool.filter(u => u.kind === 'ground');
+  const count = boss
+    ? Math.min(5, 2 + Math.floor(wave / 12))
+    : Math.min(6, 1 + Math.floor(wave / 7) + (stage >= 4 ? 1 : 0));
+  const picks = [];
+  for (let i = 0; i < count; i++) {
+    // Mayoría terrestre y una parte aérea: el halo se ve en ambos corredores sin
+    // saturar el cielo, que ya exige defensa antiaérea dedicada.
+    const prefer = i % 3 === 2 ? air : ground;
+    const list = prefer.length ? prefer : pool;
+    picks.push({ type: list[Math.floor(rnd() * list.length)].id, inf: true });
+  }
+  return picks;
+}
 function buildWavePlan(wave) {
   const fac = factionByWave(wave);
   const boss = isBossWave(wave);
-  const total = boss ? Math.min(28, 5 + Math.floor(wave / 4)) : Math.min(60, Math.round(8 + wave * 2.0));
+  const total = boss ? Math.min(32, 6 + Math.floor(wave / 4)) : Math.min(64, Math.round(8 + wave * 1.65));
   const airTypes = fac.units.filter(u => u.kind === 'air');
   const groundTypes = fac.units.filter(u => u.kind === 'ground');
   const stage = Math.max(1, Math.min(WAVES_PER_FACTION, waveInFaction(wave)));
-  // Proporción de aire por oleada: la primera es terrestre, la segunda equilibrada
-  // y la tercera aérea. El jefe llega con una escolta mixta.
-  const airRatio = boss ? .45 : [.28, .5, .72][Math.min(2, stage - 1)];
+  // Proporción de aire por oleada: la primera es casi terrestre y la presión
+  // aérea crece con cada etapa de la facción. El jefe llega con escolta mixta.
+  const airRatio = boss ? .28 : [.08, .13, .18, .22][Math.min(3, stage - 1)];
   let targetAir = Math.round(total * airRatio);
   if (airTypes.length) targetAir = Math.max(1, targetAir);
   else targetAir = 0;
@@ -3533,30 +3590,44 @@ function buildWavePlan(wave) {
     const j = Math.floor(rnd() * (i + 1));
     [plan[i], plan[j]] = [plan[j], plan[i]];
   }
-  if (boss) {
-    plan.push(fac.boss.id);
-    plan = plan.slice(0, Math.max(total, plan.length));
+  plan = plan.map(type => ({ type, inf: false }));
+  // Infiltrados: a partir de la sexta oleada, otras facciones cuelan pequeños
+  // destacamentos en las dos últimas etapas y en la escolta del jefe.
+  if (wave >= 6 && (boss || stage === 3 || stage === 4)) {
+    const squads = buildInfiltrators(wave, fac, boss, stage, rnd);
+    if (boss) plan.push({ type: fac.boss.id, inf: false });
+    const at = boss ? plan.length - 1 : Math.floor(rnd() * (plan.length + 1));
+    plan.splice(at, 0, ...squads);
+    return plan;
   }
+  if (boss) plan.push({ type: fac.boss.id, inf: false });
   return plan;
 }
 function waveScalars(wave) {
-  // La curva base crece de forma lineal y, a partir de la oleada 8, añade un
-  // término exponencial suave. Así las primeras oleadas enseñan y las últimas
-  // exigen defensas completas sin volverse imposibles de un salto.
+  // La curva base crece de forma lineal y, a partir de la oleada 10, añade un
+  // término exponencial suave. Las primeras oleadas enseñan y el resto exige
+  // defensas completas sin saltos imposibles.
   return {
-    hp: 1 + Math.max(0, wave - 1) * 0.5 + Math.pow(Math.max(0, wave - 8), 1.55) * 0.095,
-    damage: 1 + Math.max(0, wave - 1) * 0.13 + Math.max(0, wave - 10) * 0.045,
-    speed: 1 + Math.min(0.8, Math.max(0, wave - 1) * 0.022)
+    hp: 1 + Math.max(0, wave - 1) * 0.22 + Math.pow(Math.max(0, wave - 10), 1.35) * 0.05,
+    damage: 1 + Math.max(0, wave - 1) * 0.06 + Math.max(0, wave - 12) * 0.022,
+    speed: 1 + Math.min(0.65, Math.max(0, wave - 1) * 0.015)
   };
 }
 function planCounts(plan) {
   const counts = new Map();
-  for (const type of plan) counts.set(type, (counts.get(type) || 0) + 1);
+  for (const entry of plan) {
+    const type = planType(entry), inf = planInf(entry);
+    const key = inf ? type + '~inf' : type;
+    const row = counts.get(key);
+    if (row) row.n++;
+    else counts.set(key, { type, inf, n: 1 });
+  }
   return counts;
 }
 function planSummary(plan) {
-  const counts = planCounts(plan);
-  return [...counts.entries()].map(([type, n]) => `${loc(ENEMIES[type], 'name')} ×${n}`).join(' · ');
+  return [...planCounts(plan).values()]
+    .map(({ type, inf, n }) => `${loc(ENEMIES[type], 'name')}${inf ? ' ✦' : ''} ×${n}`)
+    .join(' · ');
 }
 function threatKey(wave) {
   if (wave <= 0) return 'none';
@@ -3580,15 +3651,17 @@ function renderIntel() {
   const scalars = waveScalars(nextWave);
   const stage = waveInFaction(nextWave);
   const bossNow = isBossWave(nextWave);
-  const rows = [...counts.entries()].map(([type, n]) => {
+  const rows = [...counts.values()].map(({ type, inf, n }) => {
     const d = ENEMIES[type];
     const kind = d.kind === 'air' ? tr('intel.air') : d.boss ? tr('intel.boss') : tr('intel.ground');
     const counter = d.counter ? TOWERS.find(t => t.id === d.counter) : null;
     const counterHtml = counter ? `<span class="intel-counter">▸ ${tr('intel.counter', { name: loc(counter, 'name') })}</span>` : '';
-    return `<div class="intel-row"><span class="intel-icon t${d.tier}${counter ? ' countered' : ''}">${d.icon}</span><span class="intel-name">${loc(d, 'name')}<em>${kind} · ${tr('intel.armor', { n: Math.round(d.armor * 100) })}${counterHtml}</em></span><b>×${n}</b></div>`;
+    const infTag = inf ? `<span class="intel-inf">✦ ${tr('intel.infiltrator')}</span>` : '';
+    return `<div class="intel-row${inf ? ' infiltrator' : ''}"><span class="intel-icon t${d.tier}${counter ? ' countered' : ''}">${d.icon}</span><span class="intel-name">${loc(d, 'name')}${infTag}<em>${kind} · ${tr('intel.armor', { n: Math.round(d.armor * 100) })}${counterHtml}</em></span><b>×${n}</b></div>`;
   }).join('');
-  const airCount = plan.reduce((n, type) => n + (ENEMIES[type] && ENEMIES[type].kind === 'air' ? 1 : 0), 0);
+  const airCount = plan.reduce((n, entry) => n + (ENEMIES[planType(entry)] && ENEMIES[planType(entry)].kind === 'air' ? 1 : 0), 0);
   const groundCount = plan.length - airCount;
+  const infiltratorCount = plan.filter(planInf).length;
   const totalUnits = Math.max(1, plan.length);
   const airPct = Math.round(airCount / totalUnits * 100);
   const groundPct = 100 - airPct;
@@ -3604,6 +3677,7 @@ function renderIntel() {
     <div class="intel-dialog"><span>${fac.flag}</span><p>“${dialogue}”</p></div>
     <div class="intel-head"><span>${tr('intel.head', { wave: nextWave, state: extra })}</span><b class="threat threat-${threatClass(nextWave)}">${threatLevel(nextWave)}</b></div>
     <div class="intel-sub">${tr('intel.scaling', { hp: scalars.hp.toFixed(1), dmg: scalars.damage.toFixed(1) })}</div>
+    ${infiltratorCount ? `<div class="intel-inf-note">✦ ${tr('intel.infiltrators', { n: infiltratorCount })}</div>` : ''}
     <div class="intel-balance">
       <div class="ib-labels"><span class="ib-air">✈ ${tr('intel.air')} ${airCount}</span><span class="ib-ground">▮ ${tr('intel.ground')} ${groundCount}</span></div>
       <div class="ib-bar"><i class="air" style="width:${airPct}%"></i><i class="ground" style="width:${groundPct}%"></i></div>
@@ -3622,10 +3696,14 @@ function makeWave() {
   applyClimate(fac.climate, fac.tempC);
   Music.syncFaction(); Music.start();
   state.currentPlan = buildWavePlan(state.wave);
-  state.spawnQueue = state.currentPlan.map(type => ({
-    type,
-    delay: ENEMIES[type].boss ? 2.1 : Math.max(.18, .95 - state.wave * .018)
-  }));
+  state.spawnQueue = state.currentPlan.map(entry => {
+    const type = planType(entry);
+    return {
+      type,
+      inf: planInf(entry),
+      delay: ENEMIES[type].boss ? 2.1 : Math.max(.18, .95 - state.wave * .018)
+    };
+  });
   state.spawnTimer = .25;
   state.spawned = 0;
   document.getElementById('waveBtn').disabled = true;
@@ -3634,8 +3712,9 @@ function makeWave() {
   Sound.wave();
   toast(tr('toast.waveStart', { wave: state.wave, summary: planSummary(state.currentPlan) }));
 }
-function spawnEnemy(type) {
+function spawnEnemy(type, options = {}) {
   const d = ENEMIES[type];
+  const inf = !!options.infiltrator;
   const scalars = waveScalars(state.wave);
   const rankRoll = Math.random();
   // Las unidades con rango aparecen de forma progresiva: al principio la tropa
@@ -3652,23 +3731,26 @@ function spawnEnemy(type) {
   state.spawned++;
   // Los jefes son más resistentes y golpean más fuerte, pero avanzan un 30 %
   // más despacio para dar tiempo a concentrar el fuego.
-  const hpScale = d.boss ? (.55 + Math.min(1.4, state.wave * .04)) * 1.35 : scalars.hp;
-  const hp = d.hp * hpScale * rankMul;
+  const hpScale = d.boss ? (.32 + Math.min(1.1, state.wave * .028)) * 1.2 : scalars.hp;
+  // Las aeronaves tienen menos margen de vida: su amenaza real es esquivar la
+  // defensa terrestre, no aguantar el fuego antiaéreo.
+  const hp = d.hp * hpScale * rankMul * (inf ? 1.2 : 1) * (isAir ? .85 : 1);
   const armorBonus = Math.min(.16, Math.max(0, state.wave - 1) * .008);
   const e = {
     type, data: d, model, hp, maxHp: hp,
-    speed: d.speed * scalars.speed * (d.boss ? .7 : 1),
-    damage: d.damage * scalars.damage * (rank ? 1.12 : 1) * (d.boss ? 1.3 : 1),
-    armor: Math.min(d.boss ? .86 : .82, d.armor + armorBonus + (d.boss ? .1 : 0)),
+    speed: d.speed * scalars.speed * (d.boss ? .7 : 1) * (inf ? 1.08 : 1),
+    damage: d.damage * scalars.damage * (rank ? 1.12 : 1) * (d.boss ? 1.3 : 1) * (inf ? 1.08 : 1),
+    armor: Math.min(d.boss ? .86 : .82, d.armor + armorBonus + (d.boss ? .1 : 0) + (inf ? .03 : 0)),
     progress: 0, traveled: 0, routeIndex: 0, route, routeLength: routeLength(route), lane,
-    reward: Math.round(d.reward * (rank === 'elite' ? 1.8 : rank === 'veteran' ? 1.25 : 1) * .9),
-    slowTimer: 0, repelTimer: 0, air: isAir, rank, x: route.points[0][0], z: route.points[0][1],
+    reward: Math.round(d.reward * (rank === 'elite' ? 1.8 : rank === 'veteran' ? 1.25 : 1) * .9 * (inf ? 1.35 : 1)),
+    slowTimer: 0, repelTimer: 0, air: isAir, rank, infiltrator: inf, x: route.points[0][0], z: route.points[0][1],
     structureDamage: (d.structureDamage || 0) * (d.boss ? 1.2 : 0),
     bossAttackTimer: d.boss ? 3.2 : 0,
     attackers: d.boss ? new Map() : null
   };
   model.position.set(e.x, isAir ? ALTITUDE[type] : 0, e.z);
   world.add(model);
+  if (inf) addInfiltratorHalo(model);
   if (rank) {
     const tag = labelSprite(tr(rank === 'elite' ? 'rank.elite' : 'rank.veteran'), rank === 'elite' ? '#e8a06a' : '#b9c47e');
     const ui = 1 / model.scale.x;
@@ -3684,7 +3766,7 @@ function updateSpawn(dt) {
     state.spawnTimer -= dt;
     if (state.spawnTimer <= 0) {
       const item = state.spawnQueue.shift();
-      spawnEnemy(item.type);
+      spawnEnemy(item.type, { infiltrator: item.inf });
       state.spawnTimer = item.delay;
     }
   }
@@ -3809,11 +3891,25 @@ function updateEnemy(e, dt) {
   }
   if (ud.ring) ud.ring.rotation.y += dt * 1.8;
   if (ud.bossAura) ud.bossAura.material.opacity = .06 + Math.sin(state.clock * 3) * .035;
+  if (ud.infilHalo) {
+    // Halo de infiltrado: doble anillo aditivo que gira y respira.
+    ud.infilHalo.rotation.y += dt * 2.1;
+    const pulse = .5 + Math.sin(state.clock * 4.6 + e.traveled) * .26;
+    const [outer, inner] = ud.infilRings;
+    outer.material.opacity = .55 + pulse * .35;
+    inner.material.opacity = .35 + pulse * .3;
+    inner.rotation.z += dt * .9;
+    ud.infilHalo.position.y = Math.sin(state.clock * 2.8 + e.traveled * .7) * .035;
+  }
   const ratio = Math.max(0, e.hp / e.maxHp);
   // Etiquetas y barras con tamaño casi constante en pantalla: se encogen al acercar la cámara.
   const camD = camera.position.distanceTo(e.model.position);
   const uiF = THREE.MathUtils.clamp(Math.pow(camD / DEFAULT_DISTANCE, .85), .25, 2.1);
-  ud.hpfg.scale.set((ud.hpW || .7) * ratio * uiF, (ud.hpFgH || .048) * uiF, 1);
+  if (ud.bar) ud.bar.rotation.y = -e.model.rotation.y;
+  const fgW = (ud.hpW || .7) * ratio * uiF;
+  ud.hpfg.scale.set(fgW, (ud.hpFgH || .048) * uiF, 1);
+  // Ancla el borde izquierdo: el relleno se recorta desde la derecha.
+  ud.hpfg.position.x = -((ud.hpW || .7) * uiF - fgW) * .5;
   if (ud.hpbg) ud.hpbg.scale.set((ud.hpBgW || .7) * uiF, (ud.hpBgH || .08) * uiF, 1);
   const showLabel = settings.labels !== false && camD < 23;
   if (ud.label) {
@@ -3841,10 +3937,12 @@ function updateEnemy(e, dt) {
       // y después golpea la base al llegar al final.
       bossStrikeStructures(e, alt, 3);
       damageStructures(e.x, e.z, e.structureDamage);
-      state.hp -= e.damage * .55;
+      state.hp -= e.damage * .45;
       toast(tr('toast.bossArrives', { name: loc(e.data, 'name') }));
     } else {
-      state.hp -= e.damage;
+      // El daño de fuga se mantiene moderado: una defensa que deja pasar alguna
+      // unidad debe sufrir desgaste progresivo, no perder la partida de golpe.
+      state.hp -= Math.max(2, e.damage * .5);
     }
     cameraShake = Math.min(.5, cameraShake + .12);
     explode(e.x, alt, e.z, e.data.boss ? 0xf0b14f : 0xb96a4e, e.data.boss ? 32 : 12);
@@ -4399,7 +4497,8 @@ function showWaveBanner(fac, boss) {
   const el = document.getElementById('waveBanner');
   if (!el) return;
   const stage = waveInFaction(state.wave);
-  const escorts = (state.currentPlan || []).filter(t => !ENEMIES[t].boss).length;
+  const escorts = (state.currentPlan || []).filter(entry => !ENEMIES[planType(entry)].boss).length;
+  const infCount = (state.currentPlan || []).filter(planInf).length;
   const dialogue = factionDialogue(fac, state.wave, boss);
   const speaker = boss ? loc(fac.boss, 'name') : loc(fac, 'name');
   el.className = 'wave-banner show' + (boss ? ' boss' : '');
@@ -4407,7 +4506,7 @@ function showWaveBanner(fac, boss) {
     <div class="wb-flag">${fac.flag}</div>
     <div class="wb-kicker">${boss ? tr('waveBanner.boss') : tr('waveBanner.incoming')}</div>
     <div class="wb-title">${loc(fac, 'name')}</div>
-    <div class="wb-meta"><span>${tr('waveBanner.stage', { stage, total: FACTION_CYCLE })}</span><b>${tr('waveBanner.climate', { climate: tr('climate.' + fac.climate), temp: fac.tempC })}</b>${boss ? `<span>${tr('waveBanner.escorts', { n: escorts })}</span>` : ''}</div>
+    <div class="wb-meta"><span>${tr('waveBanner.stage', { stage, total: FACTION_CYCLE })}</span><b>${tr('waveBanner.climate', { climate: tr('climate.' + fac.climate), temp: fac.tempC })}</b>${boss ? `<span>${tr('waveBanner.escorts', { n: escorts })}</span>` : ''}${infCount ? `<span class="wb-inf">✦ ${tr('waveBanner.infiltrators', { n: infCount })}</span>` : ''}</div>
     <div class="wb-dialog"><span>${fac.flag} ${speaker}:</span> “${dialogue}”</div>
     <div class="wb-bar"><i></i></div>`;
   clearTimeout(waveBannerTimer);

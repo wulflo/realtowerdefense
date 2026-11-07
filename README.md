@@ -6,7 +6,7 @@ Tactical tower defense built with Three.js. It runs on desktop and as an install
 
 Eight military doctrines, nine tower systems, a single two-lane ground road, an air corridor and a naval theater where you can deploy destroyers and aircraft carriers. Each country uses models and names inspired by its real equipment, and its multipliers change damage, range and rate of fire.
 
-Ten enemy factions rotate in four-wave cycles — three standard waves and their final boss. Every faction mixes ground and air units, and each wave shifts the ratio: the first presses on the ground, the second blends both domains and the third saturates the air corridor. Before every assault, the faction broadcasts a radio dialogue shown in the intel panel and in the wave banner.
+Ten enemy factions rotate in five-wave cycles — four standard waves and their final boss. Every faction mixes ground and air units, and each wave shifts the ratio: the first presses on the ground and the last leans hardest on the air corridor. From wave 6 onward, other factions slip small infiltrator squads into the late stages and boss escorts; every infiltrator carries a double cyan/violet halo and pays a higher reward. Before every assault, the faction broadcasts a radio dialogue shown in the intel panel and in the wave banner.
 
 On first launch you choose the language with the Spain and United States flags. The entire interface, factions, towers, enemies, help texts and notifications are available in Spanish and English; the language can be changed later from Settings.
 
@@ -49,7 +49,8 @@ On portrait mobile the arsenal becomes a slide-up bottom tray. The installed app
 ## Mechanics
 
 - **Wave intel:** the right panel shows enemy composition, armor, HP/damage scaling, threat level, the faction dialogue and a visual balance of air and ground forces.
-- **Mixed waves:** every faction fields both ground and air troops. The ratio changes per stage, and the plan guarantees at least one unit of each available type.
+- **Mixed waves:** every faction fields both ground and air troops. The air share grows across the four stages (roughly 8 %, 13 %, 18 % and 22 %), and the plan guarantees at least one unit of each available type.
+- **Infiltrators:** from wave 6 onward, foreign detachments appear in the third and fourth stages and in boss escorts. They are marked with a pulsing double halo (cyan outer ring, violet inner ring), have +20 % HP, +8 % speed and damage, +0.03 armor and +35 % reward. The intel panel tags each infiltrator row and shows the total count, and the wave banner reports how many are incoming.
 - **Enemy scaling:** armor, MLRS, drones and bombers join as waves progress; veteran and elite units appear later with their own labels. Wave size, spawn cadence, HP, damage, speed and armor all increase over time.
 - **Faction cycle:** cavemen, Spartans, Crusaders, pirates, WWI USA, Chinese hi-tech, zombies, aliens, demons and celestials. The infernal faction appears immediately before the celestial faction.
 - **Fire priority:** each tower can target the first, last, strongest or closest enemy.
@@ -62,8 +63,9 @@ On portrait mobile the arsenal becomes a slide-up bottom tray. The installed app
 - **Sea:** destroyers and aircraft carriers occupy a `2×2` cell footprint and can only be placed on water; they cover the ground road near the coast.
 - **Doctrines:** each faction's multipliers affect the real damage, range and rate of fire of its towers. Switching faction starts a new game.
 - **Aircraft carrier:** every embarked strike takes off, hits its target and returns to the carrier before disappearing.
-- **Bosses:** they appear every four waves (three faction waves and their final boss). Bosses are significantly tougher, hit harder and advance more slowly than regular troops. They retaliate against the structures that fire at them, degrade their level and stun them for a few seconds; when they reach the base they first devastate the defenses that harassed them.
-- **Difficulty curve:** early waves teach the basics; from wave 8 onward HP, damage, speed, wave size, veteran/elite odds and armor scaling accelerate, so the late game demands a complete defense.
+- **Bosses:** they appear every five waves (four faction waves and their final boss). Bosses are significantly tougher, hit harder and advance more slowly than regular troops. They retaliate against the structures that fire at them, degrade their level and stun them for a few seconds; when they reach the base they first devastate the defenses that harassed them.
+- **Difficulty curve:** waves 1–11 teach the basics and leave room to build a mixed defense; from wave 12 onward HP, damage, wave size, veteran/elite odds and armor scale faster, and leakers chip the base progressively instead of ending the run in a single burst. A solid defense should survive around wave 18–20, and the curve keeps rising beyond that.
+- **Leak damage:** a unit that reaches the base removes a fraction of its attack value (50 % for regular troops, 45 % for a boss) rather than the full amount, so a few leaks cause gradual attrition.
 - **Laser visuals:** the laser emitter only glows while it is actually firing; when idle it stays dark and emits no light.
 - **Procedural audio:** sound effects and music are synthesized live with Web Audio. Each enemy faction has its own arrangement and every faction has a boss variation with faster tempo, a lower root, war drums, a deep pedal and a tritone accent. Five base tracks can also be selected manually.
 

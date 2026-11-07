@@ -91,11 +91,13 @@ Campos principales:
 - `climate` / `tempC` / `tempF`: clima y temperatura que imponen al frente.
 - `flag` y color de facción.
 
-`ENEMIES` es el índice plano de todas las unidades; `enemyFaction(type)` recupera su facción. Cada facción ocupa `WAVES_PER_FACTION = 3` oleadas normales y cierra con su jefe (`FACTION_CYCLE = 4`). `factionByWave()`, `waveInFaction()`, `isBossWave()` y `wavesUntilBoss()` resuelven el ciclo.
+`ENEMIES` es el índice plano de todas las unidades; `enemyFaction(type)` recupera su facción. Cada facción ocupa `WAVES_PER_FACTION = 4` oleadas normales y cierra con su jefe (`FACTION_CYCLE = 5`), de modo que la rotación completa de las diez facciones dura 50 oleadas. `factionByWave()`, `waveInFaction()`, `isBossWave()` y `wavesUntilBoss()` resuelven el ciclo.
 
-`buildWavePlan(wave)` genera una composición determinista con semilla por oleada. La proporción de aire sigue `[.28, .5, .72]` en las tres etapas normales y `.45` en la oleada de jefe; siempre incluye al menos una unidad de cada tipo disponible y mezcla el orden para que no lleguen todos los aéreos o terrestres juntos. El tamaño crece hasta 60 unidades en oleadas normales y 28 en las de jefe. `waveScalars(wave)` escala HP, daño y velocidad con una curva lineal más un término exponencial suave desde la oleada 8; `threatKey()` / `threatLevel()` calculan el nivel de amenaza.
+`buildWavePlan(wave)` genera una composición determinista con semilla por oleada. Cada entrada es un objeto `{ type, inf }`, donde `inf` marca un infiltrado. La proporción de aire sigue `[.08, .13, .18, .22]` en las cuatro etapas normales y `.28` en la oleada de jefe; siempre incluye al menos una unidad de cada tipo disponible y mezcla el orden para que no lleguen todos los aéreos o terrestres juntos. El tamaño crece hasta 64 unidades en oleadas normales (`round(8 + wave * 1.65)`) y 32 en las de jefe. `waveScalars(wave)` escala HP, daño y velocidad con una curva lineal más un término exponencial suave desde la oleada 10; `threatKey()` / `threatLevel()` calculan el nivel de amenaza.
 
-`FACTION_DIALOGUES` guarda tres líneas normales y una de jefe por facción, en español e inglés. `factionDialogue(fac, wave, boss)` elige la línea según la etapa y el idioma; se muestra en el panel de inteligencia y en el aviso de oleada.
+`buildInfiltrators(wave, fac, boss, stage, rnd)` construye destacamentos de otra facción a partir de la oleada 6. Aparecen en las etapas 3 y 4 y en la escolta del jefe; la mayoría son terrestres, con una parte aérea, y se generan con la misma semilla que el resto del plan para que el panel de inteligencia coincida con lo que llega. `spawnEnemy(type, { infiltrator: true })` les aplica +20 % HP, +8 % velocidad y daño, +0,03 de blindaje y +35 % de recompensa, y les añade el halo de `addInfiltratorHalo()`.
+
+`FACTION_DIALOGUES` guarda cuatro líneas normales y una de jefe por facción, en español e inglés. `factionDialogue(fac, wave, boss)` elige la línea según la etapa y el idioma; se muestra en el panel de inteligencia y en el aviso de oleada.
 
 ### Rutas (`ROUTES`, `AIR_ROUTE`)
 
@@ -193,6 +195,8 @@ Al cambiar de idioma, `refreshEnemyLabels()` reconstruye los sprites de texto de
 
 No hay assets externos. `buildTowerModel()` y `enemyModel()` construyen cada unidad con geometrías y materiales cacheados (`geoCache`, `matCache`). Los modelos tienen `userData` con piezas animables: torreta, cañones, rotores, orugas, etiqueta y barra de vida.
 
+La barra de vida de los enemigos se guarda en `userData.bar` (grupo), `hpbg` (fondo) y `hpfg` (relleno). En `updateEnemy()` el grupo se contrarrota con `bar.rotation.y = -model.rotation.y` para que la barra permanezca horizontal se mueva la unidad en la dirección que se mueva, y el relleno se ancla al borde izquierdo recalculando su escala y `position.x`; no se reduce hacia el centro. Fondo y relleno usan `renderOrder` 3 y 4 con `depthWrite: false`, y las etiquetas quedan en 5 para que se dibujen por encima sin artefactos.
+
 ## 6. Simulación y combate
 
 ### Bucle principal
@@ -252,9 +256,9 @@ La prioridad se guarda en `tower.mode` y se muestra en el panel de inspección.
 
 ### Rangos y dificultad
 
-A partir de la oleada 5 la probabilidad de veteranos crece de forma progresiva y desde la 8 se suman élites, ambas con más HP, daño y recompensa y con etiqueta 3D propia. `buildWavePlan()` aumenta el número de unidades hasta 60 y reduce la cadencia de spawn con la oleada; `waveScalars()` escala HP, daño y velocidad con una curva lineal más un término exponencial suave; `spawnEnemy()` añade blindaje progresivo (hasta +0,16) y aplica los multiplicadores de rango. El daño recibido por la base depende del tipo de enemigo que alcanza el final de la ruta. Las recompensas por baja y la bonificación de oleada se reducen deliberadamente para exigir una defensa más planificada.
+A partir de la oleada 5 la probabilidad de veteranos crece de forma progresiva y desde la 8 se suman élites, ambas con más HP, daño y recompensa y con etiqueta 3D propia. `buildWavePlan()` aumenta el número de unidades hasta 64 y reduce la cadencia de spawn con la oleada; `waveScalars()` escala HP, daño y velocidad con una curva lineal más un término exponencial suave desde la oleada 10, con topes de velocidad y blindaje. Las aeronaves reciben un 15 % menos de HP para que su amenaza sea la saturación del corredor y no una bolsa de vida imposible de vaciar. `spawnEnemy()` añade blindaje progresivo (hasta +0,16) y aplica los multiplicadores de rango. El daño de fuga se aplica como fracción del ataque (50 % para tropa normal, 45 % para jefes) para que unas pocas fugas produzcan desgaste progresivo en lugar de derrota instantánea. Las recompensas por baja y la bonificación de oleada se reducen deliberadamente para exigir una defensa más planificada.
 
-Los jefes aparecen cada cuatro oleadas: cada facción ocupa tres oleadas normales y cierra con su jefe final. En `spawnEnemy()` reciben HP ×1,35 sobre su curva propia (que también escala con la oleada), daño ×1,3, blindaje +0,1 (con tope 0,86) y `structureDamage` ×1,2, pero avanzan a ×0,7 de su velocidad para dar tiempo a concentrar el fuego.
+Los jefes aparecen cada cinco oleadas: cada facción ocupa cuatro oleadas normales y cierra con su jefe final. En `spawnEnemy()` reciben HP según `(.32 + min(1.1, wave * .028)) * 1.2`, daño ×1,3, blindaje +0,1 (con tope 0,86) y `structureDamage` ×1,2, pero avanzan a ×0,7 de su velocidad para dar tiempo a concentrar el fuego.
 
 Los jefes con `structureDamage` registran las torres que les hacen daño y, cada `BOSS_ATTACK_COOLDOWN`, atacan a las de mayor amenaza aunque queden fuera de su alcance; si no han recibido fuego, aplastan lo que tengan alrededor. `damageStructures()` resta niveles (dos si el golpe es muy alto), recalcula las estadísticas con `applyTowerStats()` y deja la torre aturdida durante `state.combatTime + 2`. Al llegar a la base, el jefe golpea primero a sus atacantes. `state.combatTime` avanza solo con la simulación activa, de modo que pausas y cambios de velocidad también detienen estos temporizadores.
 
@@ -270,10 +274,10 @@ La barra de apoyo está anclada al pie del arsenal, no flota sobre el mapa. En m
 
 ### Oleadas
 
-- `makeWave()` incrementa la oleada, construye el plan y llena la cola de spawn.
+- `makeWave()` incrementa la oleada, construye el plan y llena la cola de spawn con `{ type, inf, delay }`.
 - Al limpiar una oleada se concede una bonificación y se actualizan los récords.
-- `renderIntel()` muestra la composición prevista o en curso, el escalado, la amenaza, el diálogo de facción y una barra de balance aire/tierra.
-- `showWaveBanner()` presenta facción, clima, etapa, número de escoltas y diálogo al iniciar el asalto.
+- `renderIntel()` muestra la composición prevista o en curso, el escalado, la amenaza, el diálogo de facción, el recuento de infiltrados y una barra de balance aire/tierra.
+- `showWaveBanner()` presenta facción, clima, etapa, número de escoltas, infiltrados y diálogo al iniciar el asalto.
 - Durante una oleada activa no se pueden comprar ni mejorar torres; el arsenal vuelve a habilitarse al limpiarla.
 
 ## 7. Interfaz
@@ -358,7 +362,7 @@ El workflow `.github/workflows/deploy.yml` se dispara con push a `main` o manual
 ### Añadir una facción enemiga
 
 1. Añade la entrada a `ENEMY_FACTIONS` con `id`, nombres, bandera, color, `climate`, temperatura y al menos una unidad terrestre y otra aérea.
-2. Define su `boss` y su línea de diálogo en `FACTION_DIALOGUES`.
+2. Define su `boss` y sus cuatro líneas normales más la de jefe en `FACTION_DIALOGUES`.
 3. Añade su clima a `CLIMATE_TOWER_MODS`, `CLIMATE_ICONS`, `CLIMATE_MUSIC` y a las claves `climate.*` de `I18N`.
 4. Si el clima necesita tinte visual, añade `.weather-overlay.climate-*` y `body.climate-*` en `index.html`.
 5. Comprueba que `factionByWave()` recorre el ciclo completo y que sus modelos se construyen sin errores.
