@@ -82,20 +82,24 @@ Campos principales:
 
 `getCost(type)` aplica el descuento del ejército. Cada torre tiene una huella: las terrestres ocupan `1×1` y los cascos navales `2×2`. `footprintOf()`, `footprintCells()` y `validPlacement()` comprueban todas las celdas de la huella (límites, agua, pista, base y ocupación) antes de construir o vender.
 
-### Enemigos (`ENEMIES`)
+### Enemigos (`ENEMY_FACTIONS`, `ENEMIES`)
 
-Tipos de tierra y aire con HP, velocidad, recompensa, radio, color, daño, blindaje, nivel (`tier`) e icono. Los enemigos desbloqueados por oleada se definen en:
+`ENEMY_FACTIONS` agrupa diez facciones: cavernícolas, espartanos, cruzados, piratas, la Gran Guerra, tecnología china, zombis, alienígenas, demonios y celestiales. Cada facción declara:
 
-```js
-const WAVE_UNLOCK = { apc: 3, heli: 4, tank: 5, drone: 6, mlrs: 7, fighter: 9, bomber: 11 };
-const WAVE_WEIGHT = { ... };
-```
+- `units`: tropas disponibles, con `kind` `ground` o `air`, HP, velocidad, recompensa, radio, color, daño, blindaje, nivel (`tier`) e icono.
+- `boss`: jefe de facción con `structureDamage` y recompensa alta.
+- `climate` / `tempC` / `tempF`: clima y temperatura que imponen al frente.
+- `flag` y color de facción.
 
-`buildWavePlan(wave)` genera una composición determinista; `waveScalars(wave)` escala HP, daño y velocidad; `threatKey()` / `threatLevel()` calculan el nivel de amenaza.
+`ENEMIES` es el índice plano de todas las unidades; `enemyFaction(type)` recupera su facción. Cada facción ocupa `WAVES_PER_FACTION = 3` oleadas normales y cierra con su jefe (`FACTION_CYCLE = 4`). `factionByWave()`, `waveInFaction()`, `isBossWave()` y `wavesUntilBoss()` resuelven el ciclo.
+
+`buildWavePlan(wave)` genera una composición determinista con semilla por oleada. La proporción de aire sigue `[.28, .5, .72]` en las tres etapas normales y `.45` en la oleada de jefe; siempre incluye al menos una unidad de cada tipo disponible y mezcla el orden para que no lleguen todos los aéreos o terrestres juntos. El tamaño crece hasta 60 unidades en oleadas normales y 28 en las de jefe. `waveScalars(wave)` escala HP, daño y velocidad con una curva lineal más un término exponencial suave desde la oleada 8; `threatKey()` / `threatLevel()` calculan el nivel de amenaza.
+
+`FACTION_DIALOGUES` guarda tres líneas normales y una de jefe por facción, en español e inglés. `factionDialogue(fac, wave, boss)` elige la línea según la etapa y el idioma; se muestra en el panel de inteligencia y en el aviso de oleada.
 
 ### Rutas (`ROUTES`, `AIR_ROUTE`)
 
-Una única pista terrestre de dos carriles (`main`) y un corredor aéreo (`AIR_ROUTE`). Cada ruta es una lista de puntos `[x, z]`; `routeLength()` precarga su longitud para calcular el progreso de cada enemigo.
+Una única pista terrestre de dos carriles (`main`) y un corredor aéreo (`AIR_ROUTE`). Cada ruta es una lista de puntos `[x, z]`; `routeLength()` precarga su longitud para calcular el progreso de cada enemigo. Al cargar, los puntos de `ROUTES` se normalizan con `worldCell()` + `cellCenter()`: la calzada se dibuja en el centro de sus celdas y las unidades caminan exactamente sobre el asfalto, no por el borde de la celda.
 
 `forEachRouteCell()` rasteriza la pista sobre la cuadrícula para bloquear sus celdas. En el spawn, `lane` alterna entre `-1` y `1`; `enemyLaneOffset()` desplaza visualmente cada unidad hacia su carril y `laneSpeedFactor()` mantiene la separación para que dos enemigos del mismo carril no se solapen.
 
@@ -103,16 +107,17 @@ Una única pista terrestre de dos carriles (`main`) y un corredor aéreo (`AIR_R
 
 Objeto central de la simulación:
 
-- Partida: `wave`, `cash`, `hp`, `score`, `active`, `paused`, `gameOver`, `deployed`, `speed`.
+- Partida: `wave`, `cash`, `hp`, `score`, `active`, `paused`, `gameOver`, `deployed`, `speed`, `climate`.
 - Entidades: `enemies`, `towers`, `effects`, `spawnQueue`.
 - Interacción: `selectedTower`, `buildType`, `abilityMode`, `selectedArmy`.
-- Habilidades: `strike`, `emp`, `repair`, con coste, recarga y cooldown.
+- Habilidades globales: `strike`, `emp`, `repair`, con coste, recarga y cooldown.
+- Habilidades por torre: `tower.special` (definición de `TOWER_SPECIALS`) y `tower.specialCd` (recarga restante).
 - Intel: `currentPlan`, `waveIntel`.
 
 ### Persistencia
 
 ```text
-frente-global:settings:v1  → calidad, sonido, volumen, ejército, etiquetas, idioma
+frente-global:settings:v1  → calidad, sonido, volumen, música, pista musical, ejército, etiquetas, idioma
 frente-global:records:v1   → mejor oleada, récord, partidas
 ```
 
@@ -146,9 +151,10 @@ En `index.html`:
 
 Toda la UI generada por JavaScript usa `tr()` y `loc()`:
 
-- Tarjetas de torre, inspección, intel de oleada y barra de habilidades.
-- Avisos (`toast`), pantalla de derrota, récords y ajustes.
+- Tarjetas de torre, inspección, intel de oleada, diálogos de facción y barra de apoyo.
+- Avisos (`toast`), pantalla de derrota, récords, ajustes y pistas de música.
 - Etiquetas 3D de enemigos y rangos (`VETERANO` / `VETERAN`, `ÉLITE` / `ELITE`).
+- Modificadores climáticos (`mod.*`) y habilidades de estructura (`tower.special*`).
 
 Al cambiar de idioma, `refreshEnemyLabels()` reconstruye los sprites de texto de los enemigos que ya están en el mapa. Los proyectiles y modelos no se recrean.
 
@@ -191,7 +197,7 @@ No hay assets externos. `buildTowerModel()` y `enemyModel()` construyen cada uni
 
 ### Bucle principal
 
-`tick(now)` se ejecuta con `requestAnimationFrame` y calcula un `dt` acotado a 50 ms. La simulación avanza solo si hay partida desplegada, no está pausada, no ha terminado y la pestaña está visible. La velocidad de juego (`×1`, `×2`, `×3`) multiplica el delta de simulación.
+`tick(now)` se ejecuta con `requestAnimationFrame` y calcula un `dt` acotado a 50 ms. La simulación avanza solo si hay partida desplegada, no está pausada, no ha terminado y la pestaña está visible. La velocidad de juego (`×1`–`×5`) multiplica el delta de simulación; las recargas usan `state.combatTime`, por lo que también se aceleran o detienen con ella.
 
 Orden aproximado por frame:
 
@@ -219,10 +225,20 @@ Los tipos de ataque son:
 - Mortero/artillería con proyectil parabólico y daño en área.
 - Salvas de cohetes.
 - Misiles guiados antiaéreos.
-- Láser continuo con penetración total.
+- Láser continuo con penetración total. El emisor usa `glowMaterial()` pero arranca con `emissiveIntensity = 0`; `updateTowers()` lo enciende con un pulso solo mientras hay objetivo y lo apaga en cuanto deja de disparar.
 - Pulso EW que ralentiza; contra drones activa `repelTimer` y los hace retroceder por la pista.
 - Misiles de crucero navales.
 - Ataque aéreo embarcado del portaaviones: el avión despega de la cubierta, impacta y regresa al portaaviones antes de retirarse.
+
+Los proyectiles se agrupan por `kind` y mantienen pools separados: `bullet`, `tracer`, `shell`, `mortarShell`, `artShell`, `rocket`, `missile`, `cruise`, `plasma` y `flak`. Cada tipo usa geometría, estela, halo y color propios. Los impactos añaden fogonazo de boca, chispas, columnas de humo, ondas expansivas y destellos de láser para que el combate se lea de un vistazo.
+
+### Habilidades de estructura
+
+`TOWER_SPECIALS` define una habilidad por tipo de torre con `name`/`nameEn`, `desc`/`descEn`, `icon`, `cost` y `cooldown`. `activateTowerSpecial(t)` comprueba créditos y recarga, descuenta el coste, fija `t.specialCd` y ejecuta el efecto (ráfaga, batería de mortero, barrera de artillería, salva total, intercepción, sobrecarga, apagón, bombardeo naval u oleada aérea). La recarga se descuenta en `updateTowers()` con `state.combatTime` y se muestra en la inspección y en el botón flotante de la torre. Se puede activar con `R`.
+
+### Clima y estructuras
+
+`CLIMATE_TOWER_MODS` aplica modificadores globales de daño, alcance y cadencia según `state.climate`. `applyTowerStats()` combina ejército, clima y nivel; `attachClimateBadge()` añade a cada torre una etiqueta con el modificador y un anillo de color. `refreshClimateTowers()` recalcula todas las torres al cambiar de facción. En cadencia, un modificador positivo acelera y se aplica como `rate / (1 + mod)`.
 
 ### Prioridades de fuego
 
@@ -236,7 +252,9 @@ La prioridad se guarda en `tower.mode` y se muestra en el panel de inspección.
 
 ### Rangos y dificultad
 
-A partir de ciertas oleadas aparecen enemigos veteranos y de élite, con más HP, daño y recompensa. Los jefes aparecen cada cuatro oleadas: cada facción ocupa tres oleadas normales y cierra con su jefe final. `waveScalars()` escala HP, daño y velocidad, `spawnEnemy()` añade blindaje progresivo y `buildWavePlan()` aumenta el número de unidades. El daño recibido por la base depende del tipo de enemigo que alcanza el final de la ruta. Las recompensas por baja y la bonificación de oleada se redujeron para exigir una defensa más planificada.
+A partir de la oleada 5 la probabilidad de veteranos crece de forma progresiva y desde la 8 se suman élites, ambas con más HP, daño y recompensa y con etiqueta 3D propia. `buildWavePlan()` aumenta el número de unidades hasta 60 y reduce la cadencia de spawn con la oleada; `waveScalars()` escala HP, daño y velocidad con una curva lineal más un término exponencial suave; `spawnEnemy()` añade blindaje progresivo (hasta +0,16) y aplica los multiplicadores de rango. El daño recibido por la base depende del tipo de enemigo que alcanza el final de la ruta. Las recompensas por baja y la bonificación de oleada se reducen deliberadamente para exigir una defensa más planificada.
+
+Los jefes aparecen cada cuatro oleadas: cada facción ocupa tres oleadas normales y cierra con su jefe final. En `spawnEnemy()` reciben HP ×1,35 sobre su curva propia (que también escala con la oleada), daño ×1,3, blindaje +0,1 (con tope 0,86) y `structureDamage` ×1,2, pero avanzan a ×0,7 de su velocidad para dar tiempo a concentrar el fuego.
 
 Los jefes con `structureDamage` registran las torres que les hacen daño y, cada `BOSS_ATTACK_COOLDOWN`, atacan a las de mayor amenaza aunque queden fuera de su alcance; si no han recibido fuego, aplastan lo que tengan alrededor. `damageStructures()` resta niveles (dos si el golpe es muy alto), recalcula las estadísticas con `applyTowerStats()` y deja la torre aturdida durante `state.combatTime + 2`. Al llegar a la base, el jefe golpea primero a sus atacantes. `state.combatTime` avanza solo con la simulación activa, de modo que pausas y cambios de velocidad también detienen estos temporizadores.
 
@@ -248,22 +266,26 @@ Los jefes con `structureDamage` registran las torres que les hacen daño y, cada
 | Pulso EMP | `X` | 90 | Ralentiza a todos los enemigos durante 4,5 s y repele drones durante 2,8 s. |
 | Reparar base | `C` | 80 | Recupera hasta 22% de integridad. |
 
+La barra de apoyo está anclada al pie del arsenal, no flota sobre el mapa. En móvil vertical forma parte de la bandeja inferior.
+
 ### Oleadas
 
 - `makeWave()` incrementa la oleada, construye el plan y llena la cola de spawn.
 - Al limpiar una oleada se concede una bonificación y se actualizan los récords.
-- `renderIntel()` muestra la composición prevista o en curso, el escalado y la amenaza.
+- `renderIntel()` muestra la composición prevista o en curso, el escalado, la amenaza, el diálogo de facción y una barra de balance aire/tierra.
+- `showWaveBanner()` presenta facción, clima, etapa, número de escoltas y diálogo al iniciar el asalto.
+- Durante una oleada activa no se pueden comprar ni mejorar torres; el arsenal vuelve a habilitarse al limpiarla.
 
 ## 7. Interfaz
 
 ### HUD superior
 
-Muestra facción, créditos, integridad, oleada, enemigos y amenaza. Los botones permiten cambiar de ejército, centrar cámara, sonido, pausa, pantalla completa y ajustes.
+Muestra facción, créditos, integridad, oleada, enemigos, amenaza, clima y facción enemiga con su etapa. Los botones permiten cambiar de ejército, centrar cámara, sonido, pausa, pantalla completa y ajustes. La barra inferior concentra el botón de oleada, los multiplicadores `×1`–`×5`, zoom y cancelar.
 
 ### Paneles laterales
 
-- **Arsenal:** tarjetas de torre con coste, dominio y descripción; teclas `1`–`9`.
-- **Inspección / Intel:** si no hay torre seleccionada muestra la previsión de oleada; si hay torre seleccionada muestra daño, alcance, cadencia, prioridad, mejora y venta.
+- **Arsenal:** tarjetas de torre con coste, dominio y descripción; teclas `1`–`9`. Durante la oleada se muestran bloqueadas. Bajo la lista se ancla la barra de apoyo de mando con coste y recarga.
+- **Inspección / Intel:** si no hay torre seleccionada muestra la previsión de oleada, diálogo enemigo, balance aire/tierra y dossier de facción; si hay torre seleccionada muestra daño, alcance, cadencia, prioridad, chip de clima, habilidad especial, mejora y venta.
 
 ### Pantallas superpuestas
 
@@ -271,19 +293,34 @@ Muestra facción, créditos, integridad, oleada, enemigos y amenaza. Los botones
 - `#armyScreen`: selección de facción y despliegue.
 - `#pauseScreen`: reanudar, reiniciar la partida, ajustes o salir al menú.
 - `#defeatScreen`: resultado, récords y reintento.
-- `#settingsScreen`: idioma, calidad, sonido, etiquetas, volumen, pantalla completa, instalación y borrado de progreso.
+- `#settingsScreen`: idioma, calidad, sonido, música, pista musical, etiquetas, volumen, pantalla completa, instalación y borrado de progreso.
 - `#updateBanner`: aviso de nueva versión del service worker.
 
 ### Responsive
 
 - Escritorio: tres columnas con paneles laterales.
 - Tablet: paneles más estrechos.
-- Móvil vertical: arsenal en bandeja horizontal inferior, inspección flotante, barra de habilidades compacta y botones táctiles de al menos 38–46 px.
+- Móvil vertical: arsenal en bandeja horizontal inferior con la barra de apoyo integrada, inspección flotante y botones táctiles de al menos 38–46 px.
+- Los paneles laterales usan `max-height` relativo al layout y sus listas hacen scroll interno, de modo que nunca empujan la barra inferior fuera de pantalla ni tapan el mapa con controles flotantes.
 - Se respetan `safe-area-inset-*` y `prefers-reduced-motion`.
 
 ## 8. Audio
 
-`Sound` es un módulo IIFE basado en Web Audio. Sintetiza disparos, explosiones, pasos de oleada, mejoras y errores con osciladores y ruido filtrado. No descarga archivos. Incluye puertas de frecuencia para evitar saturación y respeta el volumen y el silencio guardados.
+`Sound` es un módulo IIFE basado en Web Audio. Sintetiza disparos por tipo de torre, explosiones, impactos, pasos de oleada, mejoras y errores con osciladores, ruido filtrado y capas. No descarga archivos. Incluye puertas de frecuencia para evitar saturación y respeta el volumen y el silencio guardados.
+
+`Music` es otro módulo Web Audio con programación por lookahead. `MUSIC_LIBRARY` contiene cinco pistas base seleccionables manualmente:
+
+| Pista | Carácter | Clima de respaldo |
+| --- | --- | --- |
+| `march` | Marcha militar | templado |
+| `ambient` | Horizonte de ceniza | caluroso, tropical, frío |
+| `electronic` | Protocolo neón | radiactivo, desconocido |
+| `infernal` | Cántico abisal | infernal |
+| `celestial` | Coro de luz | divino |
+
+Cada pista define BPM, escala, bajo, melodía, tipo de timbre, percusión y pad. `FACTION_MUSIC` define un arreglo propio para cada facción enemiga (raíz, escala, tempo, secuencias y percusión) y genera dos entradas en `MUSIC_LIBRARY`: `<facción>` y `<facción>Boss`. La variante de jefe acelera el tempo, baja la raíz, impone tambores de guerra y añade un pedal grave y un acento de tritono.
+
+`autoMusicKey()` resuelve la pista de la oleada actual o de la siguiente según `state.active`: durante el combate usa la facción y etapa en curso; entre oleadas adelanta la siguiente. `Music.syncFaction()` la aplica y se llama al desplegar, al iniciar oleada y al limpiarla. `settings.musicTrack` puede fijar una pista base concreta y desactivar el modo automático. No hay samples, archivos ni licencias externas.
 
 ## 9. PWA, caché y despliegue
 
@@ -313,10 +350,24 @@ El workflow `.github/workflows/deploy.yml` se dispara con push a `main` o manual
 
 ### Añadir un enemigo
 
-1. Añade la entrada a `ENEMIES` con datos bilingües.
-2. Defínelo en `WAVE_UNLOCK`, `WAVE_WEIGHT` y, si es aéreo, en `ALTITUDE`.
-3. Añade su modelo en `enemyModel()` y sus animaciones en `updateEnemy()`.
-4. Revisa el icono, el `tier` y el blindaje para el panel de intel.
+1. Añade la entrada a `units` de la facción correspondiente en `ENEMY_FACTIONS` con datos bilingües y `kind` `ground`/`air`.
+2. Si cambia en inglés, añade su nombre a `ENEMY_EN`; si vuela, añade su altura a `ALTITUDE`.
+3. Añade su modelo en `enemyModel()` o reutiliza `buildFlyer()` y sus animaciones en `updateEnemy()`.
+4. Revisa el icono, el `tier`, el blindaje y el contador recomendado para el panel de intel.
+
+### Añadir una facción enemiga
+
+1. Añade la entrada a `ENEMY_FACTIONS` con `id`, nombres, bandera, color, `climate`, temperatura y al menos una unidad terrestre y otra aérea.
+2. Define su `boss` y su línea de diálogo en `FACTION_DIALOGUES`.
+3. Añade su clima a `CLIMATE_TOWER_MODS`, `CLIMATE_ICONS`, `CLIMATE_MUSIC` y a las claves `climate.*` de `I18N`.
+4. Si el clima necesita tinte visual, añade `.weather-overlay.climate-*` y `body.climate-*` en `index.html`.
+5. Comprueba que `factionByWave()` recorre el ciclo completo y que sus modelos se construyen sin errores.
+
+### Añadir una habilidad de estructura
+
+1. Añade la entrada a `TOWER_SPECIALS` con nombre bilingüe, icono, coste y recarga.
+2. Implementa su efecto en `activateTowerSpecial()`.
+3. Añade las claves `tower.special*` si el texto es nuevo.
 
 ### Añadir un ejército
 
@@ -351,6 +402,14 @@ Checklist manual:
 - Se puede construir en cualquier celda terrestre libre (incluidas las de decoración) y en toda la eslora naval válida; la vista previa ocupa la huella real.
 - Las mejoras cambian el modelo de la torre y no invaden celdas vecinas.
 - El ataque del portaaviones regresa a cubierta y la guerra electrónica hace retroceder a los drones.
+- Las oleadas mezclan tierra y aire según la etapa, el diálogo de facción cambia y el aviso de oleada muestra clima y balance.
+- Durante la oleada el arsenal queda bloqueado; al limpiarla vuelve a habilitarse.
+- Las rutas terrestres quedan centradas en las celdas de la calzada y las unidades mantienen desviación 0 respecto a la línea central.
+- Cada torre muestra su chip de clima y su habilidad especial cobra créditos y respeta la recarga.
+- Los jefes son más lentos que su tropa, aguantan más y su variante de música se activa en su oleada.
+- El emisor láser no brilla cuando no tiene objetivo.
+- Las velocidades `×4` y `×5` avanzan simulación y recargas sin errores.
 - Pausa → Reiniciar partida deja la partida a cero; cambiar de ejército también inicia una partida nueva.
+- La barra de apoyo permanece dentro del arsenal y no tapa estructuras ni el mapa.
 - En móvil vertical no hay solapamientos entre arsenal, habilidades y avisos.
 - La consola no muestra errores y el service worker sirve la versión nueva tras el despliegue.

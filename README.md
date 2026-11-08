@@ -1,90 +1,103 @@
 # Frente Global
 
-Juega en línea: https://wulflo.github.io/realtowerdefense/
+Play online: https://wulflo.github.io/realtowerdefense/
 
-Tower defense táctico con Three.js. Funciona en escritorio y como PWA instalable en Android, con soporte sin conexión.
+Tactical tower defense built with Three.js. It runs on desktop and as an installable Android PWA with offline support.
 
-Ocho doctrinas militares, nueve sistemas de torre, una pista terrestre de dos carriles, un corredor aéreo y un teatro naval donde desplegar destructores y portaaviones. Cada país usa modelos y nombres inspirados en su equipo real, y sus multiplicadores cambian daño, alcance y cadencia.
+Eight military doctrines, nine tower systems, a single two-lane ground road, an air corridor and a naval theater where you can deploy destroyers and aircraft carriers. Each country uses models and names inspired by its real equipment, and its multipliers change damage, range and rate of fire.
 
-Al entrar se elige idioma con las banderas de España y Estados Unidos. Toda la interfaz, facciones, torres, enemigos, ayudas y avisos están disponibles en español e inglés; el idioma se puede cambiar después desde Ajustes.
+Ten enemy factions rotate in four-wave cycles — three standard waves and their final boss. Every faction mixes ground and air units, and each wave shifts the ratio: the first presses on the ground, the second blends both domains and the third saturates the air corridor. Before every assault, the faction broadcasts a radio dialogue shown in the intel panel and in the wave banner.
 
-## Documentación
+On first launch you choose the language with the Spain and United States flags. The entire interface, factions, towers, enemies, help texts and notifications are available in Spanish and English; the language can be changed later from Settings.
 
-La arquitectura completa, el modelo de datos, la simulación, la internacionalización y la guía para ampliar el juego están en [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md).
+## Documentation
 
-## Jugar en local
+The full architecture, data model, simulation, internationalization and extension guide are in [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md) (Spanish).
+
+## Play locally
 
 ```bash
 python3 -m http.server 4173
 ```
 
-Abre `http://127.0.0.1:4173/`.
+Open `http://127.0.0.1:4173/`.
 
-No abras `index.html` con doble clic: el service worker y el manifiesto necesitan un servidor HTTP.
+Do not open `index.html` by double-clicking: the service worker and manifest require an HTTP server.
 
-## Controles
+## Controls
 
-| Acción | Teclado | Táctil |
+| Action | Keyboard | Touch |
 | --- | --- | --- |
-| Construir torre (terrestre o naval) | `1`–`9` | Toca una tarjeta del arsenal |
-| Iniciar oleada / pausa | `Espacio` | Botón «Iniciar oleada» |
-| Pausa | `P` | Botón ❚❚ |
-| Ataque aéreo | `Z` | Botón ✈ |
-| Pulso EMP | `X` | Botón ⌁ |
-| Reparar base | `C` | Botón ✚ |
-| Sonido | `M` | Botón ♪ |
-| Pantalla completa | `F` | Ajustes |
-| Cancelar selección | `Esc` | Botón «Cancelar» |
-| Reiniciar partida | — | Pausa → «Reiniciar partida» |
-| Mover cámara | `WASD` / flechas | Arrastrar con un dedo |
-| Rotar cámara | `Q` / `E` | Dos dedos |
-| Zoom | Rueda | Pellizcar / botones `+` `−` |
+| Build tower (land or naval) | `1`–`9` | Tap an arsenal card |
+| Start wave / pause | `Space` | “Start wave” button |
+| Pause | `P` | ❚❚ button |
+| Air strike | `Z` | ✈ button |
+| EMP pulse | `X` | ⌁ button |
+| Repair base | `C` | ✚ button |
+| Selected tower ability | `R` | Inspection panel button |
+| Simulation speed | — | `×1`–`×5` buttons |
+| Sound | `M` | ♪ button |
+| Fullscreen | `F` | Settings |
+| Cancel selection | `Esc` | “Cancel” button |
+| Restart game | — | Pause → “Restart game” |
+| Move camera | `WASD` / arrow keys | Drag with one finger |
+| Rotate camera | `Q` / `E` | Two fingers |
+| Zoom | Mouse wheel | Pinch / `+` `−` buttons |
 
-En móvil en vertical el arsenal pasa a una bandeja inferior deslizable. La app instalada se abre en horizontal para aprovechar el mapa.
+On portrait mobile the arsenal becomes a slide-up bottom tray. The installed app opens in landscape to make the most of the map.
 
-## Mecánicas
+## Mechanics
 
-- **Intel de oleada:** el panel derecho muestra composición enemiga, blindaje, escalado de HP/daño y nivel de amenaza antes de iniciar cada oleada.
-- **Escalado enemigo:** blindados, MLRS, drones y bombarderos se suman con las oleadas; las unidades veteranas y de élite aparecen más adelante con etiquetas propias.
-- **Prioridad de fuego:** cada torre puede apuntar al primero, al último, al más fuerte o al más cercano.
-- **Apoyo de mando:** ataque aéreo dirigido, EMP que ralentiza y repele drones y reparación de base, con coste y recarga.
-- **Pista única:** los enemigos terrestres comparten una calzada de dos carriles, con separación por carril para no solaparse. Las torres ocupan una celda y los modelos se ajustan a su huella.
-- **Mar:** destructores y portaaviones ocupan una huella de `2×2` celdas y solo se colocan en agua; cubren la pista terrestre cercana a la costa.
-- **Doctrinas:** los multiplicadores de cada facción afectan al daño, el alcance y la cadencia reales de las torres. Cambiar de facción inicia una partida nueva.
-- **Portaaviones:** cada ataque embarcado despega, impacta y regresa al portaaviones antes de desaparecer.
-- **Jefes:** aparecen cada cuatro oleadas (tres de facción y su jefe final). Los jefes castigan con fuego de represalia las estructuras que les disparan, degradan su nivel y las dejan aturdidas unos segundos; al llegar a la base arrasan antes las defensas que los hostigaron.
+- **Wave intel:** the right panel shows enemy composition, armor, HP/damage scaling, threat level, the faction dialogue and a visual balance of air and ground forces.
+- **Mixed waves:** every faction fields both ground and air troops. The ratio changes per stage, and the plan guarantees at least one unit of each available type.
+- **Enemy scaling:** armor, MLRS, drones and bombers join as waves progress; veteran and elite units appear later with their own labels. Wave size, spawn cadence, HP, damage, speed and armor all increase over time.
+- **Faction cycle:** cavemen, Spartans, Crusaders, pirates, WWI USA, Chinese hi-tech, zombies, aliens, demons and celestials. The infernal faction appears immediately before the celestial faction.
+- **Fire priority:** each tower can target the first, last, strongest or closest enemy.
+- **Command support:** targeted air strike, an EMP that slows and repels drones, and base repair, each with a credit cost and cooldown. The support bar is docked at the bottom of the arsenal so it never covers the map.
+- **Structure abilities:** every tower type has its own ability (burst, bombardment, salvo, interception, overcharge, blackout and more). Each one costs credits and has an independent cooldown. Activate it from the inspection panel or with `R`.
+- **Tactical climate:** each faction imposes a climate that modifies the damage, range and rate of fire of every structure. Towers display a badge with the active modifier and a colored ring (green for an advantage, red for a penalty, amber for mixed effects).
+- **Limited purchasing:** during a wave you cannot build or upgrade towers; the arsenal locks and becomes available again when the wave is cleared.
+- **Game pace:** the simulation can run at `×1`, `×2`, `×3`, `×4` or `×5` without changing balance or cooldowns.
+- **Single road:** ground enemies share a two-lane road, separated by lane so they do not overlap. Route points are snapped to cell centers, so units walk on the rendered asphalt rather than the edge of the tile. Towers occupy one cell and their models fit that footprint.
+- **Sea:** destroyers and aircraft carriers occupy a `2×2` cell footprint and can only be placed on water; they cover the ground road near the coast.
+- **Doctrines:** each faction's multipliers affect the real damage, range and rate of fire of its towers. Switching faction starts a new game.
+- **Aircraft carrier:** every embarked strike takes off, hits its target and returns to the carrier before disappearing.
+- **Bosses:** they appear every four waves (three faction waves and their final boss). Bosses are significantly tougher, hit harder and advance more slowly than regular troops. They retaliate against the structures that fire at them, degrade their level and stun them for a few seconds; when they reach the base they first devastate the defenses that harassed them.
+- **Difficulty curve:** early waves teach the basics; from wave 8 onward HP, damage, speed, wave size, veteran/elite odds and armor scaling accelerate, so the late game demands a complete defense.
+- **Laser visuals:** the laser emitter only glows while it is actually firing; when idle it stays dark and emits no light.
+- **Procedural audio:** sound effects and music are synthesized live with Web Audio. Each enemy faction has its own arrangement and every faction has a boss variation with faster tempo, a lower root, war drums, a deep pedal and a tritone accent. Five base tracks can also be selected manually.
 
 ## PWA
 
-- `manifest.webmanifest`: instalación, iconos y orientación.
-- `sw.js`: precache del shell (incluido `game.js`), navegación red-primero y recursos caché-primero.
-- Three.js está vendorizado en `vendor/three.min.js`, así que no hay dependencias externas.
-- Ajustes, récords, ejército e idioma se guardan en `localStorage`.
+- `manifest.webmanifest`: installation, icons and orientation.
+- `sw.js`: precaches the shell (including `game.js`), uses network-first navigation and cache-first assets.
+- Three.js is vendored in `vendor/three.min.js`, so there are no external dependencies.
+- Settings, records, army and language are stored in `localStorage`.
 
-## Publicar en GitHub Pages
+## Publishing to GitHub Pages
 
-1. Crea un repositorio en GitHub y sube este proyecto a la rama `main`.
-2. En el repositorio entra en **Settings → Pages** y elige **Source: GitHub Actions**.
-3. El workflow `.github/workflows/deploy.yml` se ejecuta en cada push a `main`.
-4. La URL pública aparecerá en **Settings → Pages** y en la pestaña **Actions**.
+1. Create a GitHub repository and push this project to the `main` branch.
+2. In the repository, open **Settings → Pages** and choose **Source: GitHub Actions**.
+3. The `.github/workflows/deploy.yml` workflow runs on every push to `main`.
+4. The public URL appears under **Settings → Pages** and in the **Actions** tab.
 
-No hacen falta secrets: GitHub Actions usa el token integrado y el permiso `pages: write` declarado en el workflow. El workflow sustituye `__BUILD__` en `sw.js` por el SHA del commit para invalidar la caché en cada despliegue.
+No secrets are required: GitHub Actions uses the built-in token and the declared `pages: write` permission. The workflow replaces `__BUILD__` in `sw.js` with the commit SHA to invalidate the cache on every deployment.
 
-## Estructura
+## Structure
 
 ```
-index.html              Shell, estilos y UI
-game.js                 Motor del juego: escena, modelos, oleadas, i18n y lógica
-manifest.webmanifest    Manifiesto PWA
+index.html              Shell, styles and UI
+game.js                 Game engine: scene, models, waves, i18n and logic
+manifest.webmanifest    PWA manifest
 sw.js                   Service worker
-vendor/three.min.js     Three.js r128 local
-icons/                  Iconos PWA (192, 512, maskable, Apple)
-docs/                   Documentación técnica
-.github/workflows/      Despliegue automático en GitHub Pages
+vendor/three.min.js     Local Three.js r128
+icons/                  PWA icons (192, 512, maskable, Apple)
+docs/                   Technical documentation
+.github/workflows/      Automatic GitHub Pages deployment
 ```
 
-## Notas
+## Notes
 
-- La calidad gráfica se adapta automáticamente; también puede fijarse en Ajustes.
-- El sonido se sintetiza con Web Audio, sin archivos de audio.
-- El progreso es local al dispositivo: no hay cuentas ni servidores.
+- Visual quality adapts automatically; it can also be fixed in Settings.
+- Effects and the soundtrack are synthesized with Web Audio, with no audio files or external licenses. There are five procedural base tracks (march, ambient, electronic, infernal and celestial), plus one arrangement per faction and a boss variation for each.
+- Progress is local to the device: there are no accounts or servers.

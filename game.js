@@ -98,6 +98,20 @@ const TOWERS = [
   { id: 'carrier', name: 'Portaaviones', nameEn: 'Aircraft carrier', icon: '✈', cost: 520, range: 12, damage: 46, rate: 5.6, targets: ['ground', 'air'], splash: 2.1, desc: 'Ataque aéreo embarcado de largo alcance', descEn: 'Long-range carrier air strike', domain: 'sea', pierce: .45 }
 ];
 
+// Habilidades especiales por tipo de estructura. Se pagan con créditos y
+// comparten la recarga de la torre seleccionada.
+const TOWER_SPECIALS = {
+  gun: { name: 'Ráfaga de supresión', nameEn: 'Suppression burst', desc: 'Barrido de balas trazadoras sobre toda la infantería en alcance', descEn: 'Tracer sweep over all infantry in range', icon: '✣', cost: 60, cooldown: 18 },
+  mortar: { name: 'Lluvia de mortero', nameEn: 'Mortar rain', desc: 'Batería de proyectiles en área sobre objetivos terrestres', descEn: 'Area shell battery on ground targets', icon: '◒', cost: 80, cooldown: 20 },
+  art: { name: 'Barrera de fuego', nameEn: 'Fire barrage', desc: 'Impacto masivo de artillería con gran radio de explosión', descEn: 'Massive artillery impact with a wide blast radius', icon: '◉', cost: 100, cooldown: 24 },
+  rocket: { name: 'Salva total', nameEn: 'Full salvo', desc: 'Descarga completa de cohetes sobre múltiples objetivos', descEn: 'Full rocket volley across multiple targets', icon: '⌁', cost: 120, cooldown: 26 },
+  aa: { name: 'Intercepción total', nameEn: 'Total interception', desc: 'Misiles guiados contra todas las aeronaves en alcance', descEn: 'Guided missiles against every aircraft in range', icon: '⌃', cost: 90, cooldown: 20 },
+  laser: { name: 'Sobrecarga de haz', nameEn: 'Beam overcharge', desc: 'Barrido de energía dirigida con penetración total', descEn: 'Directed-energy sweep with full penetration', icon: '⌇', cost: 110, cooldown: 22 },
+  ew: { name: 'Apagón electrónico', nameEn: 'Electronic blackout', desc: 'Ralentiza y repele a todos los enemigos del área', descEn: 'Slows and repels every enemy in the area', icon: '⌘', cost: 85, cooldown: 24 },
+  destroyer: { name: 'Bombardeo naval', nameEn: 'Naval bombardment', desc: 'Salva de misiles de crucero contra objetivos múltiples', descEn: 'Cruise missile salvo against multiple targets', icon: '⚓', cost: 140, cooldown: 30 },
+  carrier: { name: 'Oleada aérea', nameEn: 'Air wing', desc: 'Tres ataques embarcados simultáneos de largo alcance', descEn: 'Three simultaneous long-range carrier strikes', icon: '✈', cost: 160, cooldown: 34 }
+};
+
 /* --------------------------------------------------------------- facciones enemigas */
 // Cada ola pertenece a una facción. Cada facción tiene tropas comunes y un jefe final
 // que aparece cada 3 olas de esa facción y puede dañar estructuras colocadas.
@@ -108,7 +122,8 @@ const ENEMY_FACTIONS = [
     units: [
       { id: 'clubber', name: 'Portagarzos', kind: 'ground', hp: 70, speed: 0.85, reward: 16, radius: .2, color: 0x8b7355, damage: 6, armor: .1, tier: 1, desc: 'Garzó de piedra', counter: 'mortar' },
       { id: 'brute', name: 'Bruto cavernícola', kind: 'ground', hp: 200, speed: 0.6, reward: 32, radius: .3, color: 0x6b5545, damage: 12, armor: .35, tier: 2, desc: 'Fuerza bruta', counter: 'art' },
-      { id: 'shaman', name: 'Chamán', kind: 'ground', hp: 100, speed: 0.9, reward: 24, radius: .22, color: 0x5d4a3a, damage: 5, armor: .08, tier: 2, desc: 'Magia primitiva', counter: 'laser' }
+      { id: 'shaman', name: 'Chamán', kind: 'ground', hp: 100, speed: 0.9, reward: 24, radius: .22, color: 0x5d4a3a, damage: 5, armor: .08, tier: 2, desc: 'Magia primitiva', counter: 'laser' },
+      { id: 'pterodactyl', name: 'Pterodáctilo de guerra', nameEn: 'War pterodactyl', kind: 'air', hp: 120, speed: 2.0, reward: 30, radius: .26, color: 0x7a6248, damage: 10, armor: .05, tier: 2, desc: 'Jinete de las alturas', descEn: 'High-altitude rider', counter: 'aa' }
     ],
     boss: { id: 'cavemenBoss', name: 'Jefe Cavernícola', kind: 'ground', hp: 3500, speed: 0.5, reward: 450, radius: .85, color: 0x4a352a, damage: 35, armor: .55, tier: 5, desc: 'Jefe de facción', boss: true, structureDamage: 20, counter: 'laser' }
   },
@@ -118,7 +133,8 @@ const ENEMY_FACTIONS = [
     units: [
       { id: 'hoplite', name: 'Hoplita gigante', kind: 'ground', hp: 140, speed: 0.75, reward: 20, radius: .25, color: 0xa67c52, damage: 9, armor: .25, tier: 1, desc: 'Lanza y escudo', counter: 'mortar' },
       { id: 'spartan', name: 'Espartano élite', kind: 'ground', hp: 260, speed: 0.9, reward: 40, radius: .3, color: 0x8b5a3c, damage: 15, armor: .4, tier: 3, desc: 'Guerrero legendario', counter: 'rocket' },
-      { id: 'spearman', name: 'Lancero', kind: 'ground', hp: 110, speed: 1.0, reward: 18, radius: .22, color: 0x9a7048, damage: 8, armor: .18, tier: 1, desc: 'Larga lanza', counter: 'gun' }
+      { id: 'spearman', name: 'Lancero', kind: 'ground', hp: 110, speed: 1.0, reward: 18, radius: .22, color: 0x9a7048, damage: 8, armor: .18, tier: 1, desc: 'Larga lanza', counter: 'gun' },
+      { id: 'pegasus', name: 'Jinete de Pegaso', nameEn: 'Pegasus rider', kind: 'air', hp: 150, speed: 2.1, reward: 34, radius: .27, color: 0xc9a35a, damage: 12, armor: .1, tier: 3, desc: 'Caballería alada', descEn: 'Winged cavalry', counter: 'aa' }
     ],
     boss: { id: 'spartanBoss', name: 'Rey Espartano', kind: 'ground', hp: 4500, speed: 0.65, reward: 550, radius: .9, color: 0x6b4a2e, damage: 45, armor: .6, tier: 5, desc: 'Jefe de facción', boss: true, structureDamage: 25, counter: 'art' }
   },
@@ -128,7 +144,8 @@ const ENEMY_FACTIONS = [
     units: [
       { id: 'crusader', name: 'Soldado cruzado', kind: 'ground', hp: 100, speed: 0.8, reward: 18, radius: .23, color: 0x8b4513, damage: 8, armor: .15, tier: 1, desc: 'Con bandera y espada', counter: 'rocket' },
       { id: 'knight', name: 'Caballero templario', kind: 'ground', hp: 300, speed: 0.65, reward: 42, radius: .32, color: 0x5a2d0c, damage: 18, armor: .45, tier: 3, desc: 'Blindaje de platesa', counter: 'art' },
-      { id: 'archer', name: 'Arquero cruzado', kind: 'ground', hp: 85, speed: 1.1, reward: 22, radius: .2, color: 0x7a3c10, damage: 7, armor: .05, tier: 1, desc: 'Arco largo', counter: 'rocket' }
+      { id: 'archer', name: 'Arquero cruzado', kind: 'ground', hp: 85, speed: 1.1, reward: 22, radius: .2, color: 0x7a3c10, damage: 7, armor: .05, tier: 1, desc: 'Arco largo', counter: 'rocket' },
+      { id: 'gryphon', name: 'Grifo cruzado', nameEn: 'Crusader gryphon', kind: 'air', hp: 180, speed: 1.8, reward: 36, radius: .3, color: 0xd4c6a0, damage: 14, armor: .15, tier: 3, desc: 'Bestia sagrada', descEn: 'Sacred beast', counter: 'aa' }
     ],
     boss: { id: 'crusaderBoss', name: 'Señor Cruzado', kind: 'ground', hp: 5000, speed: 0.7, reward: 600, radius: .95, color: 0x4a1e08, damage: 50, armor: .65, tier: 5, desc: 'Jefe de facción', boss: true, structureDamage: 30, counter: 'laser' }
   },
@@ -138,7 +155,8 @@ const ENEMY_FACTIONS = [
     units: [
       { id: 'cutlass', name: 'Pirata con sable', kind: 'ground', hp: 90, speed: 1.0, reward: 17, radius: .22, color: 0x2c3e50, damage: 7, armor: .1, tier: 1, desc: 'A abordaje', counter: 'gun' },
       { id: 'cannoneer', name: 'Artillero pirata', kind: 'ground', hp: 160, speed: 0.7, reward: 30, radius: .28, color: 0x1a2530, damage: 14, armor: .2, tier: 2, desc: 'Disparo de cañón', counter: 'mortar' },
-      { id: 'buccaneer', name: 'Bucanero', kind: 'ground', hp: 130, speed: 1.2, reward: 26, radius: .24, color: 0x3d4e5f, damage: 10, armor: .12, tier: 2, desc: 'Rápido y peligroso', counter: 'gun' }
+      { id: 'buccaneer', name: 'Bucanero', kind: 'ground', hp: 130, speed: 1.2, reward: 26, radius: .24, color: 0x3d4e5f, damage: 10, armor: .12, tier: 2, desc: 'Rápido y peligroso', counter: 'gun' },
+      { id: 'airship', name: 'Dirigible pirata', nameEn: 'Pirate airship', kind: 'air', hp: 260, speed: 1.1, reward: 44, radius: .4, color: 0x3a4a5a, damage: 16, armor: .18, tier: 3, desc: 'Bombardeo desde las nubes', descEn: 'Bombing from the clouds', counter: 'aa' }
     ],
     boss: { id: 'pirateBoss', name: 'Capitán Pirata', kind: 'ground', hp: 4200, speed: 0.8, reward: 520, radius: .9, color: 0x0f1a25, damage: 40, armor: .5, tier: 5, desc: 'Jefe de facción', boss: true, structureDamage: 28, counter: 'rocket' }
   },
@@ -148,7 +166,8 @@ const ENEMY_FACTIONS = [
     units: [
       { id: 'doughboy', name: 'Infante estadounidense', kind: 'ground', hp: 85, speed: 0.9, reward: 15, radius: .2, color: 0x4a5568, damage: 7, armor: .08, tier: 1, desc: 'Trinchera 1918', counter: 'mortar' },
       { id: 'doughboyMG', name: 'Fusilero ametralladora', kind: 'ground', hp: 130, speed: 0.8, reward: 25, radius: .24, color: 0x3d4854, damage: 11, armor: .15, tier: 2, desc: 'Fuego de supresión', counter: 'art' },
-      { id: 'doughboyTank', name: 'Tanque ligero Renault', kind: 'ground', hp: 320, speed: 0.55, reward: 45, radius: .35, color: 0x5a6472, damage: 20, armor: .45, tier: 3, desc: 'Blindaje ligero', counter: 'rocket' }
+      { id: 'doughboyTank', name: 'Tanque ligero Renault', kind: 'ground', hp: 320, speed: 0.55, reward: 45, radius: .35, color: 0x5a6472, damage: 20, armor: .45, tier: 3, desc: 'Blindaje ligero', counter: 'rocket' },
+      { id: 'biplane', name: 'Biplano de reconocimiento', nameEn: 'Reconnaissance biplane', kind: 'air', hp: 130, speed: 2.6, reward: 30, radius: .24, color: 0x8a8258, damage: 9, armor: .05, tier: 2, desc: 'Aviación de 1918', descEn: '1918 aviation', counter: 'aa' }
     ],
     boss: { id: 'wwiBoss', name: 'Sargento Pershing', kind: 'ground', hp: 4800, speed: 0.7, reward: 580, radius: .95, color: 0x2d3a48, damage: 42, armor: .58, tier: 5, desc: 'Jefe de facción', boss: true, structureDamage: 32, counter: 'laser' }
   },
@@ -170,7 +189,8 @@ const ENEMY_FACTIONS = [
     units: [
       { id: 'walker', name: 'Caminante', kind: 'ground', hp: 250, speed: 0.7, reward: 14, radius: .24, color: 0x556b2f, damage: 9, armor: .2, tier: 1, desc: 'Superresistencia', counter: 'gun' },
       { id: 'runner', name: 'Corredor', kind: 'ground', hp: 120, speed: 2.2, reward: 20, radius: .2, color: 0x4a5a28, damage: 7, armor: .05, tier: 2, desc: 'Supervelocidad', counter: 'mortar' },
-      { id: 'tankZombie', name: 'Zombie blindado', kind: 'ground', hp: 500, speed: 0.85, reward: 40, radius: .35, color: 0x3d4a22, damage: 16, armor: .45, tier: 3, desc: 'Carne y metal', counter: 'rocket' }
+      { id: 'tankZombie', name: 'Zombie blindado', kind: 'ground', hp: 500, speed: 0.85, reward: 40, radius: .35, color: 0x3d4a22, damage: 16, armor: .45, tier: 3, desc: 'Carne y metal', counter: 'rocket' },
+      { id: 'mutantBat', name: 'Murciélago mutante', nameEn: 'Mutant bat', kind: 'air', hp: 110, speed: 2.8, reward: 24, radius: .2, color: 0x6a5a3a, damage: 7, armor: .02, tier: 2, desc: 'Enjambre nocturno', descEn: 'Night swarm', counter: 'aa' }
     ],
     boss: { id: 'zombieBoss', name: 'Zombie Colosal', kind: 'ground', hp: 7000, speed: 1.1, reward: 800, radius: 1.1, color: 0x2d3a18, damage: 50, armor: .75, tier: 5, desc: 'Jefe de facción', boss: true, structureDamage: 40, counter: 'art' }
   },
@@ -180,9 +200,22 @@ const ENEMY_FACTIONS = [
     units: [
       { id: 'scout', name: 'OVNIs explorador', kind: 'air', hp: 110, speed: 2.0, reward: 28, radius: .22, color: 0x4a90e2, damage: 9, armor: .08, tier: 2, desc: 'Reconocimiento alien', counter: 'aa' },
       { id: 'interceptor', name: 'OVNIs interceptores', kind: 'air', hp: 180, speed: 3.5, reward: 42, radius: .26, color: 0x2c5aa0, damage: 14, armor: .12, tier: 3, desc: 'Interceptación hipersónica', counter: 'laser' },
-      { id: 'mothershipScout', name: 'Nave nodriza menor', kind: 'air', hp: 300, speed: 1.5, reward: 55, radius: .4, color: 0x1a3a6a, damage: 20, armor: .25, tier: 4, desc: 'Hipertecnología avanzada', counter: 'ew' }
+      { id: 'mothershipScout', name: 'Nave nodriza menor', kind: 'air', hp: 300, speed: 1.5, reward: 55, radius: .4, color: 0x1a3a6a, damage: 20, armor: .25, tier: 4, desc: 'Hipertecnología avanzada', counter: 'ew' },
+      { id: 'abductor', name: 'Saqueador alienígena', nameEn: 'Alien raider', kind: 'ground', hp: 200, speed: 1.0, reward: 34, radius: .26, color: 0x5a8ac0, damage: 14, armor: .2, tier: 3, desc: 'Infantería de asalto', descEn: 'Assault infantry', counter: 'gun' },
+      { id: 'tripod', name: 'Trípode de asedio', nameEn: 'Siege tripod', kind: 'ground', hp: 500, speed: 0.65, reward: 60, radius: .4, color: 0x2c5aa0, damage: 22, armor: .4, tier: 4, desc: 'Blindaje alienígena', descEn: 'Alien armor', counter: 'rocket' }
     ],
     boss: { id: 'ufoBoss', name: 'Nave Madre Alienígena', kind: 'air', hp: 8000, speed: 1.8, reward: 900, radius: 1.2, color: 0x0a1a4a, damage: 60, armor: .8, tier: 5, desc: 'Jefe de facción', boss: true, structureDamage: 45, counter: 'aa' }
+  },
+  {
+    id: 'demons', name: 'Demonios', nameEn: 'Demons', flag: '😈', color: 0x8b1a1a,
+    climate: 'infernal', tempC: 45, tempF: 113,
+    units: [
+      { id: 'imp', name: 'Diablillo', nameEn: 'Imp', kind: 'ground', hp: 110, speed: 1.2, reward: 20, radius: .2, color: 0xb33a2a, damage: 9, armor: .08, tier: 2, desc: 'Legión menor', descEn: 'Lesser legion', counter: 'gun' },
+      { id: 'hellKnight', name: 'Caballero infernal', nameEn: 'Hell knight', kind: 'ground', hp: 340, speed: 0.8, reward: 46, radius: .34, color: 0x6b1414, damage: 20, armor: .5, tier: 3, desc: 'Armadura de obsidiana', descEn: 'Obsidian armor', counter: 'rocket' },
+      { id: 'demonWing', name: 'Ala infernal', nameEn: 'Infernal wing', kind: 'air', hp: 160, speed: 2.4, reward: 32, radius: .24, color: 0xd04a2a, damage: 12, armor: .1, tier: 3, desc: 'Cazador de los cielos', descEn: 'Sky hunter', counter: 'aa' },
+      { id: 'hellBomber', name: 'Bombardero abisal', nameEn: 'Abyssal bomber', kind: 'air', hp: 420, speed: 1.3, reward: 70, radius: .4, color: 0x4a0a0a, damage: 24, armor: .2, tier: 4, desc: 'Fuego del abismo', descEn: 'Abyssal fire', counter: 'laser' }
+    ],
+    boss: { id: 'demonBoss', name: 'Señor de la Guerra Infernal', nameEn: 'Infernal Warlord', kind: 'ground', hp: 9200, speed: 0.8, reward: 1000, radius: 1.15, color: 0x3a0505, damage: 65, armor: .82, tier: 5, desc: 'Jefe de facción', boss: true, structureDamage: 48, counter: 'laser' }
   },
   {
     id: 'celestials', name: 'Seres Celestiales', nameEn: 'Celestials', flag: '✨', color: 0xfdd835,
@@ -190,11 +223,86 @@ const ENEMY_FACTIONS = [
     units: [
       { id: 'angel', name: 'Ángel mensajero', kind: 'air', hp: 160, speed: 1.8, reward: 32, radius: .24, color: 0xfdd835, damage: 12, armor: .15, tier: 3, desc: 'Luz celestial', counter: 'aa' },
       { id: 'archon', name: 'Arconte', kind: 'air', hp: 280, speed: 2.2, reward: 48, radius: .3, color: 0xe6c200, damage: 18, armor: .3, tier: 4, desc: 'Ser de energía', counter: 'laser' },
-      { id: 'seraph', name: 'Serafín', kind: 'air', hp: 420, speed: 1.5, reward: 65, radius: .4, color: 0xffe066, damage: 25, armor: .4, tier: 5, desc: 'Ser supremo', counter: 'ew' }
+      { id: 'seraph', name: 'Serafín', kind: 'air', hp: 420, speed: 1.5, reward: 65, radius: .4, color: 0xffe066, damage: 25, armor: .4, tier: 5, desc: 'Ser supremo', counter: 'ew' },
+      { id: 'guardian', name: 'Guardián celestial', nameEn: 'Celestial guardian', kind: 'ground', hp: 300, speed: 0.9, reward: 44, radius: .3, color: 0xf0d060, damage: 16, armor: .35, tier: 4, desc: 'Centinela del santuario', descEn: 'Sanctuary sentinel', counter: 'rocket' }
     ],
     boss: { id: 'celestialBoss', name: 'Ser Supremo', kind: 'air', hp: 10000, speed: 2.0, reward: 1100, radius: 1.3, color: 0xfff200, damage: 70, armor: .85, tier: 5, desc: 'Jefe de facción', boss: true, structureDamage: 50, counter: 'aa' }
   }
 ];
+
+// Diálogos de radio enemiga antes de cada oleada (se muestran en el panel de
+// inteligencia y en el aviso de oleada). Cada facción tiene tres líneas normales
+// y una línea especial para su jefe final.
+const FACTION_DIALOGUES = {
+  cavemen: {
+    lines: ['Fuego, piedra y garrotes. Vuestra base caerá.', 'La tribu ha despertado... y tiene hambre.', 'El chamán ha leído vuestro final en los huesos.'],
+    linesEn: ['Fire, stone and clubs. Your base will fall.', 'The tribe has awakened... and it is hungry.', 'The shaman has read your end in the bones.'],
+    boss: 'La montaña tiembla. El Jefe Cavernícola marcha a la cabeza.',
+    bossEn: 'The mountain trembles. The Caveman Chief marches at the front.'
+  },
+  spartans: {
+    lines: ['Esto no es una batalla. Es una lección de disciplina.', 'Nuestros escudos no conocen la retirada.', 'Cada lanza espartana busca un hueco en vuestra línea.'],
+    linesEn: ['This is not a battle. It is a lesson in discipline.', 'Our shields know no retreat.', 'Every Spartan spear seeks a gap in your line.'],
+    boss: 'El Rey Espartano ha desenvainado. Que los cobardes huyan.',
+    bossEn: 'The Spartan King has drawn his blade. Let cowards flee.'
+  },
+  crusaders: {
+    lines: ['La fe es nuestra armadura. Vuestra base será el altar.', 'Los estandartes avanzan bajo un cielo de acero.', 'No pedimos clemencia. No la concedemos.'],
+    linesEn: ['Faith is our armor. Your base shall be the altar.', 'The banners advance under a steel sky.', 'We ask no mercy. We grant none.'],
+    boss: 'El Señor Cruzado alza la espada. La cruzada final comienza.',
+    bossEn: 'The Crusader Lord raises his sword. The final crusade begins.'
+  },
+  pirates: {
+    lines: ['Vuestro oro y vuestra pólvora ya tienen dueño.', 'Cargad los cañones. Saquearemos hasta el último muro.', 'El capitán ha puesto precio a vuestra bandera.'],
+    linesEn: ['Your gold and powder already have an owner.', 'Load the cannons. We will plunder every last wall.', 'The captain has put a price on your flag.'],
+    boss: 'El Capitán Pirata iza la calavera. ¡Abordaje!',
+    bossEn: 'The Pirate Captain raises the skull. Board them!'
+  },
+  wwi: {
+    lines: ['La artillería pesada abre el camino. Mantened la formación.', 'Vuestra línea está a tiro. Ajustad las miras.', '1918 ha llegado a este frente con acero y gas.'],
+    linesEn: ['Heavy artillery clears the way. Hold formation.', 'Your line is in range. Adjust your sights.', '1918 has reached this front with steel and gas.'],
+    boss: 'El Sargento Pershing ordena el asalto final. Que retumbe el frente.',
+    bossEn: 'Sergeant Pershing orders the final assault. Let the front thunder.'
+  },
+  chinaTech: {
+    lines: ['Redes neuronales ya han simulado vuestra derrota.', 'Drones y mechas avanzan en sincronía perfecta.', 'La tecnología no duda. La carne sí.'],
+    linesEn: ['Neural networks have already simulated your defeat.', 'Drones and mechs advance in perfect sync.', 'Technology does not hesitate. Flesh does.'],
+    boss: 'El Comandante Mecha ha despertado. Iniciad el protocolo de aniquilación.',
+    bossEn: 'The Mech Commander has awakened. Initiate annihilation protocol.'
+  },
+  zombies: {
+    lines: ['La horda no siente dolor. Solo hambre.', 'El aire radiactivo ya está aquí. Corred, si podéis.', 'Cada caído se levanta. Vuestra munición no es infinita.'],
+    linesEn: ['The horde feels no pain. Only hunger.', 'Radioactive air is here. Run, if you can.', 'Every fallen soldier rises. Your ammo is not infinite.'],
+    boss: 'El Zombie Colosal arrasa el horizonte. La horda ruge.',
+    bossEn: 'The Colossal Zombie blots the horizon. The horde roars.'
+  },
+  ufos: {
+    lines: ['Hemos catalogado vuestras defensas. Son... pintorescas.', 'El cielo pertenece a quienes lo comprenden.', 'La abducción comenzará por vuestra base.'],
+    linesEn: ['We have catalogued your defenses. They are... quaint.', 'The sky belongs to those who understand it.', 'The abduction will begin with your base.'],
+    boss: 'La Nave Madre alienígena ha entrado en órbita baja. No hay refugio.',
+    bossEn: 'The Alien Mothership has entered low orbit. There is no shelter.'
+  },
+  demons: {
+    lines: ['El abismo ha abierto sus puertas. Vuestra base huele a miedo.', 'Legiones de fuego han cruzado el velo. No hay vuelta atrás.', 'Cada alma en esa base arderá en nuestro nombre.'],
+    linesEn: ['The abyss has opened its gates. Your base smells of fear.', 'Fire legions have crossed the veil. There is no going back.', 'Every soul in that base will burn in our name.'],
+    boss: 'El Señor de la Guerra Infernal desciende. Las murallas se agrietan.',
+    bossEn: 'The Infernal Warlord descends. The walls crack.'
+  },
+  celestials: {
+    lines: ['La luz no negocia con la oscuridad de vuestras máquinas.', 'Hemos visto el fin de vuestros siglos y no os incluye.', 'Nuestro coro no canta victorias. Pronuncia juicios.'],
+    linesEn: ['Light does not negotiate with the darkness of your machines.', 'We have seen the end of your centuries, and you are not in it.', 'Our choir does not sing victories. It pronounces judgment.'],
+    boss: 'El Ser Supremo desciende. Todo lo que alzasteis será humo.',
+    bossEn: 'The Supreme Being descends. Everything you raised shall become smoke.'
+  }
+};
+function factionDialogue(fac, wave, boss) {
+  const d = FACTION_DIALOGUES[fac.id];
+  if (!d) return '';
+  if (boss) return settings.language === 'en' ? (d.bossEn || d.boss) : d.boss;
+  const stage = waveInFaction(wave);
+  const lines = settings.language === 'en' ? (d.linesEn || d.lines) : d.lines;
+  return lines[Math.max(0, Math.min(lines.length - 1, stage - 1))] || '';
+}
 
 // Traducciones de apoyo para las tropas de facción (el resto de datos ya es bilingüe).
 const ENEMY_EN = {
@@ -206,7 +314,11 @@ const ENEMY_EN = {
   cyberSoldier: 'Cyber soldier', droneSoldier: 'Drone soldier', mech: 'Combat mech', chinaTechBoss: 'Mech Commander',
   walker: 'Walker', runner: 'Runner', tankZombie: 'Armored zombie', zombieBoss: 'Colossal zombie',
   scout: 'UFO scout', interceptor: 'UFO interceptor', mothershipScout: 'Lesser mothership', ufoBoss: 'Alien mothership',
-  angel: 'Messenger angel', archon: 'Archon', seraph: 'Seraph', celestialBoss: 'Supreme Being'
+  angel: 'Messenger angel', archon: 'Archon', seraph: 'Seraph', celestialBoss: 'Supreme Being',
+  pterodactyl: 'War pterodactyl', pegasus: 'Pegasus rider', gryphon: 'Crusader gryphon', airship: 'Pirate airship',
+  biplane: 'Reconnaissance biplane', mutantBat: 'Mutant bat', abductor: 'Alien raider', tripod: 'Siege tripod',
+  imp: 'Imp', hellKnight: 'Hell knight', demonWing: 'Infernal wing', hellBomber: 'Abyssal bomber', demonBoss: 'Infernal Warlord',
+  guardian: 'Celestial guardian'
 };
 for (const fac of ENEMY_FACTIONS) {
   if (!fac.nameEn) fac.nameEn = fac.name;
@@ -254,9 +366,19 @@ const ROUTES = [
     ]
   }
 ];
+// La calzada se dibuja en el centro de sus celdas. Los puntos de ruta se
+// normalizan a ese mismo centro para que las unidades caminen sobre el asfalto
+// y no por el borde de la celda (donde un carril quedaría sobre la hierba).
+for (const route of ROUTES) {
+  route.points = route.points.map(([x, z]) => {
+    const cell = worldCell(x, z);
+    const center = cellCenter(cell.x, cell.z);
+    return [center.x, center.z];
+  });
+}
 const AIR_ROUTE = { id: 'air', name: 'Corredor aéreo', nameEn: 'Air corridor', points: [[-21, -10], [-14, -11], [-6, -10], [2, -8], [10, -6], [18, -4], [13.5, -1.5]] };
 
-const APP_VERSION = '2.6.0';
+const APP_VERSION = '2.7.0';
 const STORE_SETTINGS = 'frente-global:settings:v1';
 const STORE_RECORDS = 'frente-global:records:v1';
 function loadStore(key, fallback) {
@@ -264,8 +386,9 @@ function loadStore(key, fallback) {
   catch { return { ...fallback }; }
 }
 const DEFAULT_LANGUAGE = (navigator.language || 'es').toLowerCase().startsWith('en') ? 'en' : 'es';
-const settings = loadStore(STORE_SETTINGS, { quality: 'auto', sound: true, volume: .65, army: 0, labels: true, language: DEFAULT_LANGUAGE });
+const settings = loadStore(STORE_SETTINGS, { quality: 'auto', sound: true, volume: .65, music: true, musicTrack: 'auto', army: 0, labels: true, language: DEFAULT_LANGUAGE });
 if (settings.language !== 'en' && settings.language !== 'es') settings.language = DEFAULT_LANGUAGE;
+if (!['auto', 'march', 'ambient', 'electronic', 'infernal', 'celestial'].includes(settings.musicTrack)) settings.musicTrack = 'auto';
 const records = loadStore(STORE_RECORDS, { bestWave: 0, bestScore: 0, totalKills: 0, plays: 0 });
 function persistSettings() { try { localStorage.setItem(STORE_SETTINGS, JSON.stringify(settings)); } catch { } }
 function persistRecords() { try { localStorage.setItem(STORE_RECORDS, JSON.stringify(records)); } catch { } }
@@ -283,6 +406,7 @@ const I18N = {
     'action.fullscreen': 'Pantalla completa (F)', 'action.exitFullscreen': 'Salir de pantalla completa (F)', 'action.settings': 'Ajustes',
     'build.kicker': 'Arsenal de campo', 'build.title': 'Construir',
     'build.hint': 'Sistemas terrestres y navales. Elige uno y colócalo en una casilla libre. Teclas 1–9. Esc cancela.',
+    'build.hintLocked': 'Arsenal bloqueado durante el combate. Compra y mejora entre oleadas.', 'build.lockedShort': 'BLOQUEADO',
     'inspect.kicker': 'Control táctico', 'inspect.title': 'Inspección',
     'inspect.empty': 'Selecciona una torre del mapa para ver sus parámetros y órdenes disponibles.',
     'wave.start': 'Iniciar oleada', 'zoom.out': 'Alejar cámara', 'zoom.in': 'Acercar cámara', 'common.cancel': 'Cancelar',
@@ -291,7 +415,7 @@ const I18N = {
     'waveBanner.boss': 'JEFE FINAL', 'waveBanner.stage': 'Oleada {stage} de {total}', 'waveBanner.climate': '{climate} · {temp}°C',
     'waveBanner.incoming': 'Nueva facción detectada', 'waveBanner.escorts': 'Escolta: {n} unidades',
     'climate.templado': 'Templado', 'climate.caluroso': 'Caluroso', 'climate.tropical': 'Tropical', 'climate.frío': 'Frío',
-    'climate.radiactivo': 'Radiactivo', 'climate.desconocido': 'Desconocido', 'climate.divino': 'Divino',
+    'climate.radiactivo': 'Radiactivo', 'climate.desconocido': 'Desconocido', 'climate.infernal': 'Infernal', 'climate.divino': 'Divino',
     'ability.strike': 'Ataque aéreo', 'ability.strikeHint': 'Z · 120 cr', 'ability.strikeTitle': 'Ataque aéreo (Z) · 120 créditos',
     'ability.emp': 'Pulso EMP', 'ability.empHint': 'X · 90 cr', 'ability.empTitle': 'Pulso EMP (X) · 90 créditos',
     'ability.repair': 'Reparar base', 'ability.repairHint': 'C · 80 cr', 'ability.repairTitle': 'Reparar base (C) · 80 créditos',
@@ -313,6 +437,10 @@ const I18N = {
     'settings.language': 'Idioma', 'settings.languageHint': 'Cambia el idioma de la interfaz al instante.',
     'settings.quality': 'Calidad gráfica', 'quality.auto': 'Automática', 'quality.high': 'Alta', 'quality.medium': 'Media', 'quality.low': 'Baja',
     'settings.sound': 'Sonido', 'settings.soundHint': 'Efectos sintetizados, sin descargas.',
+    'settings.music': 'Música', 'settings.musicHint': 'Banda sonora procedural distinta por facción, con variación de jefe. Sin archivos externos.',
+    'settings.musicTrack': 'Pista musical',
+    'music.auto': 'Automática (facción y jefe)', 'music.march': 'Marcha de acero', 'music.ambient': 'Horizonte de ceniza',
+    'music.electronic': 'Protocolo neón', 'music.infernal': 'Cántico abisal', 'music.celestial': 'Coro de luz',
     'settings.labels': 'Etiquetas enemigas', 'settings.labelsHint': 'Muestra el tipo y el rango de veterano o élite sobre cada unidad.',
     'settings.volume': 'Volumen', 'settings.fullscreen': 'Pantalla completa', 'settings.fullscreenHint': 'Útil en escritorio y Android.',
     'settings.fullscreenUnavailable': 'Tu navegador no permite pantalla completa.',
@@ -321,7 +449,7 @@ const I18N = {
     'settings.installHintBrowser': 'Abre el menú del navegador y elige «Añadir a pantalla de inicio» para instalar.',
     'settings.progress': 'Progreso local', 'settings.progressHint': 'Récords y preferencias se guardan en este dispositivo.',
     'settings.reset': 'Borrar récord', 'settings.modeInstalled': 'instalada', 'settings.modeBrowser': 'navegador',
-    'settings.shortcutsHtml': '<b>Teclado</b><br><kbd>1</kbd>–<kbd>9</kbd> construir · <kbd>Espacio</kbd> oleada/pausa · <kbd>P</kbd> pausa<br><kbd>Z</kbd> ataque aéreo · <kbd>X</kbd> EMP · <kbd>C</kbd> reparar base<br><kbd>M</kbd> sonido · <kbd>F</kbd> pantalla completa · <kbd>Esc</kbd> cancelar<br><kbd>WASD</kbd>/flechas mover cámara · <kbd>Q</kbd><kbd>E</kbd> rotar · rueda zoom<br><b>Táctil:</b> un dedo desplaza, dos dedos hacen zoom, toca para construir.<br><b>Mar:</b> destructores y portaaviones se despliegan en el agua.',
+    'settings.shortcutsHtml': '<b>Teclado</b><br><kbd>1</kbd>–<kbd>9</kbd> construir · <kbd>Espacio</kbd> oleada/pausa · <kbd>P</kbd> pausa<br><kbd>Z</kbd> ataque aéreo · <kbd>X</kbd> EMP · <kbd>C</kbd> reparar base · <kbd>R</kbd> habilidad de la torre<br><kbd>M</kbd> sonido · <kbd>F</kbd> pantalla completa · <kbd>Esc</kbd> cancelar<br><kbd>WASD</kbd>/flechas mover cámara · <kbd>Q</kbd><kbd>E</kbd> rotar · rueda zoom<br><b>Táctil:</b> un dedo desplaza, dos dedos hacen zoom, toca para construir.<br><b>Mar:</b> destructores y portaaviones se despliegan en el agua.',
     'install.button': 'Instalar', 'update.available': 'Nueva versión disponible', 'update.reload': 'Actualizar',
     'quality.hintAuto': 'Automática: {level} en este dispositivo.', 'quality.hintForced': 'Forzada: {level}{shadows}.',
     'quality.withShadows': ', con sombras', 'quality.withoutShadows': ', sin sombras',
@@ -334,6 +462,9 @@ const I18N = {
     'tower.naval': 'Naval', 'tower.domainSea': 'MAR', 'tower.domainLand': 'TIE',
     'tower.title': '{name} · alcance {range} · tecla {key}',
     'tower.mode.first': 'Primero', 'tower.mode.last': 'Último', 'tower.mode.strong': 'Más fuerte', 'tower.mode.close': 'Más cercano',
+    'tower.climate': 'Clima', 'tower.special': 'Habilidad especial', 'tower.specialCost': '{cost} cr',
+    'tower.specialReady': 'Lista', 'tower.specialCd': 'Recarga {s} s',
+    'mod.damage': 'daño', 'mod.range': 'alcance', 'mod.rate': 'cadencia', 'mod.none': 'sin modificadores',
     'toast.noPosition': 'Posición no disponible para este sistema', 'toast.noCredits': 'Créditos insuficientes',
     'toast.deployed': 'Sistema desplegado', 'toast.place': 'Coloca: {name}', 'toast.placeSea': 'Coloca en el mar: {name}',
     'toast.priority': 'Prioridad: {mode}', 'toast.upgrade': 'Mejora completada · nivel {level}',
@@ -346,6 +477,9 @@ const I18N = {
     'toast.camera': 'Cámara centrada', 'toast.recordsCleared': 'Récords borrados', 'toast.quality': 'Calidad gráfica: {level}',
     'toast.qualityReduced': 'Calidad gráfica reducida para mantener la fluidez', 'toast.qualityMinimum': 'Calidad gráfica al mínimo',
     'toast.fullscreenUnavailable': 'Pantalla completa no disponible en este navegador', 'toast.fullscreenFailed': 'No se pudo activar pantalla completa',
+    'toast.buildLocked': 'No se puede construir durante la oleada. Espera a que termine.',
+    'toast.specialUsed': '{name} activada en {tower}',
+    'toast.specialNoTargets': 'Sin objetivos válidos para {name}',
     'toast.installMenu': 'Usa el menú del navegador → Añadir a pantalla de inicio', 'toast.installing': 'Instalando aplicación…',
     'toast.installed': 'Aplicación instalada · lista sin conexión', 'confirm.clearRecords': '¿Borrar los récords guardados en este dispositivo?',
     'threat.none': 'Sin contacto', 'threat.low': 'Baja', 'threat.medium': 'Media', 'threat.high': 'Alta', 'threat.severe': 'Severa', 'threat.critical': 'Crítica',
@@ -368,6 +502,7 @@ const I18N = {
     'action.fullscreen': 'Fullscreen (F)', 'action.exitFullscreen': 'Exit fullscreen (F)', 'action.settings': 'Settings',
     'build.kicker': 'Field arsenal', 'build.title': 'Build',
     'build.hint': 'Land and naval systems. Pick one and place it on a free tile. Keys 1–9. Esc cancels.',
+    'build.hintLocked': 'Arsenal locked during combat. Buy and upgrade between waves.', 'build.lockedShort': 'LOCKED',
     'inspect.kicker': 'Tactical control', 'inspect.title': 'Inspect',
     'inspect.empty': 'Select a tower on the map to view its stats and available orders.',
     'wave.start': 'Start wave', 'zoom.out': 'Zoom out', 'zoom.in': 'Zoom in', 'common.cancel': 'Cancel',
@@ -376,7 +511,7 @@ const I18N = {
     'waveBanner.boss': 'FINAL BOSS', 'waveBanner.stage': 'Wave {stage} of {total}', 'waveBanner.climate': '{climate} · {temp}°C',
     'waveBanner.incoming': 'New faction detected', 'waveBanner.escorts': 'Escort: {n} units',
     'climate.templado': 'Temperate', 'climate.caluroso': 'Hot', 'climate.tropical': 'Tropical', 'climate.frío': 'Cold',
-    'climate.radiactivo': 'Radioactive', 'climate.desconocido': 'Unknown', 'climate.divino': 'Divine',
+    'climate.radiactivo': 'Radioactive', 'climate.desconocido': 'Unknown', 'climate.infernal': 'Infernal', 'climate.divino': 'Divine',
     'ability.strike': 'Airstrike', 'ability.strikeHint': 'Z · 120 cr', 'ability.strikeTitle': 'Airstrike (Z) · 120 credits',
     'ability.emp': 'EMP pulse', 'ability.empHint': 'X · 90 cr', 'ability.empTitle': 'EMP pulse (X) · 90 credits',
     'ability.repair': 'Repair base', 'ability.repairHint': 'C · 80 cr', 'ability.repairTitle': 'Repair base (C) · 80 credits',
@@ -398,6 +533,10 @@ const I18N = {
     'settings.language': 'Language', 'settings.languageHint': 'Changes the interface language instantly.',
     'settings.quality': 'Graphics quality', 'quality.auto': 'Automatic', 'quality.high': 'High', 'quality.medium': 'Medium', 'quality.low': 'Low',
     'settings.sound': 'Sound', 'settings.soundHint': 'Synthesized effects, no downloads.',
+    'settings.music': 'Music', 'settings.musicHint': 'A distinct procedural soundtrack per faction, with a boss variation. No external files.',
+    'settings.musicTrack': 'Music track',
+    'music.auto': 'Automatic (faction & boss)', 'music.march': 'Steel march', 'music.ambient': 'Ash horizon',
+    'music.electronic': 'Neon protocol', 'music.infernal': 'Abyssal chant', 'music.celestial': 'Choir of light',
     'settings.labels': 'Enemy labels', 'settings.labelsHint': 'Shows unit type and veteran or elite rank above each unit.',
     'settings.volume': 'Volume', 'settings.fullscreen': 'Fullscreen', 'settings.fullscreenHint': 'Useful on desktop and Android.',
     'settings.fullscreenUnavailable': 'Your browser does not allow fullscreen.',
@@ -406,7 +545,7 @@ const I18N = {
     'settings.installHintBrowser': 'Open the browser menu and choose “Add to Home Screen” to install.',
     'settings.progress': 'Local progress', 'settings.progressHint': 'Records and preferences are stored on this device.',
     'settings.reset': 'Clear records', 'settings.modeInstalled': 'installed', 'settings.modeBrowser': 'browser',
-    'settings.shortcutsHtml': '<b>Keyboard</b><br><kbd>1</kbd>–<kbd>9</kbd> build · <kbd>Space</kbd> wave/pause · <kbd>P</kbd> pause<br><kbd>Z</kbd> airstrike · <kbd>X</kbd> EMP · <kbd>C</kbd> repair base<br><kbd>M</kbd> sound · <kbd>F</kbd> fullscreen · <kbd>Esc</kbd> cancel<br><kbd>WASD</kbd>/arrows move camera · <kbd>Q</kbd><kbd>E</kbd> rotate · wheel zoom<br><b>Touch:</b> one finger pans, two fingers zoom, tap to build.<br><b>Sea:</b> destroyers and carriers deploy on water.',
+    'settings.shortcutsHtml': '<b>Keyboard</b><br><kbd>1</kbd>–<kbd>9</kbd> build · <kbd>Space</kbd> wave/pause · <kbd>P</kbd> pause<br><kbd>Z</kbd> airstrike · <kbd>X</kbd> EMP · <kbd>C</kbd> repair base · <kbd>R</kbd> tower special<br><kbd>M</kbd> sound · <kbd>F</kbd> fullscreen · <kbd>Esc</kbd> cancel<br><kbd>WASD</kbd>/arrows move camera · <kbd>Q</kbd><kbd>E</kbd> rotate · wheel zoom<br><b>Touch:</b> one finger pans, two fingers zoom, tap to build.<br><b>Sea:</b> destroyers and carriers deploy on water.',
     'install.button': 'Install', 'update.available': 'New version available', 'update.reload': 'Update',
     'quality.hintAuto': 'Automatic: {level} on this device.', 'quality.hintForced': 'Forced: {level}{shadows}.',
     'quality.withShadows': ', with shadows', 'quality.withoutShadows': ', without shadows',
@@ -419,6 +558,9 @@ const I18N = {
     'tower.naval': 'Naval', 'tower.domainSea': 'SEA', 'tower.domainLand': 'LAND',
     'tower.title': '{name} · range {range} · key {key}',
     'tower.mode.first': 'First', 'tower.mode.last': 'Last', 'tower.mode.strong': 'Strongest', 'tower.mode.close': 'Closest',
+    'tower.climate': 'Climate', 'tower.special': 'Special ability', 'tower.specialCost': '{cost} cr',
+    'tower.specialReady': 'Ready', 'tower.specialCd': 'Cooldown {s} s',
+    'mod.damage': 'damage', 'mod.range': 'range', 'mod.rate': 'fire rate', 'mod.none': 'no modifiers',
     'toast.noPosition': 'Position unavailable for this system', 'toast.noCredits': 'Insufficient credits',
     'toast.deployed': 'System deployed', 'toast.place': 'Place: {name}', 'toast.placeSea': 'Place at sea: {name}',
     'toast.priority': 'Priority: {mode}', 'toast.upgrade': 'Upgrade complete · level {level}',
@@ -431,6 +573,9 @@ const I18N = {
     'toast.camera': 'Camera centered', 'toast.recordsCleared': 'Records cleared', 'toast.quality': 'Graphics quality: {level}',
     'toast.qualityReduced': 'Graphics quality reduced to keep frame rate smooth', 'toast.qualityMinimum': 'Graphics quality set to minimum',
     'toast.fullscreenUnavailable': 'Fullscreen is not available in this browser', 'toast.fullscreenFailed': 'Could not enable fullscreen',
+    'toast.buildLocked': 'You cannot build during a wave. Wait until it ends.',
+    'toast.specialUsed': '{name} activated on {tower}',
+    'toast.specialNoTargets': 'No valid targets for {name}',
     'toast.installMenu': 'Use the browser menu → Add to Home Screen', 'toast.installing': 'Installing app…',
     'toast.installed': 'App installed · ready offline', 'confirm.clearRecords': 'Clear the records saved on this device?',
     'threat.none': 'No contact', 'threat.low': 'Low', 'threat.medium': 'Medium', 'threat.high': 'High', 'threat.severe': 'Severe', 'threat.critical': 'Critical',
@@ -531,6 +676,7 @@ const CLIMATE_PRESETS = {
   frío:       { bg: 0xb8c4d4, fog: 0xb8c4d4, sun: 0xdfe9ee, waterDeep: 0x2a4a5a, waterShallow: 0x6ea0b8 },
   radiactivo: { bg: 0x3d2a1a, fog: 0x3d2a1a, sun: 0xaa8844, waterDeep: 0x1a1a2a, waterShallow: 0x5a4a3a },
   desconocido:{ bg: 0x2a1a4a, fog: 0x2a1a4a, sun: 0x88aaff, waterDeep: 0x0a0a2a, waterShallow: 0x2a2a5a },
+  infernal:   { bg: 0x3a0a0a, fog: 0x3a0a0a, sun: 0xff6a3a, waterDeep: 0x3a0808, waterShallow: 0x8a2a1a },
   divino:     { bg: 0xfff0d4, fog: 0xfff0d4, sun: 0xfff2cc, waterDeep: 0xd4b880, waterShallow: 0xffeaa8 }
 };
 function applyClimate(climate, tempC) {
@@ -550,8 +696,9 @@ function applyClimate(climate, tempC) {
     overlay.className = 'weather-overlay climate-' + climate;
     overlay.dataset.temp = tempC != null ? `${tempC}°C` : '';
   }
-  document.body.classList.remove('climate-templado', 'climate-caluroso', 'climate-tropical', 'climate-frío', 'climate-radiactivo', 'climate-desconocido', 'climate-divino');
+  document.body.classList.remove('climate-templado', 'climate-caluroso', 'climate-tropical', 'climate-frío', 'climate-radiactivo', 'climate-desconocido', 'climate-infernal', 'climate-divino');
   document.body.classList.add('climate-' + climate);
+  refreshClimateTowers();
 }
 
 /* ---------------------------------------------------------------- helpers */
@@ -1512,6 +1659,10 @@ function aaTower(root, army, kit) {
 
 function laserTower(root, army, kit) {
   const paint = camoMaterial(army.color), armor = mat(0x3f4a3b), dark = TOWER_MATS.dark(), hub = mat(0x8b938d, .4, .6), metal = TOWER_MATS.metal(), glow = glowMaterial();
+  // El emisor solo debe iluminar mientras dispara. Se apaga de fábrica y el
+  // bucle de torres lo enciende con un pulso durante el haz continuo.
+  glow.emissiveIntensity = 0;
+  root.userData.laserGlow = glow;
   if (kit.laser === 'turret') {
     addMesh(root, rboxGeo(.58, .16, .62, .04), paint, 0, .28, 0);
     for (const side of [-1, 1]) for (const z of [-.22, .22]) addWheel(root, side * .3, .16, z, .11, .08, dark, hub);
@@ -1850,7 +2001,7 @@ function buildTowerModel(type, army, level = 1, preview = false) {
 }
 
 /* ------------------------------------------------------ modelos enemigos */
-const ALTITUDE = { scout: 3.0, interceptor: 4.0, mothershipScout: 3.5, angel: 3.2, archon: 3.8, seraph: 4.2, fighter: 4.2, bomber: 3.4, ufoBoss: 4.5, celestialBoss: 5.0 };
+const ALTITUDE = { scout: 3.0, interceptor: 4.0, mothershipScout: 3.5, angel: 3.2, archon: 3.8, seraph: 4.2, fighter: 4.2, bomber: 3.4, ufoBoss: 4.5, celestialBoss: 5.0, pterodactyl: 2.8, pegasus: 3.0, gryphon: 3.2, airship: 3.4, biplane: 4.0, mutantBat: 2.6, demonWing: 3.0, hellBomber: 3.6 };
 const labelCache = new Map();
 function enemyLabelAccent(type) { return ENEMIES[type] && ENEMIES[type].boss ? '#e8c468' : type === 'bomber' ? '#e0a06a' : '#d8c78a'; }
 function labelSprite(text, accent = '#d8c78a') {
@@ -1902,6 +2053,7 @@ const FACTION_PALETTE = {
   chinaTech:  { cloth: 0xb01515, cloth2: 0x5e0a0a, armor: 0x22262d, accent: 0x4fd8f5, skin: 0xb9875c, metal: 0x8a9aa8, fur: 0x14181e },
   zombies:    { cloth: 0x4c5c2c, cloth2: 0x2e3a1a, armor: 0x5d6b32, accent: 0xc8d95c, skin: 0x7e9445, metal: 0x6a6a58, fur: 0x222c14 },
   ufos:       { cloth: 0x2f5c9a, cloth2: 0x16305a, armor: 0x7fb0d8, accent: 0x55e8ff, skin: 0x8ec8dc, metal: 0xa8c8dc, fur: 0x0e2244 },
+  demons:     { cloth: 0x5a0f0f, cloth2: 0x2a0505, armor: 0x8a2418, accent: 0xff6a2a, skin: 0xb34a32, metal: 0xc9a24a, fur: 0x1a0202 },
   celestials: { cloth: 0xf7f2e0, cloth2: 0xd9c07c, armor: 0xf2dd9a, accent: 0xffdf63, skin: 0xf0c98a, metal: 0xe9c45e, fur: 0xc9a24a }
 };
 
@@ -2560,6 +2712,46 @@ function addStar(parent, x, y, z, r, color = 0xd42b25) {
     p.rotation.x = Math.PI / 2; p.rotation.z = a;
   }
 }
+function buildFlyer(parent, P, opts = {}) {
+  const M = paletteMats(P);
+  const g = new THREE.Group();
+  g.scale.setScalar(opts.scale || 1);
+  parent.add(g);
+  const wingMat = opts.wingColor != null ? umat(opts.wingColor, .8) : M.cloth2;
+  const bodyMat = opts.bodyColor != null ? umat(opts.bodyColor, .7) : M.cloth;
+  const flap = [];
+  // Cuerpo alargado y cabeza con cuernos/ojos brillantes.
+  addMesh(g, sphGeo(.22, 12), bodyMat, 0, 0, 0).scale.set(.78, .62, 1.45);
+  addMesh(g, sphGeo(.12, 10), bodyMat, 0, .03, .32).scale.set(.9, .9, 1.05);
+  addMesh(g, sphGeo(.05, 8), M.skin, 0, .04, .43).scale.set(.9, .75, 1);
+  for (const side of [-1, 1]) {
+    addMesh(g, sphGeo(.024, 6), M.glow, side * .055, .07, .39);
+    if (opts.horns) addMesh(g, coneGeo(.028, .16, 5), M.bone, side * .07, .12, .28).rotation.z = side * .7;
+  }
+  addMesh(g, coneGeo(.07, .38, 8), M.cloth2, 0, 0, -.38).rotation.x = Math.PI / 2;
+  addMesh(g, coneGeo(.02, .16, 5), M.accent, 0, .02, -.6).rotation.x = Math.PI / 2;
+  // Alas con membrana y costillas.
+  for (const side of [-1, 1]) {
+    const wing = new THREE.Group();
+    wing.position.set(side * .1, .04, .02);
+    g.add(wing);
+    const membrane = addMesh(wing, rboxGeo(.58, .022, .3, .02), wingMat, side * .28, 0, -.03);
+    membrane.rotation.z = side * -.12;
+    addMesh(wing, rboxGeo(.56, .018, .035, .008), M.metal, side * .28, .012, .11);
+    for (let i = 0; i < 3; i++) {
+      const rib = addMesh(wing, rboxGeo(.5 - i * .11, .014, .022, .006), M.metal, side * (.2 + i * .035), .014, -.02 - i * .07);
+      rib.rotation.y = side * (.18 + i * .12);
+    }
+    flap.push(wing);
+  }
+  if (opts.rider) {
+    addMesh(g, rboxGeo(.13, .17, .1, .02), M.armor, 0, .18, .02);
+    addMesh(g, sphGeo(.06, 8), M.skin, 0, .3, .04);
+    addMesh(g, cylGeo(.035, .045, .12, 7), M.metal, 0, .36, .02);
+    addMesh(g, cylGeo(.012, .016, .28, 6), M.dark, .07, .24, .06).rotation.z = -.55;
+  }
+  return { group: g, walk: [], flap };
+}
 function buildFighter(parent, P, opts = {}) {
   const M = paletteMats(P);
   const paint = umat(opts.paint || 0x5b6672, .42, .35), dark = umat(0x232a31, .6, .3), glass = umat(0x9fd8e8, .1, .3);
@@ -2765,7 +2957,14 @@ const UNIT_SPECS = {
   walker:      { head: 'zombie', outfit: 'zombie', weapon: 'claw', squad: 2, scale: 1.3, labelY: 1.34 },
   runner:      { head: 'zombie', outfit: 'zombieRunner', weapon: 'claw', squad: 2, scale: 1.24, labelY: 1.3, lean: true },
   tankZombie:  { head: 'zombieHelm', outfit: 'zombieArmor', weapon: 'clawBig', squad: 1, scale: 1.5, labelY: 1.56 },
-  zombieBoss:  { head: 'zombieBoss', outfit: 'zombieBoss', weapon: 'clawBig', squad: 1, scale: 1.98, labelY: 2.1, boss: true, spikes: 6 }
+  zombieBoss:  { head: 'zombieBoss', outfit: 'zombieBoss', weapon: 'clawBig', squad: 1, scale: 1.98, labelY: 2.1, boss: true, spikes: 6 },
+
+  imp:         { head: 'horns', outfit: 'fur', weapon: 'claw', squad: 2, scale: 1.26, labelY: 1.3 },
+  hellKnight:  { head: 'greatHelm', outfit: 'plate', weapon: 'greatsword', shield: 'kite', squad: 1, scale: 1.5, labelY: 1.6, cape: true, capeColor: 0x2a0505, bracer: true },
+  demonBoss:   { head: 'hornsBig', outfit: 'plate', weapon: 'greatsword', shield: 'kiteBig', squad: 1, scale: 2.0, labelY: 2.1, boss: true, cape: true, capeColor: 0x7a1010, weaponScale: 1.25, spikes: 8 },
+
+  abductor:    { head: 'tech', outfit: 'techLight', weapon: 'energy', squad: 1, scale: 1.35, labelY: 1.4 },
+  guardian:    { head: 'goldhelm', outfit: 'celestialArch', weapon: 'spear', shield: 'round', squad: 1, scale: 1.5, labelY: 1.8, bracer: true }
 };
 
 function buildSquad(g, spec, P) {
@@ -2798,12 +2997,22 @@ function enemyModel(type) {
   const g = new THREE.Group();
   let walk = [], flap = null, ring = null, labelY = spec.labelY || 1.35, scale = spec.scale || 1.35;
 
-  if (type === 'fighter') {
-    const r = buildFighter(g, P, { paint: 0x7c8b99 });
-    walk = r.walk; scale = 1.28; labelY = 1.35;
-  } else if (type === 'bomber') {
-    const r = buildBomber(g, P, { paint: 0x4b5561 });
-    walk = r.walk; scale = 1.34; labelY = 1.45;
+  if (type === 'fighter' || type === 'biplane') {
+    const r = buildFighter(g, P, { paint: type === 'biplane' ? P.cloth : 0x7c8b99 });
+    walk = r.walk; scale = type === 'biplane' ? 1.18 : 1.28; labelY = 1.35;
+  } else if (type === 'bomber' || type === 'airship' || type === 'hellBomber') {
+    const r = buildBomber(g, P, { paint: type === 'airship' ? P.cloth : type === 'hellBomber' ? 0x4a0a0a : 0x4b5561 });
+    walk = r.walk; scale = type === 'airship' ? 1.55 : 1.34; labelY = type === 'airship' ? 1.6 : 1.45;
+  } else if (type === 'pterodactyl' || type === 'pegasus' || type === 'gryphon' || type === 'mutantBat' || type === 'demonWing') {
+    const style = {
+      pterodactyl: { wingColor: P.cloth2, bodyColor: P.cloth, horns: false, rider: true, scale: .86, labelY: 1.15 },
+      pegasus: { wingColor: 0xe8e2d2, bodyColor: P.cloth, horns: false, rider: true, scale: .9, labelY: 1.25 },
+      gryphon: { wingColor: P.accent, bodyColor: P.cloth2, horns: true, rider: true, scale: .95, labelY: 1.3 },
+      mutantBat: { wingColor: P.cloth2, bodyColor: P.fur, horns: false, rider: false, scale: .74, labelY: 1.0 },
+      demonWing: { wingColor: P.cloth2, bodyColor: P.cloth, horns: true, rider: false, scale: .88, labelY: 1.2 }
+    }[type];
+    const r = buildFlyer(g, P, style);
+    walk = r.walk; flap = r.flap; scale = style.scale; labelY = style.labelY;
   } else if (type === 'scout') {
     const r = buildSaucer(g, P, { r: .46 });
     walk = r.walk; ring = r.group.userData.ring; scale = 1.12; labelY = 1.1;
@@ -2819,13 +3028,13 @@ function enemyModel(type) {
   } else if (type === 'chinaTechBoss') {
     const r = buildMech(g, P, { boss: true, scale: 1 });
     walk = r.walk; scale = 1.2; labelY = 2.1;
-  } else if (type === 'mech') {
+  } else if (type === 'mech' || type === 'tripod') {
     const r = buildMech(g, P, { scale: 1 });
-    walk = r.walk; scale = .9; labelY = 1.8;
+    walk = r.walk; scale = type === 'tripod' ? 1.0 : .9; labelY = type === 'tripod' ? 1.95 : 1.8;
   } else if (type === 'doughboyTank') {
     const r = buildTank(g, P);
     walk = r.walk; scale = 1.2; labelY = 1.1;
-  } else if (d.faction === 'celestials') {
+  } else if (d.faction === 'celestials' && d.kind === 'air') {
     const boss = type === 'celestialBoss';
     const cel = buildCelestial(g, P, { boss, arch: type !== 'angel', weapon: boss ? 'staff' : 'spear' });
     flap = cel.userData.flap;
@@ -2958,13 +3167,62 @@ function armyMods(army, type) {
   };
 }
 const TOWER_UPGRADE = { damage: 1.34, range: 1.07, rate: .94, maxLevel: 5 };
+// Modificadores de clima aplicados a TODAS las estructuras. Los valores son
+// fracciones: +.08 = +8 %. En cadencia, un valor negativo la ralentiza.
+const CLIMATE_TOWER_MODS = {
+  templado:   { damage: 0, range: 0, rate: 0 },
+  caluroso:   { damage: .08, range: 0, rate: -.12 },
+  tropical:   { damage: 0, range: -.08, rate: .08 },
+  frío:       { damage: .05, range: .04, rate: -.10 },
+  radiactivo: { damage: .12, range: -.10, rate: 0 },
+  desconocido:{ damage: -.08, range: .12, rate: 0 },
+  infernal:   { damage: .10, range: -.06, rate: .06 },
+  divino:     { damage: .08, range: .08, rate: .08 }
+};
+const CLIMATE_ICONS = { templado: '⚖', caluroso: '☀', tropical: '☔', frío: '❄', radiactivo: '☢', desconocido: '👁', infernal: '🔥', divino: '✦' };
+function climateMods() { return CLIMATE_TOWER_MODS[state.climate] || CLIMATE_TOWER_MODS.templado; }
+function climateBadgeInfo() {
+  const mods = climateMods();
+  const parts = [];
+  if (mods.damage) parts.push(`${mods.damage > 0 ? '+' : '−'}${Math.abs(Math.round(mods.damage * 100))}% ${tr('mod.damage')}`);
+  if (mods.range) parts.push(`${mods.range > 0 ? '+' : '−'}${Math.abs(Math.round(mods.range * 100))}% ${tr('mod.range')}`);
+  if (mods.rate) parts.push(`${mods.rate > 0 ? '+' : '−'}${Math.abs(Math.round(mods.rate * 100))}% ${tr('mod.rate')}`);
+  const total = (mods.damage || 0) + (mods.range || 0) + (mods.rate || 0);
+  const mixed = (mods.damage > 0 || mods.range > 0 || mods.rate > 0) && (mods.damage < 0 || mods.range < 0 || mods.rate < 0);
+  const color = mixed ? '#e8c468' : total > 0 ? '#9bd06a' : total < 0 ? '#e07a5f' : '#aab19f';
+  const ring = mixed ? 0xe8c468 : total > 0 ? 0x8fd06a : total < 0 ? 0xe07a5f : 0x8a948a;
+  return {
+    icon: CLIMATE_ICONS[state.climate] || '⚖',
+    text: parts.length ? `${CLIMATE_ICONS[state.climate] || '⚖'} ${parts.join(' · ')}` : `${CLIMATE_ICONS[state.climate] || '⚖'} ${tr('mod.none')}`,
+    color, ring, tone: mixed ? 'mixed' : total > 0 ? 'buff' : total < 0 ? 'debuff' : 'neutral'
+  };
+}
+function attachClimateBadge(t) {
+  if (!t || !t.group) return;
+  if (t.climateBadge) { t.group.remove(t.climateBadge); t.climateBadge = null; }
+  if (t.climateRing) { t.group.remove(t.climateRing); t.climateRing = null; }
+  const info = climateBadgeInfo();
+  const tag = labelSprite(info.text, info.color);
+  const w = Math.min(1.35, .34 + info.text.length * .022);
+  tag.scale.set(w, .17, 1);
+  tag.position.set(0, t.data && t.data.domain === 'sea' ? 1.35 : 1.52, 0);
+  t.group.add(tag); t.climateBadge = tag;
+  const ring = new THREE.Mesh(new THREE.RingGeometry(.4, .46, 28), new THREE.MeshBasicMaterial({ color: info.ring, transparent: true, opacity: .42, side: THREE.DoubleSide, depthWrite: false }));
+  ring.rotation.x = -Math.PI / 2; ring.position.y = .075;
+  t.group.add(ring); t.climateRing = ring;
+}
+function refreshClimateTowers() {
+  if (!state || !Array.isArray(state.towers)) return;
+  for (const t of state.towers) { applyTowerStats(t); attachClimateBadge(t); }
+}
 function applyTowerStats(t) {
   const data = t.data;
   const mods = armyMods(state.army, t.type);
+  const cm = climateMods();
   const level = Math.max(1, t.level || 1) - 1;
-  t.stats.damage = data.damage * mods.damage * Math.pow(TOWER_UPGRADE.damage, level);
-  t.stats.range = data.range * mods.range * Math.pow(TOWER_UPGRADE.range, level);
-  t.stats.rate = data.rate * mods.rate * Math.pow(TOWER_UPGRADE.rate, level);
+  t.stats.damage = data.damage * mods.damage * (1 + (cm.damage || 0)) * Math.pow(TOWER_UPGRADE.damage, level);
+  t.stats.range = data.range * mods.range * (1 + (cm.range || 0)) * Math.pow(TOWER_UPGRADE.range, level);
+  t.stats.rate = data.rate * mods.rate / (1 + (cm.rate || 0)) * Math.pow(TOWER_UPGRADE.rate, level);
   t.stats.splash = data.splash || 0;
   t.stats.pierce = data.pierce || 0;
   t.stats.slow = data.slow || 0;
@@ -2978,6 +3236,7 @@ function refreshTowerModel(t) {
   t.pivot = t.group.userData.pivot;
   t.barrels = t.group.userData.barrels || [];
   t.stats.muzzleY = t.group.userData.muzzleY || t.stats.muzzleY;
+  attachClimateBadge(t);
 }
 function makeTower(type, cx, cz) {
   const data = TOWERS.find(t => t.id === type);
@@ -2991,15 +3250,18 @@ function makeTower(type, cx, cz) {
     type, data, group, pivot: group.userData.pivot, level: 1,
     cooldown: Math.random() * .2, target: null, cell: { x: cx, z: cz },
     barrels: group.userData.barrels || [], mode: 'first',
+    specialCd: 0, special: TOWER_SPECIALS[type] || null,
     stats: { muzzleY: group.userData.muzzleY || 1 }
   };
   applyTowerStats(tower);
+  attachClimateBadge(tower);
   state.towers.push(tower);
   for (const cell of cells) towerCells.set(cellKey(cell.x, cell.z), tower);
   return tower;
 }
 function getCost(type) { return Math.ceil(TOWERS.find(t => t.id === type).cost * (state.army.discount || 1)); }
 function placeTower() {
+  if (state.active) { Sound.error(); toast(tr('toast.buildLocked')); return; }
   if (!state.buildType || !hoverCell) return;
   const { cellX, cellZ } = hoverCell;
   if (!validPlacement(cellX, cellZ)) { Sound.error(); toast(tr('toast.noPosition')); return; }
@@ -3017,6 +3279,7 @@ function removeGhost() {
 }
 function setBuild(type) {
   if (state.gameOver) return;
+  if (state.active) { Sound.error(); toast(tr('toast.buildLocked')); return; }
   // Pulsar de nuevo la misma unidad cancela la selección.
   if (state.buildType === type) {
     state.buildType = null; removeGhost(); updateInspect(); renderTowerList(); renderAbilities();
@@ -3054,13 +3317,15 @@ function renderTowerList() {
   for (let i = 0; i < TOWERS.length; i++) {
     const t = TOWERS[i];
     const el = document.createElement('div');
-    el.className = 'tower-card' + (state.buildType === t.id ? ' selected' : '') + (t.domain === 'sea' ? ' naval' : '');
-    el.innerHTML = `<div class="tower-icon">${t.icon}</div><div><div class="tower-name">${loc(t, 'name')}<span class="domain-tag ${t.domain}">${tr(t.domain === 'sea' ? 'tower.domainSea' : 'tower.domainLand')}</span></div><div class="tower-meta">${loc(t, 'desc')}</div></div><div class="tower-cost">${getCost(t.id)} ◈</div>`;
-    el.title = tr('tower.title', { name: loc(t, 'name'), range: t.range, key: i + 1 });
+    el.className = 'tower-card' + (state.buildType === t.id ? ' selected' : '') + (t.domain === 'sea' ? ' naval' : '') + (state.active ? ' locked' : '');
+    el.innerHTML = `<div class="tower-icon">${t.icon}</div><div><div class="tower-name">${loc(t, 'name')}<span class="domain-tag ${t.domain}">${tr(t.domain === 'sea' ? 'tower.domainSea' : 'tower.domainLand')}</span></div><div class="tower-meta">${loc(t, 'desc')}</div></div><div class="tower-cost">${state.active ? '🔒' : getCost(t.id) + ' ◈'}</div>`;
+    el.title = state.active ? tr('build.hintLocked') : tr('tower.title', { name: loc(t, 'name'), range: t.range, key: i + 1 });
     el.addEventListener('click', () => setBuild(t.id));
     host.appendChild(el);
   }
-  document.getElementById('buildHint').textContent = state.buildType ? 'ESC' : '1-9';
+  document.getElementById('buildHint').textContent = state.active ? tr('build.lockedShort') : state.buildType ? 'ESC' : '1-9';
+  const hint = document.querySelector('.tower-hint');
+  if (hint) hint.textContent = state.active ? tr('build.hintLocked') : tr('build.hint');
 }
 function armyWeapon(type) {
   const base = (WEAPONS[state.army.id] || WEAPONS.usa)[type] || '';
@@ -3079,11 +3344,14 @@ function updateInspect() {
     return;
   }
   const nextCost = Math.ceil(t.data.cost * (.8 + t.level * .48));
+  const spec = TOWER_SPECIALS[t.type];
+  const climate = climateBadgeInfo();
   level.textContent = tr('tower.level', { level: t.level });
   body.className = 'action-panel';
   body.innerHTML = `
     <div class="selected-name">${armyWeapon(t.type)}</div>
     <div class="selected-detail">${loc(t.data, 'name')} · ${targetText(t.data.targets)}${t.data.domain === 'sea' ? ' · ' + tr('tower.naval') : ''}</div>
+    <div class="climate-chip ${climate.tone}" title="${tr('tower.climate')}">${climate.icon} <span>${climate.text.replace(climate.icon + ' ', '')}</span></div>
     <div class="meter-line"><span>${tr('tower.damage')}</span><b>${Math.round(t.stats.damage)}</b></div>
     <div class="meter"><i style="width:${Math.min(100, t.stats.damage / 1.6)}%"></i></div>
     <div class="meter-line"><span>${tr('tower.range')}</span><b>${t.stats.range.toFixed(1)}</b></div>
@@ -3091,18 +3359,27 @@ function updateInspect() {
     <div class="meter-line"><span>${tr('tower.rate')}</span><b>${(1 / t.stats.rate).toFixed(1)}/s</b></div>
     <div class="meter"><i style="width:${Math.min(100, 24 / t.stats.rate)}%"></i></div>
     <div class="target-row"><span>${tr('tower.priority')}</span><button class="target-btn" id="targetMode">${modeText(t.mode)} ↻</button></div>
-    <div class="upgrade-row"><button class="action-btn" id="upgradeTower" ${t.level >= TOWER_UPGRADE.maxLevel ? 'disabled' : ''}>${tr('tower.upgrade', { cost: t.level >= TOWER_UPGRADE.maxLevel ? tr('tower.max') : nextCost })}</button><button class="action-btn sell" id="sellTower">${tr('tower.sell', { cost: Math.floor(t.data.cost * .6) })}</button></div>`;
+    ${spec ? `<div class="special-box">
+      <div class="special-head"><span>${tr('tower.special')}</span><b>${tr('tower.specialCost', { cost: spec.cost })}</b></div>
+      <button class="action-btn special" id="towerSpecial">${spec.icon} ${loc(spec, 'name')} <em>${tr('tower.specialReady')}</em></button>
+      <div class="special-desc">${loc(spec, 'desc')}</div>
+    </div>` : ''}
+    <div class="upgrade-row"><button class="action-btn" id="upgradeTower" ${t.level >= TOWER_UPGRADE.maxLevel || state.active ? 'disabled' : ''}>${tr('tower.upgrade', { cost: t.level >= TOWER_UPGRADE.maxLevel ? tr('tower.max') : nextCost })}</button><button class="action-btn sell" id="sellTower">${tr('tower.sell', { cost: Math.floor(t.data.cost * .6) })}</button></div>`;
   document.getElementById('upgradeTower').addEventListener('click', upgradeSelected);
   document.getElementById('sellTower').addEventListener('click', sellSelected);
+  const specialBtn = document.getElementById('towerSpecial');
+  if (specialBtn) specialBtn.addEventListener('click', () => activateTowerSpecial(t));
   document.getElementById('targetMode').addEventListener('click', () => {
     const order = ['first', 'last', 'strong', 'close'];
     t.mode = order[(order.indexOf(t.mode) + 1) % order.length];
     updateInspect(); toast(tr('toast.priority', { mode: modeText(t.mode) })); Sound.ui();
   });
+  updateSelectedSpecialButton();
 }
 function upgradeSelected() {
   const t = state.selectedTower;
   if (!t || t.level >= TOWER_UPGRADE.maxLevel) return;
+  if (state.active) { Sound.error(); toast(tr('toast.buildLocked')); return; }
   const cost = Math.ceil(t.data.cost * (.8 + t.level * .48));
   if (state.cash < cost) { Sound.error(); toast(tr('toast.noCredits')); return; }
   state.cash -= cost; t.level++;
@@ -3121,38 +3398,155 @@ function sellSelected() {
   state.selectedTower = null; placementRing.visible = false;
   updateInspect(); updateHud(); Sound.sell(); toast(tr('toast.sold'));
 }
+function specialTargets(t) {
+  const px = t.group.position.x, pz = t.group.position.z;
+  const py = t.group.position.y + (t.stats.muzzleY || 1);
+  return state.enemies.filter(e => {
+    if (!t.data.targets.includes(e.data.kind)) return false;
+    const ey = e.air ? (ALTITUDE[e.type] || 2) : .4;
+    return Math.hypot(e.x - px, ey - py, e.z - pz) <= t.stats.range;
+  });
+}
+// Las habilidades de estructura se pagan por uso y respetan una recarga
+// independiente. Reutilizan los efectos de proyectil de cada arma para que
+// cada torre tenga una lectura visual propia.
+function activateTowerSpecial(t) {
+  if (!t || state.gameOver) return;
+  const spec = TOWER_SPECIALS[t.type];
+  if (!spec) return;
+  const specName = loc(spec, 'name');
+  if (t.specialCd > 0) { Sound.error(); toast(tr('toast.reloading', { name: specName, s: Math.ceil(t.specialCd) })); return; }
+  if (state.cash < spec.cost) { Sound.error(); toast(tr('toast.noCredits')); return; }
+  const targets = specialTargets(t);
+  if (!targets.length) { Sound.error(); toast(tr('toast.specialNoTargets', { name: specName })); return; }
+  state.cash -= spec.cost;
+  t.specialCd = spec.cooldown;
+  const baseDamage = t.stats.damage;
+  const cx = t.group.position.x, cz = t.group.position.z;
+  const ownKind = t.type;
+  const pulseColor = ownKind === 'laser' ? 0x6ef0ff : ownKind === 'ew' ? 0xa98bff : ownKind === 'aa' ? 0xffd27a : 0xffb060;
+  makePulse(cx, cz, t.stats.range, pulseColor);
+  Sound.special(ownKind);
+  if (ownKind === 'ew') {
+    for (const e of targets) {
+      e.slowTimer = Math.max(e.slowTimer, 5.5);
+      if (e.data.kind === 'air' || e.type === 'droneSoldier') e.repelTimer = Math.max(e.repelTimer, 3.4);
+      spawnParticle(e.x, (e.air ? ALTITUDE[e.type] : .5), e.z, 0xb79bff, .8, .5);
+    }
+  } else if (ownKind === 'laser') {
+    const from = new THREE.Vector3(cx, t.group.position.y + (t.stats.muzzleY || 1), cz);
+    if (t.group.userData.laserGlow) t.group.userData.laserGlow.emissiveIntensity = 2.8;
+    for (const e of targets) {
+      const to = new THREE.Vector3(e.x, (ALTITUDE[e.type] || 0) + .45, e.z);
+      beam(from, to, .32, 0x77f4ff);
+      applyDamage(e, baseDamage * 5.5, t.stats.pierce, t.type, t);
+      makeSparks(e.x, to.y, e.z, 0x9ff8ff, 5);
+    }
+    makePulse(cx, cz, t.stats.range * .72, 0x77f4ff);
+  } else if (ownKind === 'art') {
+    // Elige el punto con más enemigos agrupados y martillea la zona.
+    let best = targets[0], bestScore = -1;
+    for (const e of targets) {
+      const nearby = targets.filter(o => Math.hypot(o.x - e.x, o.z - e.z) <= (t.data.splash || 1.5)).length;
+      if (nearby > bestScore) { bestScore = nearby; best = e; }
+    }
+    for (let i = 0; i < 4; i++) {
+      const ox = (Math.random() - .5) * (t.data.splash || 1.7), oz = (Math.random() - .5) * (t.data.splash || 1.7);
+      impactArtillery(best.x + ox, best.z + oz, baseDamage * 1.15, (t.data.splash || 1.7) * 1.15, t.stats.pierce, t.type, t);
+      makeSparks(best.x + ox, .5, best.z + oz, 0xffc472, 4);
+    }
+    t.cooldown = Math.max(t.cooldown, .22);
+  } else if (ownKind === 'carrier') {
+    const picked = targets.slice(0, 3);
+    picked.forEach((e, i) => setTimeout(() => {
+      if (state.gameOver || !state.towers.includes(t)) return;
+      t.stats.damage = baseDamage * 1.25;
+      carrierStrike(t, e);
+      t.stats.damage = baseDamage;
+    }, i * 160));
+  } else {
+    const limit = ownKind === 'gun' ? 8 : ownKind === 'rocket' ? 4 : ownKind === 'destroyer' ? 3 : ownKind === 'aa' ? 5 : ownKind === 'mortar' ? 5 : 4;
+    const picked = targets.slice(0, limit);
+    t.stats.damage = baseDamage * (ownKind === 'gun' ? 1.25 : 1.45);
+    for (const e of picked) fire(t, e);
+    t.stats.damage = baseDamage;
+    if (ownKind === 'gun') {
+      const from = new THREE.Vector3(cx, t.group.position.y + (t.stats.muzzleY || 1), cz);
+      for (const e of picked) {
+        const to = new THREE.Vector3(e.x, (ALTITUDE[e.type] || 0) + .4, e.z);
+        const tracer = makeLine(from, to, 0xfff0b0, .2);
+        setTimeout(() => { if (tracer.parent) world.remove(tracer); }, 70);
+      }
+    }
+  }
+  updateHud(); updateSelectedSpecialButton();
+  toast(tr('toast.specialUsed', { name: specName, tower: loc(t.data, 'name') }));
+}
+function updateSelectedSpecialButton() {
+  const t = state.selectedTower, btn = document.getElementById('towerSpecial');
+  if (!t || !btn) return;
+  const cd = Math.ceil(t.specialCd || 0);
+  btn.disabled = cd > 0 || state.gameOver;
+  btn.classList.toggle('cooling', cd > 0);
+  const stateEl = btn.querySelector('em');
+  if (stateEl) stateEl.textContent = cd > 0 ? tr('tower.specialCd', { s: cd }) : tr('tower.specialReady');
+}
 
 /* ------------------------------------------------------------ oleadas e IA */
 function buildWavePlan(wave) {
   const fac = factionByWave(wave);
   const boss = isBossWave(wave);
-  const total = boss ? Math.min(22, 4 + Math.floor(wave / 5)) : Math.min(48, Math.round(6 + wave * 1.8));
-  const plan = [];
-  if (boss) {
-    // El jefe llega al final de la oleada, escoltado por tropas de su facción.
-    const escorts = Math.min(18, 3 + Math.floor(wave / 8));
-    for (let i = 0; i < escorts; i++) plan.push(fac.units[(i + wave) % fac.units.length].id);
-    plan.push(fac.boss.id);
-  } else {
-    const unitTypes = fac.units.map(u => u.id);
-    const weights = fac.units.map(u => 1.2 + (u.tier || 1) * 0.9);
-    for (const u of unitTypes) plan.push(u);
-    let seed = (wave * 9301 + 49297) % 233280;
-    const rnd = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
-    while (plan.length < total) {
-      const wsum = weights.reduce((s, w) => s + w, 0);
-      let roll = rnd() * wsum, chosen = unitTypes[0];
-      for (let i = 0; i < unitTypes.length; i++) { roll -= weights[i]; if (roll <= 0) { chosen = unitTypes[i]; break; } }
-      plan.push(chosen);
-    }
+  const total = boss ? Math.min(28, 5 + Math.floor(wave / 4)) : Math.min(60, Math.round(8 + wave * 2.0));
+  const airTypes = fac.units.filter(u => u.kind === 'air');
+  const groundTypes = fac.units.filter(u => u.kind === 'ground');
+  const stage = Math.max(1, Math.min(WAVES_PER_FACTION, waveInFaction(wave)));
+  // Proporción de aire por oleada: la primera es terrestre, la segunda equilibrada
+  // y la tercera aérea. El jefe llega con una escolta mixta.
+  const airRatio = boss ? .45 : [.28, .5, .72][Math.min(2, stage - 1)];
+  let targetAir = Math.round(total * airRatio);
+  if (airTypes.length) targetAir = Math.max(1, targetAir);
+  else targetAir = 0;
+  if (groundTypes.length) targetAir = Math.min(total - 1, targetAir);
+  else targetAir = total;
+  if (airTypes.length && targetAir < Math.min(airTypes.length, total - 1)) targetAir = Math.min(airTypes.length, total - 1);
+  const targetGround = total - targetAir;
+  let seed = (wave * 9301 + 49297) % 233280;
+  const rnd = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
+  const pick = list => {
+    const weights = list.map(u => 1.1 + (u.tier || 1) * .85);
+    const sum = weights.reduce((s, w) => s + w, 0);
+    let roll = rnd() * sum;
+    for (let i = 0; i < list.length; i++) { roll -= weights[i]; if (roll <= 0) return list[i].id; }
+    return list[list.length - 1].id;
+  };
+  const fill = (list, count) => {
+    if (!list.length || count <= 0) return [];
+    const picks = [];
+    // Cada tipo aparece al menos una vez si el cupo lo permite.
+    for (const unit of list) { if (picks.length < count) picks.push(unit.id); else break; }
+    while (picks.length < count) picks.push(pick(list));
+    return picks;
+  };
+  let plan = fill(airTypes, targetAir).concat(fill(groundTypes, targetGround));
+  // Mezcla determinista para que no lleguen primero todos los aéreos o terrestres.
+  for (let i = plan.length - 1; i > 0; i--) {
+    const j = Math.floor(rnd() * (i + 1));
+    [plan[i], plan[j]] = [plan[j], plan[i]];
   }
-  return plan.slice(0, Math.max(total, plan.length));
+  if (boss) {
+    plan.push(fac.boss.id);
+    plan = plan.slice(0, Math.max(total, plan.length));
+  }
+  return plan;
 }
 function waveScalars(wave) {
+  // La curva base crece de forma lineal y, a partir de la oleada 8, añade un
+  // término exponencial suave. Así las primeras oleadas enseñan y las últimas
+  // exigen defensas completas sin volverse imposibles de un salto.
   return {
-    hp: 1 + Math.max(0, wave - 1) * 0.45 + Math.pow(Math.max(0, wave - 8), 1.5) * 0.08,
-    damage: 1 + Math.max(0, wave - 1) * 0.12 + Math.max(0, wave - 10) * 0.04,
-    speed: 1 + Math.min(0.6, Math.max(0, wave - 1) * 0.02)
+    hp: 1 + Math.max(0, wave - 1) * 0.5 + Math.pow(Math.max(0, wave - 8), 1.55) * 0.095,
+    damage: 1 + Math.max(0, wave - 1) * 0.13 + Math.max(0, wave - 10) * 0.045,
+    speed: 1 + Math.min(0.8, Math.max(0, wave - 1) * 0.022)
   };
 }
 function planCounts(plan) {
@@ -3193,6 +3587,12 @@ function renderIntel() {
     const counterHtml = counter ? `<span class="intel-counter">▸ ${tr('intel.counter', { name: loc(counter, 'name') })}</span>` : '';
     return `<div class="intel-row"><span class="intel-icon t${d.tier}${counter ? ' countered' : ''}">${d.icon}</span><span class="intel-name">${loc(d, 'name')}<em>${kind} · ${tr('intel.armor', { n: Math.round(d.armor * 100) })}${counterHtml}</em></span><b>×${n}</b></div>`;
   }).join('');
+  const airCount = plan.reduce((n, type) => n + (ENEMIES[type] && ENEMIES[type].kind === 'air' ? 1 : 0), 0);
+  const groundCount = plan.length - airCount;
+  const totalUnits = Math.max(1, plan.length);
+  const airPct = Math.round(airCount / totalUnits * 100);
+  const groundPct = 100 - airPct;
+  const dialogue = factionDialogue(fac, nextWave, bossNow);
   const extra = state.active ? tr('intel.inProgress') : tr('intel.planned');
   const bossBadge = bossNow ? tr('faction.bossNow') : tr('faction.bossIn', { n: wavesUntilBoss(nextWave) });
   body.innerHTML = `
@@ -3201,27 +3601,35 @@ function renderIntel() {
       <div class="if-copy"><div class="if-name">${loc(fac, 'name')}</div><div class="if-sub">${tr('climate.' + fac.climate)} · ${fac.tempC}°C · ${bossNow ? tr('intel.bossWave') : tr('faction.stage', { stage, total: WAVES_PER_FACTION })}</div></div>
       <span class="if-boss">${bossBadge}</span>
     </div>
+    <div class="intel-dialog"><span>${fac.flag}</span><p>“${dialogue}”</p></div>
     <div class="intel-head"><span>${tr('intel.head', { wave: nextWave, state: extra })}</span><b class="threat threat-${threatClass(nextWave)}">${threatLevel(nextWave)}</b></div>
     <div class="intel-sub">${tr('intel.scaling', { hp: scalars.hp.toFixed(1), dmg: scalars.damage.toFixed(1) })}</div>
+    <div class="intel-balance">
+      <div class="ib-labels"><span class="ib-air">✈ ${tr('intel.air')} ${airCount}</span><span class="ib-ground">▮ ${tr('intel.ground')} ${groundCount}</span></div>
+      <div class="ib-bar"><i class="air" style="width:${airPct}%"></i><i class="ground" style="width:${groundPct}%"></i></div>
+    </div>
     <div class="intel-list">${rows || `<div class="intel-row"><span class="intel-name">${tr('intel.noThreats')}</span></div>`}</div>
     <div class="intel-routes"><b>${tr('intel.routes')}</b><span>${tr('intel.routesDetail')}</span><b>${tr('intel.airRoute')}</b></div>
     <div class="intel-abilities"><b>${tr('intel.support')}</b><span>${tr('intel.supportHtml')}</span></div>`;
 }
 function makeWave() {
   if (state.active || state.gameOver) return;
+  // El arsenal se cierra al comenzar el combate: solo se compra entre oleadas.
+  state.buildType = null; state.abilityMode = null; removeGhost();
   state.wave++;
   state.active = true;
   const fac = factionByWave(state.wave);
   applyClimate(fac.climate, fac.tempC);
+  Music.syncFaction(); Music.start();
   state.currentPlan = buildWavePlan(state.wave);
   state.spawnQueue = state.currentPlan.map(type => ({
     type,
-    delay: ENEMIES[type].boss ? 2.4 : Math.max(.26, 1.05 - state.wave * .02)
+    delay: ENEMIES[type].boss ? 2.1 : Math.max(.18, .95 - state.wave * .018)
   }));
   state.spawnTimer = .25;
   state.spawned = 0;
   document.getElementById('waveBtn').disabled = true;
-  updateHud(); renderIntel();
+  updateHud(); renderIntel(); renderTowerList(); updateInspect();
   showWaveBanner(fac, isBossWave(state.wave));
   Sound.wave();
   toast(tr('toast.waveStart', { wave: state.wave, summary: planSummary(state.currentPlan) }));
@@ -3230,25 +3638,33 @@ function spawnEnemy(type) {
   const d = ENEMIES[type];
   const scalars = waveScalars(state.wave);
   const rankRoll = Math.random();
-  const rank = !d.boss && state.wave >= 11 && rankRoll > .7 ? 'elite' : !d.boss && state.wave >= 7 && rankRoll > .5 ? 'veteran' : '';
+  // Las unidades con rango aparecen de forma progresiva: al principio la tropa
+  // es básica y, a partir de la oleada 5, crece la probabilidad de veteranos y
+  // de élite. Los jefes no reciben rango adicional.
+  const eliteChance = d.boss ? 0 : Math.min(.3, Math.max(0, (state.wave - 8) * .009));
+  const veteranChance = d.boss ? 0 : Math.min(.45, Math.max(0, (state.wave - 4) * .014));
+  const rank = rankRoll < eliteChance ? 'elite' : rankRoll < eliteChance + veteranChance ? 'veteran' : '';
   const rankMul = rank === 'elite' ? 1.7 : rank === 'veteran' ? 1.3 : 1;
   const model = enemyModel(type);
   const isAir = d.kind === 'air';
   const route = isAir ? AIR_ROUTE : ROUTES[0];
   const lane = state.spawned % 2 === 0 ? -1 : 1;
   state.spawned++;
-  // Los jefes escalan más despacio que la tropa común para que sigan siendo batibles.
-  const hpScale = d.boss ? .55 + Math.min(1.15, state.wave * .03) : scalars.hp;
+  // Los jefes son más resistentes y golpean más fuerte, pero avanzan un 30 %
+  // más despacio para dar tiempo a concentrar el fuego.
+  const hpScale = d.boss ? (.55 + Math.min(1.4, state.wave * .04)) * 1.35 : scalars.hp;
   const hp = d.hp * hpScale * rankMul;
-  const armorBonus = Math.min(.12, Math.max(0, state.wave - 1) * .006);
+  const armorBonus = Math.min(.16, Math.max(0, state.wave - 1) * .008);
   const e = {
-    type, data: d, model, hp, maxHp: hp, speed: d.speed * scalars.speed,
-    damage: d.damage * scalars.damage * (rank ? 1.12 : 1),
-    armor: Math.min(.82, d.armor + armorBonus),
+    type, data: d, model, hp, maxHp: hp,
+    speed: d.speed * scalars.speed * (d.boss ? .7 : 1),
+    damage: d.damage * scalars.damage * (rank ? 1.12 : 1) * (d.boss ? 1.3 : 1),
+    armor: Math.min(d.boss ? .86 : .82, d.armor + armorBonus + (d.boss ? .1 : 0)),
     progress: 0, traveled: 0, routeIndex: 0, route, routeLength: routeLength(route), lane,
     reward: Math.round(d.reward * (rank === 'elite' ? 1.8 : rank === 'veteran' ? 1.25 : 1) * .9),
     slowTimer: 0, repelTimer: 0, air: isAir, rank, x: route.points[0][0], z: route.points[0][1],
-    structureDamage: d.structureDamage || 0, bossAttackTimer: d.boss ? 3.2 : 0,
+    structureDamage: (d.structureDamage || 0) * (d.boss ? 1.2 : 0),
+    bossAttackTimer: d.boss ? 3.2 : 0,
     attackers: d.boss ? new Map() : null
   };
   model.position.set(e.x, isAir ? ALTITUDE[type] : 0, e.z);
@@ -3279,7 +3695,8 @@ function updateSpawn(dt) {
     if (state.wave > records.bestWave) { records.bestWave = state.wave; persistRecords(); updateRecordUI(); }
     Sound.cleared();
     toast(tr('toast.waveClear', { wave: state.wave }));
-    updateHud(); renderIntel();
+    Music.syncFaction();
+    updateHud(); renderIntel(); renderTowerList(); updateInspect();
   }
 }
 function advanceEnemyAlongRoute(e, amount) {
@@ -3440,7 +3857,7 @@ function applyDamage(e, amount, pierce = 0, towerType = null, sourceTower = null
   // Counter units: la torre bonifica daño si su tipo es el counter del enemigo.
   let counterMul = 1;
   if (towerType && e.data.counter === towerType) counterMul = 1.45;
-  const armor = Math.max(0, Math.min(.82, (e.armor || 0) - pierce + (e.rank === 'elite' ? .06 : 0)));
+  const armor = Math.max(0, Math.min(e.data.boss ? .86 : .82, (e.armor || 0) - pierce + (e.rank === 'elite' ? .06 : 0)));
   const dealt = amount * (1 - armor) * counterMul;
   e.hp -= dealt;
   // Los jefes recuerdan qué estructuras les disparan para contraatacar.
@@ -3536,21 +3953,33 @@ function acquireTarget(t) {
 
 /* --------------------------------------------------------------- proyectiles */
 const projectilePools = new Map();
+function projectileGeometry(kind) {
+  switch (kind) {
+    case 'mortarShell': return new THREE.CylinderGeometry(.045, .065, .17, 7);
+    case 'artShell': return new THREE.CylinderGeometry(.065, .095, .28, 8);
+    case 'rocket': return new THREE.CylinderGeometry(.014, .038, .36, 7);
+    case 'missile': return new THREE.CylinderGeometry(.016, .032, .46, 7);
+    case 'cruise': return new THREE.CylinderGeometry(.024, .052, .6, 8);
+    case 'plasma': return new THREE.SphereGeometry(.11, 10, 8);
+    case 'flak': return new THREE.OctahedronGeometry(.09, 0);
+    default: return new THREE.SphereGeometry(.085, 8, 6);
+  }
+}
 function getProjectile(color = 0xffd074, kind = 'ball') {
   const pool = projectilePools.get(kind) || [];
   let o = pool.pop();
   if (!o) {
-    const geo = kind === 'rocket' ? new THREE.CylinderGeometry(.018, .028, .22, 8) :
-      kind === 'missile' ? new THREE.CylinderGeometry(.022, .034, .32, 8) :
-        kind === 'cruise' ? new THREE.CylinderGeometry(.028, .042, .44, 8) :
-          new THREE.SphereGeometry(.09, 8, 6);
-    o = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color }));
+    o = new THREE.Mesh(projectileGeometry(kind), new THREE.MeshBasicMaterial({ color }));
     world.add(o);
     o.userData.kind = kind;
+    // Un halo tenue hace legible el proyectil sobre cualquier clima.
+    const halo = new THREE.Mesh(new THREE.SphereGeometry(kind === 'cruise' || kind === 'missile' ? .11 : .075, 7, 5), new THREE.MeshBasicMaterial({ color, transparent: true, opacity: .28, depthWrite: false }));
+    o.add(halo); o.userData.halo = halo;
   }
   o.material.color.set(color);
+  if (o.userData.halo) o.userData.halo.material.color.set(color);
   o.visible = true;
-  o.rotation.x = Math.PI / 2;
+  o.rotation.set(Math.PI / 2, 0, 0);
   return o;
 }
 function recycleProjectile(o) {
@@ -3585,51 +4014,53 @@ function fire(t, e) {
     return;
   }
   if (type === 'mortar') {
-    const shell = getProjectile(0xffc878, 'ball');
-    Sound.mortar(); muzzleFlash(t, 1.1);
-    shell.position.copy(start); shell.scale.setScalar(.75);
-    state.effects.push({ kind: 'shell', active: true, life: .95, data: { mesh: shell, target: e, start, elapsed: 0, duration: .95, damage: t.stats.damage, splash: t.data.splash, pierce: t.stats.pierce, arc: 1.7, towerType: t.type, sourceTower: t } });
+    const shell = getProjectile(0xffb45a, 'mortarShell');
+    Sound.mortar(); muzzleFlash(t, 1.1, 0xffb45a);
+    shell.position.copy(start); shell.scale.setScalar(.8);
+    state.effects.push({ kind: 'shell', active: true, life: .95, data: { mesh: shell, target: e, start, elapsed: 0, duration: .95, damage: t.stats.damage, splash: t.data.splash, pierce: t.stats.pierce, arc: 1.7, towerType: t.type, sourceTower: t, trailColor: 0x8d8577, impactColor: 0xffb45a } });
     return;
   }
   if (type === 'art') {
-    const shell = getProjectile(0xffc878, 'ball');
-    Sound.mortar(); muzzleFlash(t, 1.4);
-    shell.position.copy(start); shell.scale.setScalar(.9);
-    state.effects.push({ kind: 'shell', active: true, life: .82, data: { mesh: shell, target: e, start, elapsed: 0, duration: .82, damage: t.stats.damage, splash: t.data.splash, pierce: t.stats.pierce, arc: 2.7, towerType: t.type, sourceTower: t } });
+    const shell = getProjectile(0xffb060, 'artShell');
+    Sound.artillery(); muzzleFlash(t, 1.4, 0xffb060);
+    shell.position.copy(start); shell.scale.setScalar(1);
+    state.effects.push({ kind: 'shell', active: true, life: .82, data: { mesh: shell, target: e, start, elapsed: 0, duration: .82, damage: t.stats.damage, splash: t.data.splash, pierce: t.stats.pierce, arc: 2.7, towerType: t.type, sourceTower: t, trailColor: 0x7d7568, impactColor: 0xff9a4a } });
     return;
   }
   if (type === 'rocket') {
     Sound.rocket();
     for (let i = 0; i < (t.stats.salvo || 4); i++) {
-      const rocket = getProjectile(0xffc362, 'rocket');
+      const rocket = getProjectile(0xffb24a, 'rocket');
       const spread = 1.15;
       const tx = e.x + (Math.random() - .5) * spread, tz = e.z + (Math.random() - .5) * spread;
       rocket.position.copy(start);
       state.effects.push({
         kind: 'rocket', active: true, life: 1.2, data: {
           mesh: rocket, start: start.clone(), targetPos: new THREE.Vector3(tx, .4, tz),
-          elapsed: -i * .11, duration: .72, damage: t.stats.damage, splash: t.data.splash, pierce: t.stats.pierce, arc: 1.6, towerType: t.type, sourceTower: t
+          elapsed: -i * .11, duration: .72, damage: t.stats.damage, splash: t.data.splash, pierce: t.stats.pierce, arc: 1.6, towerType: t.type, sourceTower: t,
+          trailColor: 0xffc45a, smokeColor: 0x6f6a60, spin: (Math.random() - .5) * 7
         }
       });
     }
     return;
   }
   if (type === 'aa') {
-    const missile = getProjectile(0xffc362, 'missile');
-    Sound.missile(); muzzleFlash(t, 1.2);
+    const missile = getProjectile(0xffe27a, 'missile');
+    Sound.missile(); muzzleFlash(t, 1.2, 0xffe27a);
     missile.position.copy(start);
-    state.effects.push({ kind: 'missile', active: true, life: 2.2, data: { mesh: missile, target: e, life: 2.2, damage: t.stats.damage, pierce: t.stats.pierce, splash: 0, towerType: t.type, sourceTower: t } });
+    state.effects.push({ kind: 'missile', active: true, life: 2.2, data: { mesh: missile, target: e, life: 2.2, damage: t.stats.damage, pierce: t.stats.pierce, splash: 0, towerType: t.type, sourceTower: t, trailColor: 0xffc050, smokeColor: 0x9a9184 } });
     return;
   }
   if (type === 'destroyer') {
     Sound.navalGun();
     for (let i = 0; i < 2; i++) {
-      const missile = getProjectile(0xffbc6a, 'cruise');
+      const missile = getProjectile(0xff8a5a, 'cruise');
       missile.position.copy(start);
       state.effects.push({
         kind: 'cruise', active: true, life: 2.4, data: {
           mesh: missile, target: e, life: 2.4, damage: t.stats.damage, pierce: t.stats.pierce,
-          splash: t.data.splash, delay: i * .18, towerType: t.type, sourceTower: t
+          splash: t.data.splash, delay: i * .18, towerType: t.type, sourceTower: t,
+          trailColor: 0xff7040, smokeColor: 0x8f8d84
         }
       });
     }
@@ -3658,16 +4089,20 @@ function carrierStrike(t, e) {
     }
   });
 }
-function impactArtillery(x, z, damage, splash, pierce = 0, towerType = null, sourceTower = null) {
+function impactArtillery(x, z, damage, splash, pierce = 0, towerType = null, sourceTower = null, color = 0xf5a753) {
   for (const enemy of [...state.enemies]) {
     const dist = Math.hypot(enemy.x - x, enemy.z - z);
     if (dist <= splash) applyDamage(enemy, damage * (1 - .3 * dist / splash), pierce, towerType, sourceTower);
   }
-  explosionEffect(x, .25, z);
+  explosionEffect(x, .25, z, color, 20);
 }
 function updateTowers(dt) {
   for (const t of state.towers) {
     t.cooldown -= dt;
+    if (t.specialCd > 0) t.specialCd = Math.max(0, t.specialCd - dt);
+    // El brillo del emisor láser decae en cuanto deja de haber objetivo.
+    const laserGlow = t.type === 'laser' ? t.group.userData.laserGlow : null;
+    if (laserGlow) laserGlow.emissiveIntensity = Math.max(0, laserGlow.emissiveIntensity - dt * 9);
     if (t.disabledUntil && state.combatTime < t.disabledUntil) { t.target = null; continue; }
     if ((t.type === 'ew' || t.type === 'carrier' || t.type === 'destroyer') && t.pivot) t.pivot.rotation.y += dt * .4;
     const target = acquireTarget(t);
@@ -3683,9 +4118,11 @@ function updateTowers(dt) {
       t.group.userData.elev.rotation.x = .12 + Math.min(.38, Math.hypot(dx, dz) * .025);
     }
     if (t.type === 'laser') {
+      if (laserGlow) laserGlow.emissiveIntensity = 2.2 + Math.sin(state.combatTime * 38) * .5;
       const from = new THREE.Vector3(t.group.position.x, t.group.position.y + (t.stats.muzzleY || 1), t.group.position.z);
       const to = new THREE.Vector3(target.x, (ALTITUDE[target.type] || 0) + .45, target.z);
-      beam(from, to, .22);
+      beam(from, to, .22, 0x7df3ff);
+      if (Math.random() < .5) makeSparks(target.x, to.y, target.z, 0x9ff8ff, 2);
       Sound.laser();
       applyDamage(target, t.stats.damage * dt, t.stats.pierce, t.type, t);
     } else if (t.cooldown <= 0) {
@@ -3702,16 +4139,18 @@ function makeLine(a, b, color, opacity = 1) {
   world.add(line);
   return line;
 }
-function beam(a, b, width = .18) {
+function beam(a, b, width = .18, color = 0x62e7ff) {
   const key = 'beam';
   let fx = state.effects.find(x => x.kind === key && !x.active);
   if (!fx) {
-    const mesh = new THREE.Mesh(new THREE.CylinderGeometry(.045, .045, 1, 7), new THREE.MeshBasicMaterial({ color: 0x62e7ff, transparent: true, opacity: .9 }));
+    const mesh = new THREE.Mesh(new THREE.CylinderGeometry(.045, .045, 1, 7), new THREE.MeshBasicMaterial({ color, transparent: true, opacity: .9, depthWrite: false }));
     world.add(mesh);
     fx = { kind: key, mesh, life: 0, active: false };
     state.effects.push(fx);
   }
   fx.active = true; fx.life = .06;
+  fx.mesh.material.color.set(color);
+  fx.mesh.material.opacity = .92;
   const d = b.clone().sub(a);
   fx.mesh.position.copy(a).add(b).multiplyScalar(.5);
   fx.mesh.scale.set(width, d.length(), width);
@@ -3721,16 +4160,17 @@ function makeSparks(x, y, z, color, n) {
   const count = Math.max(2, Math.round(n * quality().particles));
   for (let i = 0; i < count; i++) spawnParticle(x, y, z, color, 1.8 + Math.random() * 1.8, .24 + Math.random() * .35);
 }
-function muzzleFlash(t, size = 1) {
+function muzzleFlash(t, size = 1, color = 0xffe0a0) {
   const p = t.group.position.clone(); p.y += (t.stats.muzzleY || 1.05);
   let fx = state.effects.find(e => e.kind === 'muzzle' && !e.active);
   if (!fx) {
-    const mesh = new THREE.Mesh(new THREE.SphereGeometry(.16, 8, 6), new THREE.MeshBasicMaterial({ color: 0xffe0a0, transparent: true, opacity: .95, depthWrite: false }));
+    const mesh = new THREE.Mesh(new THREE.SphereGeometry(.16, 8, 6), new THREE.MeshBasicMaterial({ color, transparent: true, opacity: .95, depthWrite: false }));
     world.add(mesh);
     fx = { kind: 'muzzle', mesh, active: false, life: 0 };
     state.effects.push(fx);
   }
   fx.active = true; fx.life = .08; fx.maxLife = .08;
+  fx.mesh.material.color.set(color);
   fx.mesh.position.copy(p);
   fx.mesh.scale.setScalar((.8 + Math.random() * .7) * size);
   fx.mesh.material.opacity = .95; fx.mesh.visible = true;
@@ -3748,28 +4188,32 @@ function spawnParticle(x, y, z, color, speed, life) {
   fx.velocity = new THREE.Vector3((Math.random() - .5) * speed, Math.random() * speed * .6, (Math.random() - .5) * speed);
   fx.mesh.scale.setScalar(.6 + Math.random() * 1.4);
 }
-function explode(x, y, z, color = 0xe29b54, n = 15) {
+function explode(x, y, z, color = 0xe29b54, n = 15, ringColor = color) {
   const count = Math.max(3, Math.round(n * quality().particles));
   for (let i = 0; i < count; i++) spawnParticle(x, y, z, color, 1.3 + Math.random() * 3, .45 + Math.random() * .6);
-  makePulse(x, z, 1.4);
+  for (let i = 0; i < Math.max(2, Math.round(count * .35)); i++) spawnParticle(x, y + .1, z, 0x5b5a54, .7 + Math.random() * 1.2, .7 + Math.random() * .7);
+  makePulse(x, z, 1.4, ringColor, .42);
 }
-function explosionEffect(x, y, z) {
-  explode(x, y, z, 0xf5a753, 22);
+function explosionEffect(x, y, z, color = 0xf5a753, n = 22) {
+  explode(x, y, z, color, n, color);
   Sound.explosion();
-  const flash = new THREE.Mesh(new THREE.SphereGeometry(.45, 8, 6), new THREE.MeshBasicMaterial({ color: 0xffe6ae, transparent: true, opacity: .8 }));
+  const flash = new THREE.Mesh(new THREE.SphereGeometry(.45, 8, 6), new THREE.MeshBasicMaterial({ color: 0xfff0c8, transparent: true, opacity: .85, depthWrite: false }));
   flash.position.set(x, y, z); world.add(flash);
   state.effects.push({ kind: 'flash', mesh: flash, life: .2, maxLife: .2, active: true });
+  makeSparks(x, y + .1, z, color, 5);
   cameraShake = Math.min(.35, cameraShake + .1);
 }
-function makePulse(x, z, scale) {
+function makePulse(x, z, scale, color = 0x9ecf79, life = .38) {
   let fx = state.effects.find(e => e.kind === 'pulse' && !e.active);
   if (!fx) {
-    const mesh = new THREE.Mesh(new THREE.RingGeometry(.86, 1, 28), new THREE.MeshBasicMaterial({ color: 0x9ecf79, transparent: true, opacity: .7, side: THREE.DoubleSide }));
+    const mesh = new THREE.Mesh(new THREE.RingGeometry(.86, 1, 34), new THREE.MeshBasicMaterial({ color, transparent: true, opacity: .7, side: THREE.DoubleSide, depthWrite: false }));
     mesh.rotation.x = -Math.PI / 2; world.add(mesh);
     fx = { kind: 'pulse', mesh, life: 0, active: false };
     state.effects.push(fx);
   }
-  fx.active = true; fx.life = .38; fx.maxLife = .38;
+  fx.active = true; fx.life = life; fx.maxLife = life;
+  fx.mesh.material.color.set(color);
+  fx.mesh.material.opacity = .72;
   fx.mesh.position.set(x, .12, z); fx.mesh.scale.setScalar(.2); fx.maxScale = scale;
 }
 function removeEnemy(e, killed) {
@@ -3795,10 +4239,12 @@ function updateEffects(dt) {
       const dist = direction.length(), step = Math.min(dist, dt * (fx.kind === 'cruise' ? 9 : 11));
       p.mesh.position.add(direction.normalize().multiplyScalar(step));
       p.mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction.clone().normalize());
-      if (Math.random() < .85) spawnParticle(p.mesh.position.x, p.mesh.position.y, p.mesh.position.z, 0x9d9b8d, .45, .28);
+      p.mesh.rotateY(state.clock * 8);
+      if (Math.random() < .9) spawnParticle(p.mesh.position.x, p.mesh.position.y, p.mesh.position.z, p.trailColor || 0xffc050, .35, .22);
+      if (Math.random() < .45) spawnParticle(p.mesh.position.x, p.mesh.position.y - .05, p.mesh.position.z, p.smokeColor || 0x8f8d84, .22, .4);
       if (step >= dist - .08) {
-        if (p.splash) impactArtillery(destination.x, destination.z, p.damage, p.splash, p.pierce, p.towerType, p.sourceTower);
-        else { applyDamage(e, p.damage, p.pierce, p.towerType, p.sourceTower); explosionEffect(e.x, destination.y, e.z); }
+        if (p.splash) impactArtillery(destination.x, destination.z, p.damage, p.splash, p.pierce, p.towerType, p.sourceTower, p.trailColor || 0xf5a753);
+        else { applyDamage(e, p.damage, p.pierce, p.towerType, p.sourceTower); explosionEffect(e.x, destination.y, e.z, p.trailColor || 0xf5a753, 18); }
         recycleProjectile(p.mesh); fx.active = false;
       }
       continue;
@@ -3810,8 +4256,9 @@ function updateEffects(dt) {
       const destination = new THREE.Vector3(e.x, (ALTITUDE[e.type] || 0) + .35, e.z);
       p.mesh.position.lerpVectors(p.start, destination, progress);
       p.mesh.position.y += Math.sin(progress * Math.PI) * (p.arc || 2.2);
-      if (Math.random() < .32) spawnParticle(p.mesh.position.x, p.mesh.position.y, p.mesh.position.z, 0x827d6a, .35, .32);
-      if (progress >= 1) { impactArtillery(destination.x, destination.z, p.damage, p.splash, p.pierce, p.towerType, p.sourceTower); recycleProjectile(p.mesh); fx.active = false; }
+      p.mesh.rotation.z += dt * 9;
+      if (Math.random() < .38) spawnParticle(p.mesh.position.x, p.mesh.position.y, p.mesh.position.z, p.trailColor || 0x827d6a, .35, .32);
+      if (progress >= 1) { impactArtillery(destination.x, destination.z, p.damage, p.splash, p.pierce, p.towerType, p.sourceTower, p.impactColor || 0xf5a753); recycleProjectile(p.mesh); fx.active = false; }
       continue;
     }
     if (fx.kind === 'rocket') {
@@ -3821,9 +4268,11 @@ function updateEffects(dt) {
       const progress = Math.min(1, p.elapsed / p.duration);
       p.mesh.position.lerpVectors(p.start, p.targetPos, progress);
       p.mesh.position.y += Math.sin(progress * Math.PI) * (p.arc || 1.4);
+      p.mesh.rotation.z += (p.spin || 0) * dt;
       const prev = p.mesh.position.clone();
-      if (Math.random() < .6) spawnParticle(prev.x, prev.y, prev.z, 0xb9b4a4, .3, .24);
-      if (progress >= 1) { impactArtillery(p.targetPos.x, p.targetPos.z, p.damage, p.splash, p.pierce, p.towerType, p.sourceTower); recycleProjectile(p.mesh); fx.active = false; }
+      if (Math.random() < .75) spawnParticle(prev.x, prev.y, prev.z, p.trailColor || 0xffc45a, .32, .2);
+      if (Math.random() < .4) spawnParticle(prev.x, prev.y, prev.z, p.smokeColor || 0x6f6a60, .2, .45);
+      if (progress >= 1) { impactArtillery(p.targetPos.x, p.targetPos.z, p.damage, p.splash, p.pierce, p.towerType, p.sourceTower, p.trailColor || 0xffa040); recycleProjectile(p.mesh); fx.active = false; }
       continue;
     }
     if (fx.kind === 'airstrike') {
@@ -3932,6 +4381,7 @@ function updateAbilities(dt) {
     if (ab.cd > 0) { ab.cd = Math.max(0, ab.cd - dt); changed = true; }
   }
   if (changed) renderAbilities();
+  if (state.selectedTower) updateSelectedSpecialButton();
 }
 
 /* --------------------------------------------------------------------- HUD */
@@ -3950,15 +4400,18 @@ function showWaveBanner(fac, boss) {
   if (!el) return;
   const stage = waveInFaction(state.wave);
   const escorts = (state.currentPlan || []).filter(t => !ENEMIES[t].boss).length;
+  const dialogue = factionDialogue(fac, state.wave, boss);
+  const speaker = boss ? loc(fac.boss, 'name') : loc(fac, 'name');
   el.className = 'wave-banner show' + (boss ? ' boss' : '');
   el.innerHTML = `
     <div class="wb-flag">${fac.flag}</div>
     <div class="wb-kicker">${boss ? tr('waveBanner.boss') : tr('waveBanner.incoming')}</div>
     <div class="wb-title">${loc(fac, 'name')}</div>
     <div class="wb-meta"><span>${tr('waveBanner.stage', { stage, total: FACTION_CYCLE })}</span><b>${tr('waveBanner.climate', { climate: tr('climate.' + fac.climate), temp: fac.tempC })}</b>${boss ? `<span>${tr('waveBanner.escorts', { n: escorts })}</span>` : ''}</div>
+    <div class="wb-dialog"><span>${fac.flag} ${speaker}:</span> “${dialogue}”</div>
     <div class="wb-bar"><i></i></div>`;
   clearTimeout(waveBannerTimer);
-  waveBannerTimer = setTimeout(() => el.classList.remove('show'), boss ? 4400 : 2700);
+  waveBannerTimer = setTimeout(() => el.classList.remove('show'), boss ? 5600 : 3900);
 }
 function updateHud() {
   const set = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
@@ -4011,6 +4464,7 @@ function endGame() {
   document.getElementById('defeatRecordLine').innerHTML = `<span>${tr('menu.bestWave')}<b>${records.bestWave}</b></span><span>${tr('menu.record')}<b>${records.bestScore}</b></span><span>${tr('menu.runs')}<b>${records.plays}</b></span>`;
   document.getElementById('defeatScreen').classList.remove('hidden');
   Sound.defeat();
+  Music.stop();
 }
 function chooseArmy(i) { state.selectedArmy = i; document.querySelectorAll('.army-card').forEach((el, n) => el.classList.toggle('chosen', n === i)); }
 function renderArmies() {
@@ -4052,12 +4506,14 @@ function deploy() {
   document.getElementById('hudFlag').textContent = state.army.flag;
   updateHud(); renderTowerList(); updateInspect(); renderAbilities(); updatePauseButton();
   Sound.init(); Sound.ui();
+  Music.syncFaction(); Music.start();
   toast(tr(freshMatch ? 'toast.armyNew' : 'toast.army', { name: loc(state.army, 'name') }));
 }
 function restartGame() {
   resetGame();
   setPaused(false);
   updatePauseButton();
+  Music.refresh();
   toast(tr('toast.restart'));
 }
 function resetGame() {
@@ -4105,17 +4561,22 @@ const Sound = (() => {
     return ctx;
   }
   function gate(name, ms) { const now = performance.now(); if (last[name] && now - last[name] < ms) return false; last[name] = now; return true; }
-  function tone(freq, dur, type = 'square', vol = .15, slide = 0, delay = 0) {
+  function tone(freq, dur, type = 'square', vol = .15, slide = 0, delay = 0, pan = 0) {
     const c = ensure(); if (!c) return;
     const t0 = c.currentTime + delay, osc = c.createOscillator(), gain = c.createGain();
     osc.type = type; osc.frequency.setValueAtTime(Math.max(20, freq), t0);
     if (slide) osc.frequency.exponentialRampToValueAtTime(Math.max(20, freq + slide), t0 + dur);
     gain.gain.setValueAtTime(.0001, t0);
-    gain.gain.exponentialRampToValueAtTime(Math.max(.0002, vol), t0 + .008);
+    gain.gain.exponentialRampToValueAtTime(Math.max(.0002, vol), t0 + .006);
     gain.gain.exponentialRampToValueAtTime(.0001, t0 + dur);
-    osc.connect(gain); gain.connect(master); osc.start(t0); osc.stop(t0 + dur + .02);
+    let tail = gain;
+    if (pan && c.createStereoPanner) {
+      const p = c.createStereoPanner(); p.pan.value = Math.max(-1, Math.min(1, pan));
+      gain.connect(p); tail = p;
+    }
+    osc.connect(gain); tail.connect(master); osc.start(t0); osc.stop(t0 + dur + .02);
   }
-  function noise(dur, vol = .2, cutoff = 1000, delay = 0) {
+  function noise(dur, vol = .2, cutoff = 1000, delay = 0, type = 'lowpass', q = 1) {
     const c = ensure(); if (!c) return;
     if (!noiseBuffer) {
       const len = Math.floor(c.sampleRate);
@@ -4125,7 +4586,7 @@ const Sound = (() => {
     }
     const t0 = c.currentTime + delay, src = c.createBufferSource();
     src.buffer = noiseBuffer;
-    const filter = c.createBiquadFilter(); filter.type = 'lowpass'; filter.frequency.setValueAtTime(cutoff, t0);
+    const filter = c.createBiquadFilter(); filter.type = type; filter.Q.value = q; filter.frequency.setValueAtTime(cutoff, t0);
     const gain = c.createGain(); gain.gain.setValueAtTime(vol, t0);
     gain.gain.exponentialRampToValueAtTime(.0001, t0 + dur);
     src.connect(filter); filter.connect(gain); gain.connect(master);
@@ -4133,28 +4594,240 @@ const Sound = (() => {
   }
   return {
     init() { ensure(); },
-    setVolume(v) { settings.volume = Math.max(0, Math.min(1, v)); persistSettings(); if (master) master.gain.value = settings.volume; },
-    gun() { if (gate('gun', 55)) { tone(190 + Math.random() * 40, .05, 'square', .09, -110); noise(.04, .07, 2600); } },
-    mortar() { if (gate('mortar', 120)) { tone(92, .18, 'sawtooth', .19, -52); noise(.16, .16, 520); } },
-    rocket() { if (gate('rocket', 160)) { noise(.26, .17, 1500); tone(72, .3, 'sawtooth', .12, 120); } },
-    missile() { if (gate('missile', 100)) { tone(430, .28, 'sawtooth', .08, 720); noise(.12, .07, 1900); } },
-    navalGun() { if (gate('naval', 220)) { tone(110, .2, 'sawtooth', .16, -45); noise(.2, .14, 650); } },
-    laser() { if (gate('laser', 110)) tone(860, .09, 'sine', .05, 340); },
-    ew() { if (gate('ew', 170)) { tone(240, .22, 'triangle', .07, 190); tone(320, .18, 'sine', .04, 120, .04); } },
-    emp() { if (gate('emp', 300)) { tone(540, .32, 'sine', .1, -420); tone(180, .45, 'triangle', .08, 60, .05); } },
-    jet() { if (gate('jet', 300)) { noise(.55, .16, 2400); tone(280, .5, 'sawtooth', .06, 380); } },
-    explosion() { if (gate('boom', 85)) { noise(.35, .3, 700); tone(60, .3, 'sine', .2, -25); } },
-    leak() { if (gate('leak', 170)) { tone(230, .32, 'triangle', .16, -130); noise(.18, .1, 900); } },
-    build() { tone(320, .08, 'square', .12, 130); tone(520, .1, 'square', .1, 110, .08); },
-    sell() { tone(380, .1, 'triangle', .11, -160); tone(240, .12, 'triangle', .1, -90, .09); },
-    upgrade() { [440, 660, 880].forEach((f, i) => tone(f, .12, 'square', .08, 70, i * .06)); },
-    cleared() { [523, 659, 784].forEach((f, i) => tone(f, .16, 'triangle', .08, 30, i * .07)); },
-    wave() { tone(140, .5, 'sawtooth', .11, 130); tone(210, .5, 'triangle', .07, 170, .08); },
-    defeat() { [330, 262, 196, 131].forEach((f, i) => tone(f, .38, 'triangle', .13, -25, i * .14)); },
-    error() { tone(150, .15, 'square', .1, -60); },
-    click() { if (gate('click', 45)) tone(620, .035, 'square', .05, 90); },
-    ui() { if (gate('ui', 60)) tone(480, .06, 'sine', .06, 130); },
+    setVolume(v) { settings.volume = Math.max(0, Math.min(1, v)); persistSettings(); if (master) master.gain.value = settings.volume; Music.setVolume(settings.volume); },
+    gun() { if (gate('gun', 45)) { tone(215 + Math.random() * 45, .045, 'square', .075, -150); tone(96, .035, 'triangle', .06, -40); noise(.03, .055, 3300, 0, 'highpass'); } },
+    mortar() { if (gate('mortar', 110)) { tone(82, .2, 'sine', .2, -42); noise(.13, .16, 760); noise(.05, .06, 2400, 0, 'highpass'); } },
+    artillery() { if (gate('art', 150)) { tone(64, .28, 'sine', .23, -30); noise(.22, .2, 560); noise(.06, .08, 2100, .01, 'highpass'); } },
+    rocket() { if (gate('rocket', 150)) { noise(.28, .15, 1500, 0, 'bandpass', 1.2); tone(76, .3, 'sawtooth', .1, 150); } },
+    missile() { if (gate('missile', 90)) { tone(480, .32, 'sawtooth', .075, 760); noise(.17, .06, 2300, 0, 'highpass'); } },
+    navalGun() { if (gate('naval', 190)) { tone(96, .26, 'sawtooth', .17, -42); noise(.24, .17, 600); } },
+    laser() { if (gate('laser', 95)) { tone(1240, .085, 'sawtooth', .032, -560); tone(760, .075, 'sine', .03, 260, .01); } },
+    ew() { if (gate('ew', 150)) { tone(260, .25, 'triangle', .065, 230); tone(340, .2, 'sine', .038, -140, .04); noise(.12, .03, 1200, 0, 'bandpass', 3); } },
+    emp() { if (gate('emp', 260)) { tone(560, .36, 'sine', .095, -460); tone(170, .5, 'triangle', .075, 70, .05); noise(.25, .08, 800, .02); } },
+    jet() { if (gate('jet', 260)) { noise(.6, .14, 2500, 0, 'bandpass', .8); tone(300, .54, 'sawtooth', .055, 430); } },
+    explosion() { if (gate('boom', 75)) { noise(.42, .27, 780); noise(.16, .14, 2400, .02, 'highpass'); tone(56, .34, 'sine', .2, -22); } },
+    leak() { if (gate('leak', 150)) { tone(250, .34, 'triangle', .15, -140); tone(190, .3, 'square', .07, -80, .12); noise(.16, .08, 1000); } },
+    build() { tone(300, .08, 'triangle', .12, 150); tone(500, .1, 'square', .09, 140, .08); noise(.07, .06, 1800, .01, 'highpass'); },
+    sell() { tone(400, .1, 'triangle', .11, -180); tone(250, .13, 'triangle', .09, -100, .1); },
+    upgrade() { [440, 590, 740, 990].forEach((f, i) => tone(f, .12, 'triangle', .07, 60, i * .055)); },
+    cleared() { [523, 659, 784, 1047].forEach((f, i) => tone(f, .18, 'triangle', .075, 26, i * .07)); },
+    wave() { tone(132, .55, 'sawtooth', .1, 145); tone(198, .5, 'triangle', .065, 180, .08); tone(264, .4, 'sine', .04, 90, .16); },
+    defeat() { [330, 294, 247, 196, 147].forEach((f, i) => tone(f, .42, 'triangle', .12, -22, i * .16)); noise(.9, .07, 500, .3); },
+    error() { tone(155, .14, 'square', .09, -65); tone(120, .14, 'square', .06, -35, .1); },
+    click() { if (gate('click', 40)) tone(680, .03, 'square', .045, 100); },
+    ui() { if (gate('ui', 55)) tone(520, .055, 'sine', .055, 160); },
+    special(type) {
+      if (!gate('special', 110)) return;
+      if (type === 'laser') { tone(1500, .24, 'sawtooth', .06, -900); tone(900, .3, 'sine', .05, -300, .05); }
+      else if (type === 'ew') { tone(300, .4, 'triangle', .07, -190); tone(460, .35, 'sine', .05, 140, .06); }
+      else if (type === 'carrier') { noise(.65, .17, 2400, 0, 'bandpass', .9); tone(330, .55, 'sawtooth', .06, 500); }
+      else { tone(150, .3, 'sawtooth', .1, 70); tone(300, .26, 'square', .06, 120, .04); noise(.24, .12, 1500, 0, 'bandpass', 1.2); }
+    },
     toggle(on) { settings.sound = on; persistSettings(); if (on) ensure(); updateSoundButton(); }
+  };
+})();
+
+/* ------------------------------------------------- música procedural (sin assets) */
+// Cada pista se sintetiza en vivo con Web Audio: no hay archivos descargados,
+// muestras ni licencias externas. El motor programa notas con lookahead.
+const MUSIC_LIBRARY = {
+  march:      { bpm: 116, root: 55, scale: [0, 2, 3, 5, 7, 8, 10], bass: [0, 0, 5, 3, 0, 0, 7, 5], lead: [12, 15, 19, 15, 12, 10, 7, 10], leadType: 'square', pad: false, drums: 'march' },
+  ambient:    { bpm: 76,  root: 49, scale: [0, 2, 3, 5, 7, 9, 11], bass: [0, 0, 3, 3, 5, 5, 3, 0], lead: [12, 14, 16, 19, 16, 14, 12, 7], leadType: 'sine', pad: true, drums: 'sparse', padType: 'sine' },
+  electronic: { bpm: 128, root: 44, scale: [0, 2, 3, 5, 7, 8, 10], bass: [0, 7, 0, 7, 3, 7, 5, 7], lead: [12, 15, 19, 22, 19, 15, 12, 19], leadType: 'sawtooth', pad: false, drums: 'electro' },
+  infernal:   { bpm: 92,  root: 41, scale: [0, 1, 3, 5, 6, 8, 10], bass: [0, 0, 1, 0, 5, 4, 3, 1], lead: [12, 13, 15, 18, 15, 13, 12, 6], leadType: 'sawtooth', pad: true, drums: 'war', padType: 'sawtooth' },
+  celestial:  { bpm: 70,  root: 58, scale: [0, 2, 4, 7, 9, 11], bass: [0, 0, 4, 4, 7, 7, 4, 0], lead: [12, 16, 19, 24, 19, 16, 12, 7], leadType: 'sine', pad: true, drums: 'none', padType: 'sine' }
+};
+// Arreglo propio de cada facción enemiga. Parte de una de las cinco bases y
+// cambia raíz, escala, tempo, bajo, melodía, timbre y percusión. Cada perfil
+// genera además una variante de jefe más rápida, grave y agresiva.
+const FACTION_MUSIC = {
+  cavemen:    { base: 'march',      bpm: 104, root: 41, scale: [0, 2, 3, 5, 7, 10, 12], bass: [0, 0, 3, 0, 5, 3, 0, 0], lead: [12, 15, 12, 10, 7, 10, 12, 15], leadType: 'square', drums: 'war', pad: true, padType: 'triangle' },
+  spartans:   { base: 'march',      bpm: 118, root: 52, scale: [0, 1, 4, 5, 7, 8, 11], bass: [0, 0, 5, 5, 3, 3, 7, 7], lead: [12, 13, 17, 20, 17, 13, 12, 8], leadType: 'sawtooth', drums: 'march', pad: false },
+  crusaders:  { base: 'celestial',  bpm: 88,  root: 50, scale: [0, 2, 4, 5, 7, 9, 11], bass: [0, 4, 4, 0, 5, 5, 7, 0], lead: [12, 16, 19, 24, 19, 16, 12, 7], leadType: 'triangle', drums: 'sparse', pad: true, padType: 'sine' },
+  pirates:    { base: 'march',      bpm: 126, root: 45, scale: [0, 2, 3, 7, 9, 10, 12], bass: [0, 3, 5, 3, 0, 5, 7, 5], lead: [12, 15, 19, 15, 12, 10, 7, 10], leadType: 'square', drums: 'march', pad: false },
+  wwi:        { base: 'march',      bpm: 98,  root: 43, scale: [0, 2, 3, 5, 7, 8, 10], bass: [0, 0, 5, 3, 0, 0, 7, 5], lead: [12, 15, 19, 15, 12, 8, 7, 10], leadType: 'sawtooth', drums: 'war', pad: true, padType: 'triangle' },
+  chinaTech:  { base: 'electronic', bpm: 132, root: 46, scale: [0, 2, 3, 5, 7, 8, 10], bass: [0, 7, 0, 7, 3, 7, 5, 7], lead: [12, 15, 19, 22, 19, 15, 12, 19], leadType: 'sawtooth', drums: 'electro', pad: false },
+  zombies:    { base: 'ambient',    bpm: 84,  root: 38, scale: [0, 1, 3, 5, 6, 8, 10], bass: [0, 0, 1, 0, 5, 4, 3, 1], lead: [12, 13, 15, 18, 15, 13, 12, 6], leadType: 'sawtooth', drums: 'sparse', pad: true, padType: 'sawtooth' },
+  ufos:       { base: 'electronic', bpm: 120, root: 54, scale: [0, 2, 3, 6, 7, 8, 11], bass: [0, 6, 0, 6, 3, 7, 5, 6], lead: [12, 14, 18, 22, 18, 14, 12, 20], leadType: 'sine', drums: 'electro', pad: true, padType: 'sine' },
+  demons:     { base: 'infernal',   bpm: 96,  root: 37, scale: [0, 1, 3, 5, 6, 8, 10], bass: [0, 0, 1, 0, 5, 4, 3, 1], lead: [12, 13, 15, 18, 15, 13, 12, 6], leadType: 'sawtooth', drums: 'war', pad: true, padType: 'sawtooth' },
+  celestials: { base: 'celestial',  bpm: 72,  root: 58, scale: [0, 2, 4, 7, 9, 11, 12], bass: [0, 0, 4, 4, 7, 7, 4, 0], lead: [12, 16, 19, 24, 19, 16, 12, 7], leadType: 'sine', drums: 'none', pad: true, padType: 'sine' }
+};
+for (const [id, profile] of Object.entries(FACTION_MUSIC)) {
+  const base = MUSIC_LIBRARY[profile.base] || MUSIC_LIBRARY.march;
+  const normal = { ...base, ...profile };
+  delete normal.base;
+  MUSIC_LIBRARY[id] = normal;
+  MUSIC_LIBRARY[id + 'Boss'] = {
+    ...normal,
+    bpm: Math.round(normal.bpm * 1.12) + 4,
+    root: Math.max(24, normal.root - 5),
+    drums: 'war',
+    pad: true,
+    boss: true,
+    lead: normal.lead.map((v, i) => v + (i % 4 === 3 ? 1 : 0))
+  };
+}
+const CLIMATE_MUSIC = { templado: 'march', caluroso: 'ambient', tropical: 'ambient', frío: 'ambient', radiactivo: 'electronic', desconocido: 'electronic', infernal: 'infernal', divino: 'celestial' };
+function musicTrackForClimate(climate) { return CLIMATE_MUSIC[climate] || 'march'; }
+function factionMusicKey(fac, boss) {
+  if (!fac || !FACTION_MUSIC[fac.id]) return musicTrackForClimate(state.climate);
+  return fac.id + (boss ? 'Boss' : '');
+}
+function nextWaveNumber() { return state.active ? state.wave : state.wave + 1; }
+function autoMusicKey() {
+  const wave = nextWaveNumber();
+  return factionMusicKey(factionByWave(wave), isBossWave(wave));
+}
+const Music = (() => {
+  let ctx = null, master = null, noiseBuffer = null, timer = null;
+  let track = 'march', step = 0, nextTime = 0, active = false;
+  function gainValue() { return Math.max(0, Math.min(1, settings.volume)) * .3; }
+  function ensure() {
+    if (!settings.music) return null;
+    if (!ctx) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return null;
+      ctx = new AC();
+      master = ctx.createGain();
+      master.gain.value = .0001;
+      const comp = ctx.createDynamicsCompressor();
+      master.connect(comp); comp.connect(ctx.destination);
+      noiseBuffer = null;
+    }
+    if (ctx.state === 'suspended') ctx.resume().catch(() => { });
+    return ctx;
+  }
+  function resolveTrack() {
+    return settings.musicTrack === 'auto' ? autoMusicKey() : settings.musicTrack;
+  }
+  function degFreq(lib, degree) {
+    const d = ((degree % 7) + 7) % 7, oct = Math.floor(degree / 7);
+    return lib.root * Math.pow(2, (lib.scale[d] + oct * 12) / 12);
+  }
+  function note(freq, dur, type, vol, at, opts = {}) {
+    if (!ctx) return;
+    const osc = ctx.createOscillator(), gain = ctx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(Math.max(20, freq), at);
+    if (opts.slide) osc.frequency.exponentialRampToValueAtTime(Math.max(20, freq + opts.slide), at + dur);
+    gain.gain.setValueAtTime(.0001, at);
+    gain.gain.exponentialRampToValueAtTime(Math.max(.0002, vol), at + .012);
+    gain.gain.exponentialRampToValueAtTime(.0001, at + dur);
+    let tail = gain;
+    if (opts.filter) {
+      const f = ctx.createBiquadFilter();
+      f.type = 'lowpass'; f.frequency.value = opts.filter; f.Q.value = .7;
+      gain.connect(f); tail = f;
+    }
+    osc.connect(gain); tail.connect(master);
+    osc.start(at); osc.stop(at + dur + .03);
+  }
+  function drumNoise(dur, vol, at, cutoff, type = 'highpass') {
+    if (!ctx) return;
+    if (!noiseBuffer) {
+      const len = Math.floor(ctx.sampleRate * .5);
+      noiseBuffer = ctx.createBuffer(1, len, ctx.sampleRate);
+      const data = noiseBuffer.getChannelData(0);
+      for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+    }
+    const src = ctx.createBufferSource(); src.buffer = noiseBuffer;
+    const f = ctx.createBiquadFilter(); f.type = type; f.frequency.value = cutoff; f.Q.value = .9;
+    const g = ctx.createGain(); g.gain.setValueAtTime(vol, at); g.gain.exponentialRampToValueAtTime(.0001, at + dur);
+    src.connect(f); f.connect(g); g.connect(master);
+    src.start(at); src.stop(at + dur);
+  }
+  function kick(at, vol = .5) { note(120, .18, 'sine', vol, at, { slide: -78 }); }
+  function snare(at, vol = .35) { drumNoise(.12, vol * .7, at, 1900); note(180, .09, 'triangle', vol * .35, at, { slide: -70 }); }
+  function hat(at, vol = .1) { drumNoise(.035, vol, at, 7200); }
+  function schedule(lib, s, at) {
+    const stepDur = 60 / lib.bpm / 4;
+    const pos = s % 16;
+    if (lib.drums === 'march') {
+      if (pos % 4 === 0) kick(at, .5);
+      if (pos === 4 || pos === 12) snare(at, .34);
+      if (pos % 2 === 0) hat(at, .065);
+    } else if (lib.drums === 'sparse') {
+      if (pos === 0 || pos === 8) kick(at, .32);
+      if (pos === 14) hat(at, .08);
+    } else if (lib.drums === 'electro') {
+      if (pos % 4 === 0) kick(at, .52);
+      if (pos === 4 || pos === 12) snare(at, .36);
+      if (pos % 2 === 0) hat(at, .07);
+    } else if (lib.drums === 'war') {
+      if ([0, 3, 8, 11].includes(pos)) kick(at, .56);
+      if (pos === 6 || pos === 14) snare(at, .3);
+      if (pos % 4 === 2) hat(at, .06);
+    }
+    if (pos % 2 === 0) {
+      const deg = lib.bass[(pos / 2) | 0];
+      note(degFreq(lib, deg), stepDur * 1.45, 'triangle', .085, at, { filter: 420 });
+    }
+    if (pos % 4 === 0) {
+      const deg = lib.lead[(pos / 4) | 0];
+      note(degFreq(lib, deg), stepDur * 2.4, lib.leadType, .048, at, { filter: 2200 });
+    }
+    if (lib.pad && pos === 0) {
+      const chord = [0, 2, 4];
+      for (const degree of chord) note(degFreq(lib, degree + 7), stepDur * 15, lib.padType || 'sine', .022, at, { filter: 900 });
+    }
+    // La variante de jefe añade un pedal grave, un acento de tritono y más
+    // percusión para que el cambio se note sin cortar la melodía de facción.
+    if (lib.boss) {
+      if (pos === 0) note(degFreq(lib, 0) * .5, stepDur * 14, 'sawtooth', .03, at, { filter: 240 });
+      if (pos === 7 || pos === 15) note(degFreq(lib, 6) * 2, stepDur * 1.4, 'square', .026, at, { filter: 1200 });
+      if (pos % 2 === 1) hat(at, .04);
+    }
+  }
+  function scheduler() {
+    if (!active) return;
+    const c = ctx;
+    if (!c) return;
+    if (state.paused || state.gameOver || !state.deployed || document.hidden || !settings.music) {
+      nextTime = c.currentTime + .08;
+      return;
+    }
+    const lib = MUSIC_LIBRARY[track] || MUSIC_LIBRARY.march;
+    const stepDur = 60 / lib.bpm / 4;
+    while (nextTime < c.currentTime + .26) {
+      schedule(lib, step, nextTime);
+      nextTime += stepDur; step++;
+    }
+  }
+  function start(name) {
+    if (!settings.music) return;
+    const c = ensure(); if (!c) return;
+    const wanted = name || resolveTrack();
+    if (MUSIC_LIBRARY[wanted]) track = wanted;
+    active = true;
+    if (!timer) { step = 0; nextTime = c.currentTime + .08; timer = setInterval(scheduler, 120); }
+    master.gain.setTargetAtTime(gainValue(), c.currentTime, .35);
+  }
+  function stop() {
+    active = false;
+    if (timer) { clearInterval(timer); timer = null; }
+    if (ctx && master) master.gain.setTargetAtTime(.0001, ctx.currentTime, .2);
+  }
+  function setTrack(name) {
+    if (!MUSIC_LIBRARY[name] || name === track) return;
+    track = name; step = 0;
+    if (ctx) nextTime = ctx.currentTime + .08;
+  }
+  return {
+    start, stop, setTrack,
+    syncFaction() { if (settings.musicTrack === 'auto') setTrack(autoMusicKey()); },
+    syncClimate() { if (settings.musicTrack === 'auto') setTrack(autoMusicKey()); },
+    setVolume(v) { if (ctx && master) master.gain.setTargetAtTime(gainValue(), ctx.currentTime, .15); },
+    toggle(on) {
+      settings.music = !!on; persistSettings();
+      if (on) start(resolveTrack()); else stop();
+      updateMusicUI();
+    },
+    refresh() {
+      if (!settings.music) return stop();
+      if (settings.musicTrack === 'auto') setTrack(autoMusicKey());
+      else setTrack(settings.musicTrack);
+      start(resolveTrack());
+    }
   };
 })();
 
@@ -4164,6 +4837,16 @@ function updateSoundButton() {
   const b = document.getElementById('soundBtn');
   if (b) { b.textContent = settings.sound ? '♪' : '🔇'; b.classList.toggle('off', !settings.sound); b.title = settings.sound ? tr('action.soundOn') : tr('action.soundOff'); }
   const t = document.getElementById('soundToggle'); if (t) t.textContent = settings.sound ? tr('sound.on') : tr('sound.off');
+}
+function updateMusicUI() {
+  const t = document.getElementById('musicToggle');
+  if (t) t.textContent = settings.music ? tr('sound.on') : tr('sound.off');
+  const sel = document.getElementById('musicSelect');
+  if (sel) sel.value = settings.musicTrack;
+  const hint = document.getElementById('musicTrackHint');
+  if (hint) hint.textContent = settings.musicTrack === 'auto'
+    ? tr('music.auto')
+    : tr('music.' + settings.musicTrack);
 }
 function updateLabelsUI() {
   const b = document.getElementById('labelsToggle');
@@ -4195,6 +4878,7 @@ function setPaused(value, options = {}) {
 function togglePause() { if (!state.deployed || state.gameOver) return; setPaused(!state.paused); }
 function quitToMenu() {
   resetGame(); state.deployed = false; state.paused = false;
+  Music.stop();
   document.getElementById('pauseScreen').classList.add('hidden');
   document.getElementById('armyScreen').classList.remove('hidden');
   renderArmies(); updateRecordUI(); updatePauseButton();
@@ -4260,7 +4944,7 @@ function syncSettingsUI() {
   const v = document.getElementById('volumeRange'); if (v) v.value = Math.round(settings.volume * 100);
   const ver = document.getElementById('appVersion'); if (ver) ver.textContent = APP_VERSION;
   const mode = document.getElementById('installMode'); if (mode) mode.textContent = standalone ? tr('settings.modeInstalled') : tr('settings.modeBrowser');
-  updateSoundButton(); updateQualityHint(); updateInstallUI(); updateFullscreenUI(); updateLabelsUI();
+  updateSoundButton(); updateQualityHint(); updateInstallUI(); updateFullscreenUI(); updateLabelsUI(); updateMusicUI();
 }
 
 /* ---------------------------------------------------------------- PWA */
@@ -4335,7 +5019,7 @@ function applyLanguage() {
   document.querySelectorAll('[data-i18n-title]').forEach(el => { el.title = tr(el.getAttribute('data-i18n-title')); });
   updateHud(); renderArmies(); renderTowerList(); updateInspect(); updateRecordUI();
   if (state.climate) applyClimate(state.climate, state.tempC);
-  updateSoundButton(); updateLabelsUI(); updatePauseButton(); updateQualityHint();
+  updateSoundButton(); updateLabelsUI(); updatePauseButton(); updateQualityHint(); updateMusicUI();
   updateInstallUI(); updateFullscreenUI(); renderAbilities(); syncSettingsUI();
   refreshEnemyLabels();
 }
@@ -4378,6 +5062,13 @@ document.querySelectorAll('.language-option').forEach(btn => btn.addEventListene
   Sound.init(); Sound.ui();
 }));
 document.getElementById('soundToggle').addEventListener('click', () => Sound.toggle(!settings.sound));
+document.getElementById('musicToggle').addEventListener('click', () => Music.toggle(!settings.music));
+document.getElementById('musicSelect').addEventListener('change', event => {
+  settings.musicTrack = MUSIC_LIBRARY[event.target.value] ? event.target.value : 'auto';
+  persistSettings();
+  Music.refresh(); updateMusicUI();
+  toast(tr(settings.musicTrack === 'auto' ? 'music.auto' : 'music.' + settings.musicTrack));
+});
 document.getElementById('labelsToggle').addEventListener('click', toggleLabels);
 document.getElementById('volumeRange').addEventListener('input', event => Sound.setVolume(Number(event.target.value) / 100));
 document.getElementById('fullscreenBtn').addEventListener('click', toggleFullscreen);
@@ -4442,6 +5133,7 @@ window.addEventListener('keydown', e => {
     else if (k === 'z' && !e.repeat) activateAbility('strike');
     else if (k === 'x' && !e.repeat) activateAbility('emp');
     else if (k === 'c' && !e.repeat) activateAbility('repair');
+    else if (k === 'r' && !e.repeat && state.selectedTower) activateTowerSpecial(state.selectedTower);
     else if (k === 'q') yaw += .1;
     else if (k === 'e') yaw -= .1;
   }
