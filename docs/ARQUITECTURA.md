@@ -61,6 +61,18 @@ Ocho facciones con:
 
 La facción activa se guarda en `state.army` y su índice en `settings.army`. Al desplegar una facción distinta a la partida en curso, `deploy()` llama a `resetGame()` y comienza un enfrentamiento nuevo.
 
+### Dificultad (`DIFFICULTY_LEVELS`)
+
+Cuatro niveles (`recruit`, `veteran`, `elite`, `nightmare`) declarados con:
+
+- `start`: multiplicador de créditos iniciales.
+- `bounty`: multiplicador del botín por baja.
+- `waveClear`: multiplicador de la bonificación al limpiar una oleada.
+- `enemyHp` / `enemyDamage`: ajuste de resistencia y daño enemigo.
+- `name` / `nameEn`, `tagline` / `taglineEn`, `icon` y `tone` para la tarjeta del menú.
+
+La economía es inversa a la dificultad: Recluta empieza con ×1,35 créditos y ×1,33 de botín, mientras que Pesadilla baja a ×0,65 y ×0,65 y además endurece HP y daño enemigos. `clampDifficulty()` valida el índice, `difficultyDef()` devuelve la definición activa y `chooseDifficulty()` actualiza la selección del menú. El nivel se guarda en `state.difficultyIndex` y `settings.difficulty`; `deploy()` inicia una partida nueva si cambia respecto a la partida en curso. `updateDifficultySummary()` muestra los créditos iniciales resultantes y `updateHud()` pinta el chip de dificultad en el HUD.
+
 ### Equipo por país (`WEAPONS`)
 
 Asocia cada ejército y tipo de torre con un nombre real de equipo. `WEAPONS_EN` contiene las excepciones que cambian en inglés (por ejemplo, «Cúpula de Hierro» → «Iron Dome» y «Brouilleur» → «Jammer»). La función `armyWeapon(type)` resuelve el nombre correcto según el idioma.
@@ -80,7 +92,7 @@ Campos principales:
 - `splash`, `pierce`, `slow`, `salvo` (opcionales).
 - `domain`: `land` o `sea`.
 
-`getCost(type)` aplica el descuento del ejército y la inflación de construcción. `towerCostInflation()` combina tres factores: +3 % por cada estructura desplegada después de las dos primeras, +8 % por cada torre repetida del mismo tipo a partir de la segunda, y hasta +85 % según la oleada. El resultado se interpola con un peso (`weight`) para que `upgradeCost()` sufra la misma inflación a la mitad. `sellValue()` devuelve el 50 % de `tower.invested`, que acumula el coste real de construcción y de cada mejora, no el coste base. Cada torre tiene una huella: las terrestres ocupan `1×1` y los cascos navales `2×2`. `footprintOf()`, `footprintCells()` y `validPlacement()` comprueban todas las celdas de la huella (límites, agua, pista, base y ocupación) antes de construir o vender.
+`getCost(type)` aplica el descuento del ejército y la inflación de construcción. `towerCostInflation()` combina tres factores: +1,5 % por cada estructura desplegada después de las dos primeras, +5 % por cada torre repetida del mismo tipo a partir de la segunda, y hasta +60 % según la oleada. El resultado se interpola con un peso (`weight`) para que `upgradeCost()` sufra la misma inflación a la mitad. `sellValue()` devuelve el 50 % de `tower.invested`, que acumula el coste real de construcción y de cada mejora, no el coste base. Cada torre tiene una huella: las terrestres ocupan `1×1` y los cascos navales `2×2`. `footprintOf()`, `footprintCells()` y `validPlacement()` comprueban todas las celdas de la huella (límites, agua, pista, base y ocupación) antes de construir o vender.
 
 ### Enemigos (`ENEMY_FACTIONS`, `ENEMIES`)
 
@@ -116,7 +128,7 @@ Una única pista terrestre de dos carriles (`main`) y un corredor aéreo (`AIR_R
 Objeto central de la simulación:
 
 - Partida: `wave`, `cash`, `hp`, `score`, `active`, `paused`, `gameOver`, `deployed`, `speed`, `climate`, `combatTime`.
-- Economía y dificultad: `repairUses` (fatiga de reparación) y `wavePressure` (presión adaptativa congelada al iniciar la oleada).
+- Economía y dificultad: `difficultyIndex` / `selectedDifficulty`, `repairUses` (fatiga de reparación) y `wavePressure` (presión adaptativa congelada al iniciar la oleada).
 - Entidades: `enemies`, `towers`, `effects`, `spawnQueue`. Cada torre guarda `invested` para calcular la venta.
 - Interacción: `selectedTower`, `buildType`, `abilityMode`, `selectedArmy`.
 - Habilidades globales: `strike`, `emp`, `repair`, con coste, recarga y cooldown. `abilityCost()` sustituye el coste fijo de reparación por `repairCost()`.
@@ -126,7 +138,7 @@ Objeto central de la simulación:
 ### Persistencia
 
 ```text
-frente-global:settings:v1  → calidad, sonido, volumen, música, pista musical, ejército, etiquetas, idioma
+frente-global:settings:v1  → calidad, sonido, volumen, música, pista musical, ejército, dificultad, etiquetas, idioma
 frente-global:records:v1   → mejor oleada, récord, partidas
 ```
 
@@ -236,7 +248,7 @@ Los tipos de ataque son:
 - Mortero/artillería con proyectil parabólico y daño en área.
 - Salvas de cohetes.
 - Misiles guiados antiaéreos.
-- Láser continuo con penetración total. El emisor usa `glowMaterial()` pero arranca con `emissiveIntensity = 0`; `updateTowers()` lo enciende con un pulso solo mientras hay objetivo y lo apaga en cuanto deja de disparar.
+- Láser continuo con penetración total. El emisor usa `glowMaterial()` pero arranca con `emissiveIntensity = 0`; `updateTowers()` lo enciende con un pulso solo mientras hay objetivo y lo apaga en cuanto deja de disparar. El haz de `beam()` dura 0,09 s y se oculta por completo al expirar, y la torreta vuelve a su ángulo de reposo cuando no queda ningún objetivo en rango.
 - Pulso EW que solo adquiere y afecta a unidades con `jam > 0`: ralentiza en proporción a la vulnerabilidad y, con `jam >= 0.5`, activa `repelTimer` y hace retroceder al enemigo por la pista. Las criaturas y la aviación sin guiado electrónico son objetivos inválidos.
 - Misiles de crucero navales.
 - Ataque aéreo embarcado del portaaviones: el avión despega de la cubierta, impacta y regresa al portaaviones antes de retirarse.
@@ -263,11 +275,11 @@ La prioridad se guarda en `tower.mode` y se muestra en el panel de inspección.
 
 ### Rangos y dificultad
 
-A partir de la oleada 5 la probabilidad de veteranos crece de forma progresiva y desde la 8 se suman élites, ambas con más HP, daño y recompensa y con etiqueta 3D propia. `buildWavePlan()` aumenta el número de unidades hasta 64 y reduce la cadencia de spawn con la oleada; `waveScalars()` escala HP, daño y velocidad con una curva lineal más términos exponenciales desde las oleadas 10 y 20, con topes de velocidad y blindaje. Las aeronaves reciben un 15 % menos de HP para que su amenaza sea la saturación del corredor y no una bolsa de vida imposible de vaciar. `spawnEnemy()` añade blindaje progresivo (hasta +0,16), aplica los multiplicadores de rango y multiplica HP y daño por la presión adaptativa. El daño de fuga se aplica como fracción del ataque (50 % para tropa normal, 45 % para jefes) para que unas pocas fugas produzcan desgaste progresivo en lugar de derrota instantánea.
+A partir de la oleada 5 la probabilidad de veteranos crece de forma progresiva y desde la 8 se suman élites, ambas con más HP, daño y recompensa y con etiqueta 3D propia. `buildWavePlan()` aumenta el número de unidades hasta 64 y reduce la cadencia de spawn con la oleada; `waveScalars()` escala HP, daño y velocidad con una curva lineal más términos exponenciales desde las oleadas 10 y 20, con topes de velocidad y blindaje. Las aeronaves reciben un 35 % menos de HP y un 15 % menos de velocidad para que su amenaza sea la saturación del corredor y no una bolsa de vida imposible de vaciar. `spawnEnemy()` añade blindaje progresivo (hasta +0,10), aplica los multiplicadores de rango, la dificultad (`enemyHp` / `enemyDamage`) y la presión adaptativa. El daño de fuga se aplica como fracción del ataque (35 %, con tope de 22, para tropa normal; 28 %, con tope de 36, para jefes) para que unas pocas fugas produzcan desgaste progresivo en lugar de derrota instantánea.
 
-`defenseValue()` suma el coste base de cada torre multiplicado por su nivel; las mejoras pesan un 70 % adicional. `defensePressure()` lo convierte en un multiplicador de 1 a 2,4 a partir de 1.200 créditos de defensa. `makeWave()` congela el valor en `state.wavePressure` antes de generar la cola, de modo que destruir estructuras durante la oleada no reduce la presión de las unidades pendientes. La presión eleva HP y daño y reduce recompensas; el dinero sin gastar no influye. Las recompensas por baja y la bonificación de oleada se reducen además con la oleada para exigir una defensa más planificada.
+`defenseValue()` suma el coste base de cada torre multiplicado por su nivel; las mejoras pesan solo un 25 % adicional por nivel, de modo que concentrar la inversión en pocas torres veteranas genera menos presión que llenar el mapa de estructuras de nivel 1. `defensePressure()` lo convierte en un multiplicador de 1 a 1,6 a partir de 1.500 créditos de defensa. `makeWave()` congela el valor en `state.wavePressure` antes de generar la cola, de modo que destruir estructuras durante la oleada no reduce la presión de las unidades pendientes. La presión eleva HP y daño y reduce recompensas; el dinero sin gastar no influye. Las recompensas por baja usan `economyScale = .95 × (1 + (oleada − 1) × .01) / (1 + (presión − 1) × .12)`, de forma que se mantienen estables e incluso suben ligeramente con la campaña en lugar de desplomarse, y la bonificación de oleada escala con `waveClear` de la dificultad.
 
-Los jefes aparecen cada cinco oleadas: cada facción ocupa cuatro oleadas normales y cierra con su jefe final. En `spawnEnemy()` reciben HP según `(.32 + min(1.1, wave * .028)) * 1.2`, daño ×1,3, blindaje +0,1 (con tope 0,86) y `structureDamage` ×1,2, pero avanzan a ×0,7 de su velocidad para dar tiempo a concentrar el fuego.
+Los jefes aparecen cada cinco oleadas: cada facción ocupa cuatro oleadas normales y cierra con su jefe final. En `spawnEnemy()` reciben HP según `(.32 + min(1.1, wave * .028)) * 0.9`, daño ×1,3, blindaje +0,1 (con tope 0,86) y `structureDamage` ×1,2, pero avanzan a ×0,7 de su velocidad para dar tiempo a concentrar el fuego. La habilidad de asedio concentrado deja un aturdimiento de 2,5 s y el golpe directo del jefe contra estructuras usa 2 s, para que un jefe no deje la defensa inmovilizada demasiado tiempo.
 
 Los jefes registran las torres que les hacen daño y, cada pocos segundos, usan la habilidad asignada en `BOSS_SKILL_BY_ID`. `bossStrikeTargets()` solo considera estructuras dentro de `SIEGE_BOSS_RANGE = 8` y las ordena por cercanía (la amenaza solo desempata a igual distancia), de modo que el jefe castiga lo que tiene al lado y no torres lejanas. `useBossSkill()` aplica la definición de `BOSS_SKILLS` mediante `siegeHit()`: resta niveles, recalcula estadísticas con `applyTowerStats()`, destruye la estructura si la habilidad lo permite y fija `disabledUntil` con `state.combatTime`, siempre respetando el cupo de estructuras distintas de `createSiegeState()`. Las habilidades de área (`emp`, `judgment`) se centran en el jefe y se ordenan igualmente por cercanía. Al llegar a la base, el jefe golpea primero a las estructuras cercanas que le queden dentro del cupo. `state.combatTime` avanza solo con la simulación activa, de modo que pausas y cambios de velocidad también detienen estos temporizadores.
 
@@ -293,7 +305,7 @@ La barra de apoyo está anclada al pie del arsenal, no flota sobre el mapa. En m
 
 ### HUD superior
 
-Muestra facción, créditos, integridad, oleada, enemigos, amenaza, clima y facción enemiga con su etapa. Los botones permiten cambiar de ejército, centrar cámara, sonido, pausa, pantalla completa y ajustes. La barra inferior concentra el botón de oleada, los multiplicadores `×1`–`×5`, zoom y cancelar.
+Muestra facción, créditos, integridad, oleada, enemigos, amenaza, clima y facción enemiga con su etapa, además del chip de dificultad activa. Los botones permiten cambiar de ejército, centrar cámara, sonido, pausa, pantalla completa y ajustes. La barra inferior concentra el botón de oleada, los multiplicadores `×1`–`×5`, zoom y cancelar.
 
 ### Paneles laterales
 
@@ -303,7 +315,7 @@ Muestra facción, créditos, integridad, oleada, enemigos, amenaza, clima y facc
 ### Pantallas superpuestas
 
 - `#languageScreen`: selector inicial bilingüe.
-- `#armyScreen`: selección de facción y despliegue.
+- `#armyScreen`: selección de facción, selector de dificultad (cuatro tarjetas con resumen de créditos y botín) y despliegue.
 - `#pauseScreen`: reanudar, reiniciar la partida, ajustes o salir al menú.
 - `#defeatScreen`: resultado, récords y reintento.
 - `#settingsScreen`: idioma, calidad, sonido, música, pista musical, etiquetas, volumen, pantalla completa, instalación y borrado de progreso.

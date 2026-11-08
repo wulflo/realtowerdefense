@@ -358,6 +358,43 @@ body.climate-radiactivo .vignette{background:linear-gradient(180deg,rgba(12,16,6
   .intel-faction .if-sub{font-size:7px}
   .intel-faction .if-boss{font-size:7px;padding:2px 3px}
 }
+/* Selector de dificultad · la economía se invierte respecto al nivel */
+.diff-chip{font:700 8px var(--font);letter-spacing:.6px;text-transform:uppercase;color:#f0cd85;border:1px solid #8a6d3c;background:#3a2f1c;padding:2px 5px;white-space:nowrap}
+.difficulty-block{margin-top:14px;border-top:1px solid #465044;padding-top:12px}
+.difficulty-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+.difficulty-label{font:700 14px var(--display);text-transform:uppercase;letter-spacing:.8px;color:#e9e3ce}
+.difficulty-summary{font-size:10px;color:#e2c36e;letter-spacing:.3px;text-align:right;line-height:1.35}
+.difficulty-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.difficulty-card{position:relative;text-align:left;background:#1d281f;border:1px solid #465044;padding:10px 11px;min-height:78px;transition:.16s;overflow:hidden}
+.difficulty-card:hover,.difficulty-card.chosen{border-color:#c3a34e;background:#2b3629;transform:translateY(-1px)}
+.difficulty-card.chosen{box-shadow:inset 0 0 0 1px #c3a34e55}
+.difficulty-card:after{content:'';position:absolute;right:-26px;bottom:-54px;width:86px;height:86px;border:1px solid #69724b30;transform:rotate(45deg);pointer-events:none}
+.diff-head{display:flex;align-items:flex-start;gap:8px;position:relative;z-index:1}
+.diff-icon{font-size:20px;line-height:1}
+.diff-name{font:700 14px var(--display);text-transform:uppercase;letter-spacing:.5px}
+.diff-tag{font-size:9px;line-height:1.35;color:#aeb8a9;margin-top:3px}
+.diff-stats{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;font:600 9px var(--display);color:#e2c36e;letter-spacing:.3px;position:relative;z-index:1}
+.difficulty-card.easy .diff-icon{color:#9bd06a}
+.difficulty-card.normal .diff-icon{color:#e2c36e}
+.difficulty-card.hard .diff-icon{color:#e89a5c}
+.difficulty-card.nightmare .diff-icon{color:#e06a5c}
+.difficulty-card.nightmare.chosen{border-color:#b85a4a;box-shadow:inset 0 0 0 1px #b85a4a55}
+@media(max-width:850px){
+  .difficulty-grid{grid-template-columns:repeat(2,1fr)}
+  .difficulty-card{min-height:70px}
+  .difficulty-summary{font-size:9px}
+}
+@media(max-width:570px){
+  .diff-chip{display:none}
+  .difficulty-block{margin-top:10px;padding-top:9px}
+  .difficulty-head{margin-bottom:6px}
+  .difficulty-label{font-size:12px}
+  .difficulty-card{padding:8px;min-height:64px}
+  .diff-icon{font-size:17px}
+  .diff-name{font-size:12px}
+  .diff-tag{font-size:8px}
+  .diff-stats{font-size:8px;gap:5px;margin-top:6px}
+}
 </style>
 </head>
 <body>
@@ -367,7 +404,7 @@ body.climate-radiactivo .vignette{background:linear-gradient(180deg,rgba(12,16,6
   <header class="topbar">
     <div class="brand"><div class="mark"><span>FG</span></div><div><div class="brand-title">Frente Global</div><div class="brand-sub" data-i18n="brand.sub">Comando de defensa</div></div></div>
     <div class="statusbar">
-      <div class="army-mini"><span class="flag" id="hudFlag">🇺🇸</span><b id="hudArmy">Fuerza aliada</b></div>
+      <div class="army-mini"><span class="flag" id="hudFlag">🇺🇸</span><b id="hudArmy">Fuerza aliada</b><span class="diff-chip" id="hudDifficulty">Veterano</span></div>
       <div class="stat money"><div class="label" data-i18n="stat.credits">Créditos</div><div class="value" id="cash">650</div></div>
       <div class="stat"><div class="label" data-i18n="stat.integrity">Integridad</div><div class="value"><span id="baseHp">100</span>%</div></div>
       <div class="stat"><div class="label" data-i18n="stat.wave">Oleada</div><div class="value" id="waveLabel">00</div></div>
@@ -387,7 +424,7 @@ body.climate-radiactivo .vignette{background:linear-gradient(180deg,rgba(12,16,6
   <div class="map-coords" id="mapCoords" data-i18n="map.sector">SECTOR 07 / CUADRÍCULA 01</div><div class="wave-banner" id="waveBanner"></div><div class="hint-toast" id="toast"></div>
 </div>
 <section class="veil" id="languageScreen"><div class="language-box"><div class="language-eyebrow" data-i18n="language.eyebrow">Configuración inicial</div><h1 class="language-title" data-i18n="language.title">Elige tu idioma</h1><p class="language-copy" data-i18n="language.copy">Puedes cambiarlo después en Ajustes.</p><div class="language-grid"><button class="language-option" type="button" data-lang="es" aria-label="Español"><span class="lang-flag">🇪🇸</span><span class="lang-name">Español</span><span class="lang-sub" data-i18n="language.esSub">Jugar en español</span></button><button class="language-option" type="button" data-lang="en" aria-label="English"><span class="lang-flag">🇺🇸</span><span class="lang-name">English</span><span class="lang-sub" data-i18n="language.enSub">Play in English</span></button></div></div></section>
-<section class="veil hidden" id="armyScreen"><div class="selection-shell"><div class="selection-top"><div><div class="selection-eyebrow" data-i18n="menu.eyebrow">Protocolo de despliegue · Operación indefinida</div><h1 class="selection-title" data-i18n="menu.title">Elige tu fuerza</h1></div><div class="selection-copy" data-i18n-html="menu.copyHtml">Una pista de dos carriles. Un mar. Un corredor aéreo.<br>Tu doctrina define cada defensa.</div></div><div class="army-grid" id="armyGrid"></div><div class="selection-footer"><div><div class="selection-note" data-i18n="menu.note">Los parámetros son valores de equilibrio de juego.</div><div class="record-line" id="menuRecords"><span><span data-i18n="menu.bestWave">Mejor oleada</span><b id="recordWave">0</b></span><span><span data-i18n="menu.record">Récord</span><b id="recordScore">0</b></span><span><span data-i18n="menu.runs">Partidas</span><b id="recordRuns">0</b></span></div></div><div class="selection-actions"><button class="small-btn install-btn" id="installBtnMenu" data-i18n="menu.install" hidden>Instalar app</button><button class="deploy-btn" id="deployBtn" data-i18n="menu.deploy">Desplegar fuerza →</button></div></div></div></section>
+<section class="veil hidden" id="armyScreen"><div class="selection-shell"><div class="selection-top"><div><div class="selection-eyebrow" data-i18n="menu.eyebrow">Protocolo de despliegue · Operación indefinida</div><h1 class="selection-title" data-i18n="menu.title">Elige tu fuerza</h1></div><div class="selection-copy" data-i18n-html="menu.copyHtml">Una pista de dos carriles. Un mar. Un corredor aéreo.<br>Tu doctrina define cada defensa.</div></div><div class="army-grid" id="armyGrid"></div><div class="difficulty-block"><div class="difficulty-head"><span class="difficulty-label" data-i18n="menu.difficulty">Dificultad</span><span class="difficulty-summary" id="diffSummary"></span></div><div class="difficulty-grid" id="difficultyGrid"></div></div><div class="selection-footer"><div><div class="selection-note" data-i18n="menu.note">Los parámetros son valores de equilibrio de juego.</div><div class="record-line" id="menuRecords"><span><span data-i18n="menu.bestWave">Mejor oleada</span><b id="recordWave">0</b></span><span><span data-i18n="menu.record">Récord</span><b id="recordScore">0</b></span><span><span data-i18n="menu.runs">Partidas</span><b id="recordRuns">0</b></span></div></div><div class="selection-actions"><button class="small-btn install-btn" id="installBtnMenu" data-i18n="menu.install" hidden>Instalar app</button><button class="deploy-btn" id="deployBtn" data-i18n="menu.deploy">Desplegar fuerza →</button></div></div></div></section>
 <section class="veil hidden" id="defeatScreen"><div class="result-box"><div class="selection-eyebrow" data-i18n="defeat.eyebrow">Fin de la operación</div><div class="result-title" data-i18n="defeat.title">Línea perdida</div><p id="defeatText">La base ha caído. Reorganiza tu defensa y vuelve al frente.</p><div class="record-line" id="defeatRecordLine"></div><button class="deploy-btn" id="retryBtn" data-i18n="defeat.retry">Reintentar</button></div></section>
 <section class="veil hidden" id="pauseScreen"><div class="result-box pause-box"><div class="selection-eyebrow" data-i18n="pause.eyebrow">Operación en espera</div><div class="result-title" data-i18n="pause.title">Pausa</div><p data-i18n="pause.text">La simulación está detenida. Tu posición se mantiene intacta.</p><div class="pause-actions"><button class="deploy-btn" id="resumeBtn" data-i18n="pause.resume">Reanudar</button><button class="setting-btn" id="pauseRestartBtn" data-i18n="pause.restart">Reiniciar partida</button><button class="setting-btn" id="pauseSettingsBtn" data-i18n="pause.settings">Ajustes</button><button class="setting-btn danger" id="pauseQuitBtn" data-i18n="pause.quit">Salir al menú</button></div></div></section>
 <section class="veil hidden" id="settingsScreen"><div class="settings-box"><div class="settings-head"><div><div class="kicker" data-i18n="settings.kicker">Configuración</div><div class="settings-title" data-i18n="settings.title">Ajustes</div></div><button class="settings-close" id="closeSettingsBtn" data-i18n="settings.close">Cerrar</button></div>
@@ -402,7 +439,7 @@ body.climate-radiactivo .vignette{background:linear-gradient(180deg,rgba(12,16,6
 <div class="setting-row"><div class="setting-text"><span data-i18n="settings.install">Instalar aplicación</span><span class="hint" id="installHint">Añádela a tu pantalla de inicio para jugar sin conexión.</span></div><button class="setting-btn" id="installBtn" data-i18n="install.button" hidden>Instalar</button></div>
 <div class="setting-row"><div class="setting-text"><span data-i18n="settings.progress">Progreso local</span><span class="hint" data-i18n="settings.progressHint">Récords y preferencias se guardan en este dispositivo.</span></div><button class="setting-btn danger" id="resetProgressBtn" data-i18n="settings.reset">Borrar récord</button></div>
 <div class="shortcuts" data-i18n-html="settings.shortcutsHtml"><b>Teclado</b><br><kbd>1</kbd>–<kbd>9</kbd> construir · <kbd>Espacio</kbd> oleada/pausa · <kbd>P</kbd> pausa<br><kbd>Z</kbd> ataque aéreo · <kbd>X</kbd> EMP · <kbd>C</kbd> reparar base<br><kbd>M</kbd> sonido · <kbd>F</kbd> pantalla completa · <kbd>Esc</kbd> cancelar<br><kbd>WASD</kbd>/flechas mover cámara · <kbd>Q</kbd><kbd>E</kbd> rotar · rueda zoom<br><b>Táctil:</b> un dedo desplaza, dos dedos hacen zoom, toca para construir.<br><b>Mar:</b> destructores y portaaviones se despliegan en el agua.</div>
-<div class="settings-version">Frente Global · v<span id="appVersion">2.7.0</span> · <span id="installMode">navegador</span></div></div></section>
+<div class="settings-version">Frente Global · v<span id="appVersion">2.9.0</span> · <span id="installMode">navegador</span></div></div></section>
 <div class="update-banner" id="updateBanner" hidden><span data-i18n="update.available">Nueva versión disponible</span><button id="reloadBtn" data-i18n="update.reload">Actualizar</button></div>
 </main>
 <script src="vendor/three.min.js"></script>

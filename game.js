@@ -75,6 +75,40 @@ const ARMIES = [
   }
 ];
 
+// Dificultad: la economía es inversa a la dificultad. Cada nivel reduce (o
+// aumenta) los créditos iniciales, el botín por baja y la bonificación de
+// oleada; los niveles altos también endurecen ligeramente a los enemigos.
+const DIFFICULTY_LEVELS = [
+  {
+    id: 'recruit', name: 'Recluta', nameEn: 'Recruit', icon: '🛡', tone: 'easy',
+    tagline: 'Más créditos y enemigos algo más débiles.', taglineEn: 'More credits and slightly weaker enemies.',
+    start: 1.35, bounty: 1.33, waveClear: 1.3, enemyHp: .92, enemyDamage: .92
+  },
+  {
+    id: 'veteran', name: 'Veterano', nameEn: 'Veteran', icon: '⚖', tone: 'normal',
+    tagline: 'La curva prevista: sin ventajas ni castigos.', taglineEn: 'The intended curve: no bonuses or penalties.',
+    start: 1, bounty: 1, waveClear: 1, enemyHp: 1, enemyDamage: 1
+  },
+  {
+    id: 'elite', name: 'Élite', nameEn: 'Elite', icon: '⚔', tone: 'hard',
+    tagline: 'Economía reducida y enemigos endurecidos.', taglineEn: 'Reduced economy and tougher enemies.',
+    start: .8, bounty: .8, waveClear: .78, enemyHp: 1.06, enemyDamage: 1.04
+  },
+  {
+    id: 'nightmare', name: 'Pesadilla', nameEn: 'Nightmare', icon: '☠', tone: 'nightmare',
+    tagline: 'Créditos mínimos. Solo una defensa perfecta aguanta.', taglineEn: 'Minimal credits. Only a flawless defense holds.',
+    start: .65, bounty: .65, waveClear: .6, enemyHp: 1.12, enemyDamage: 1.08
+  }
+];
+const DEFAULT_DIFFICULTY = 1;
+function clampDifficulty(value) {
+  const n = Number(value);
+  return Number.isInteger(n) && DIFFICULTY_LEVELS[n] ? n : DEFAULT_DIFFICULTY;
+}
+function difficultyDef(index = state.difficultyIndex) {
+  return DIFFICULTY_LEVELS[clampDifficulty(index)] || DIFFICULTY_LEVELS[DEFAULT_DIFFICULTY];
+}
+
 const WEAPONS = {
   usa: { gun: 'M134 Minigun', mortar: 'M120', art: 'M777', rocket: 'M270 MLRS', aa: 'Patriot', laser: 'HELIOS', ew: 'EA-18G', destroyer: 'USS Arleigh Burke', carrier: 'USS Gerald R. Ford' },
   china: { gun: 'Type 1130 CIWS', mortar: 'PLL-05', art: 'PCL-181', rocket: 'PHL-03', aa: 'HQ-17', laser: 'GuoRong', ew: 'DWL-002', destroyer: 'Type 055 Nanchang', carrier: 'Fujian' },
@@ -90,9 +124,9 @@ const TOWERS = [
   { id: 'gun', name: 'Ametralladora', nameEn: 'Machine gun', icon: '✣', cost: 120, range: 4.7, damage: 7, rate: .22, targets: ['ground'], desc: 'Tiro rápido de defensa cercana', descEn: 'Rapid-fire close defense', domain: 'land', pierce: .12 },
   { id: 'mortar', name: 'Mortero', nameEn: 'Mortar', icon: '◒', cost: 145, range: 5.2, damage: 18, rate: 1.05, targets: ['ground'], splash: 1.05, desc: 'Fuego indirecto de cadencia media', descEn: 'Medium-rate indirect fire', domain: 'land', pierce: .25 },
   { id: 'art', name: 'Artillería', nameEn: 'Artillery', icon: '◉', cost: 195, range: 6.8, damage: 38, rate: 2.25, targets: ['ground'], splash: 1.7, desc: 'Obús de alto impacto en área', descEn: 'High-impact area howitzer', domain: 'land', pierce: .35 },
-  { id: 'rocket', name: 'Lanzacohetes', nameEn: 'Rocket launcher', icon: '⌁', cost: 260, range: 7, damage: 16, rate: 3.4, targets: ['ground'], splash: 1.35, desc: 'Salva de cohetes de saturación', descEn: 'Saturation rocket salvo', domain: 'land', pierce: .4, salvo: 4 },
-  { id: 'aa', name: 'Misil antiaéreo', nameEn: 'Surface-to-air missile', icon: '⌃', cost: 170, range: 8.4, damage: 52, rate: 1.15, targets: ['air'], desc: 'Lanzador guiado contra aeronaves', descEn: 'Guided launcher against aircraft', domain: 'land', pierce: .2 },
-  { id: 'laser', name: 'Láser', nameEn: 'Laser', icon: '⌇', cost: 225, range: 5.8, damage: 14, rate: .12, targets: ['ground', 'air'], desc: 'Haz continuo de energía dirigida', descEn: 'Continuous directed-energy beam', domain: 'land', pierce: 1 },
+  { id: 'rocket', name: 'Lanzacohetes', nameEn: 'Rocket launcher', icon: '⌁', cost: 260, range: 7, damage: 20, rate: 3.4, targets: ['ground'], splash: 1.35, desc: 'Salva de cohetes de saturación', descEn: 'Saturation rocket salvo', domain: 'land', pierce: .4, salvo: 4 },
+  { id: 'aa', name: 'Misil antiaéreo', nameEn: 'Surface-to-air missile', icon: '⌃', cost: 170, range: 9.2, damage: 70, rate: 1.15, targets: ['air'], desc: 'Lanzador guiado contra aeronaves', descEn: 'Guided launcher against aircraft', domain: 'land', pierce: .2 },
+  { id: 'laser', name: 'Láser', nameEn: 'Laser', icon: '⌇', cost: 225, range: 5.8, damage: 34, rate: .12, targets: ['ground', 'air'], desc: 'Haz continuo de energía dirigida', descEn: 'Continuous directed-energy beam', domain: 'land', pierce: 1 },
   { id: 'ew', name: 'Guerra electrónica', nameEn: 'Electronic warfare', icon: '⌘', cost: 180, range: 5.2, damage: 0, rate: .5, targets: ['ground', 'air'], slow: .5, desc: 'Interferencia: solo afecta a unidades con guiado electrónico', descEn: 'Jamming: only affects electronically guided units', domain: 'land', pierce: 0 },
   { id: 'destroyer', name: 'Destructor', nameEn: 'Destroyer', icon: '⚓', cost: 360, range: 8.8, damage: 46, rate: 2.9, targets: ['ground', 'air'], splash: 1.55, desc: 'Misiles de crucero desde el mar', descEn: 'Cruise missiles from the sea', domain: 'sea', pierce: .5 },
   { id: 'carrier', name: 'Portaaviones', nameEn: 'Aircraft carrier', icon: '✈', cost: 520, range: 12, damage: 46, rate: 5.6, targets: ['ground', 'air'], splash: 2.1, desc: 'Ataque aéreo embarcado de largo alcance', descEn: 'Long-range carrier air strike', domain: 'sea', pierce: .45 }
@@ -351,7 +385,7 @@ const JAM_OVERRIDES = {
 // temporizadores de simulación, por lo que pausar o acelerar no altera el ritmo.
 const BOSS_SKILLS = {
   smash: { name: 'Golpe sísmico', nameEn: 'Seismic smash', desc: 'Golpea la estructura más cercana y le arranca dos niveles; puede destruirla si está a nivel 1', descEn: 'Hits the nearest structure for two levels; may destroy it at level 1', icon: '✹', cooldown: 7.5, maxTargets: 1, radius: 2.2, levels: 2, stun: 4, destroyWeak: true },
-  siege: { name: 'Asedio concentrado', nameEn: 'Focused siege', desc: 'Martillea las dos estructuras más cercanas y las deja aturdidas', descEn: 'Hammers the two nearest structures and stuns them', icon: '☄', cooldown: 8, maxTargets: 2, radius: 2.4, levels: 2, stun: 3.5 },
+  siege: { name: 'Asedio concentrado', nameEn: 'Focused siege', desc: 'Martillea las dos estructuras más cercanas y las deja aturdidas', descEn: 'Hammers the two nearest structures and stuns them', icon: '☄', cooldown: 8, maxTargets: 2, radius: 2.4, levels: 2, stun: 2.5 },
   sabotage: { name: 'Sabotaje', nameEn: 'Sabotage', desc: 'Intenta destruir la estructura más cercana; si no puede, la degrada por completo', descEn: 'Attempts to destroy the nearest structure; if it cannot, strips it completely', icon: '☠', cooldown: 12, maxTargets: 1, radius: 2.2, levels: 9, stun: 0, destroy: true },
   barrage: { name: 'Barrera de mando', nameEn: 'Command barrage', desc: 'Inhabilita las estructuras más cercanas en un área amplia', descEn: 'Disables the nearest structures over a wide area', icon: '✷', cooldown: 8.5, maxTargets: 3, radius: 3.4, levels: 1, stun: 5 },
   emp: { name: 'Pulso de apagón', nameEn: 'Blackout pulse', desc: 'Inhabilita las estructuras cercanas al jefe durante varios segundos', descEn: 'Disables structures near the boss for several seconds', icon: '⌁', cooldown: 10, maxTargets: 99, radius: 5.5, levels: 0, stun: 6, areaFromBoss: true },
@@ -423,7 +457,7 @@ for (const route of ROUTES) {
 }
 const AIR_ROUTE = { id: 'air', name: 'Corredor aéreo', nameEn: 'Air corridor', points: [[-21, -10], [-14, -11], [-6, -10], [2, -8], [10, -6], [18, -4], [13.5, -1.5]] };
 
-const APP_VERSION = '2.8.0';
+const APP_VERSION = '2.9.0';
 const STORE_SETTINGS = 'frente-global:settings:v1';
 const STORE_RECORDS = 'frente-global:records:v1';
 function loadStore(key, fallback) {
@@ -431,9 +465,10 @@ function loadStore(key, fallback) {
   catch { return { ...fallback }; }
 }
 const DEFAULT_LANGUAGE = (navigator.language || 'es').toLowerCase().startsWith('en') ? 'en' : 'es';
-const settings = loadStore(STORE_SETTINGS, { quality: 'auto', sound: true, volume: .65, music: true, musicTrack: 'auto', army: 0, labels: true, language: DEFAULT_LANGUAGE });
+const settings = loadStore(STORE_SETTINGS, { quality: 'auto', sound: true, volume: .65, music: true, musicTrack: 'auto', army: 0, difficulty: DEFAULT_DIFFICULTY, labels: true, language: DEFAULT_LANGUAGE });
 if (settings.language !== 'en' && settings.language !== 'es') settings.language = DEFAULT_LANGUAGE;
 if (!['auto', 'march', 'ambient', 'electronic', 'infernal', 'celestial'].includes(settings.musicTrack)) settings.musicTrack = 'auto';
+settings.difficulty = clampDifficulty(settings.difficulty);
 const records = loadStore(STORE_RECORDS, { bestWave: 0, bestScore: 0, totalKills: 0, plays: 0 });
 function persistSettings() { try { localStorage.setItem(STORE_SETTINGS, JSON.stringify(settings)); } catch { } }
 function persistRecords() { try { localStorage.setItem(STORE_RECORDS, JSON.stringify(records)); } catch { } }
@@ -471,6 +506,9 @@ const I18N = {
     'menu.note': 'Los parámetros son valores de equilibrio de juego.',
     'menu.bestWave': 'Mejor oleada', 'menu.record': 'Récord', 'menu.runs': 'Partidas',
     'menu.install': 'Instalar app', 'menu.deploy': 'Desplegar fuerza →', 'menu.roster': 'Dotación:',
+    'menu.difficulty': 'Dificultad', 'menu.diffStart': 'Inicio', 'menu.diffBounty': 'Botín',
+    'menu.difficultySummary': 'Créditos iniciales {cash} ◈ · Recompensas ×{bounty}',
+    'menu.difficultyHint': 'La dificultad invierte la economía: menos créditos iniciales y por baja cuanto más dura sea.',
     'defeat.eyebrow': 'Fin de la operación', 'defeat.title': 'Línea perdida',
     'defeat.text': 'La base resistió {wave} oleadas y neutralizó {score} créditos en amenazas.', 'defeat.textOne': 'La base resistió 1 oleada y neutralizó {score} créditos en amenazas.', 'defeat.retry': 'Reintentar',
     'pause.eyebrow': 'Operación en espera', 'pause.title': 'Pausa',
@@ -574,6 +612,9 @@ const I18N = {
     'menu.note': 'Values shown are gameplay balance parameters.',
     'menu.bestWave': 'Best wave', 'menu.record': 'High score', 'menu.runs': 'Runs',
     'menu.install': 'Install app', 'menu.deploy': 'Deploy force →', 'menu.roster': 'Loadout:',
+    'menu.difficulty': 'Difficulty', 'menu.diffStart': 'Start', 'menu.diffBounty': 'Bounty',
+    'menu.difficultySummary': 'Starting credits {cash} ◈ · Rewards ×{bounty}',
+    'menu.difficultyHint': 'Difficulty inverts the economy: higher difficulty means fewer starting and kill credits.',
     'defeat.eyebrow': 'Operation ended', 'defeat.title': 'Line lost',
     'defeat.text': 'The base held for {wave} waves and neutralized {score} credits in threats.', 'defeat.textOne': 'The base held for 1 wave and neutralized {score} credits in threats.', 'defeat.retry': 'Retry',
     'pause.eyebrow': 'Operation on hold', 'pause.title': 'Paused',
@@ -681,6 +722,7 @@ const state = {
   spawnQueue: [], spawnTimer: 0, spawned: 0, enemies: [], towers: [], effects: [],
   selectedTower: null, buildType: null, abilityMode: null, gameOver: false,
   selectedArmy: Number.isInteger(settings.army) && ARMIES[settings.army] ? settings.army : 0,
+  difficultyIndex: clampDifficulty(settings.difficulty), selectedDifficulty: clampDifficulty(settings.difficulty),
   clock: 0, combatTime: 0, score: 0, paused: false, deployed: false, base: null,
   climate: 'templado', tempC: 22, repairUses: 0, wavePressure: 1,
   waveIntel: [], abilities: {
@@ -3354,9 +3396,9 @@ function makeTower(type, cx, cz) {
 function towerCostInflation(type, weight = 1) {
   const total = state.towers.length;
   const same = state.towers.reduce((n, t) => n + (t.type === type ? 1 : 0), 0);
-  const global = Math.max(0, total - 2) * .03;
-  const repeated = Math.max(0, same - 1) * .08;
-  const wave = Math.min(.85, Math.max(0, state.wave - 1) * .022);
+  const global = Math.max(0, total - 2) * .015;
+  const repeated = Math.max(0, same - 1) * .05;
+  const wave = Math.min(.6, Math.max(0, state.wave - 1) * .012);
   const combined = (1 + global + repeated) * (1 + wave);
   return 1 + (combined - 1) * weight;
 }
@@ -3702,7 +3744,7 @@ function waveScalars(wave) {
   // término exponencial suave. Las primeras oleadas enseñan y el resto exige
   // defensas completas sin saltos imposibles.
   return {
-    hp: 1 + Math.max(0, wave - 1) * 0.22 + Math.pow(Math.max(0, wave - 10), 1.35) * 0.05 + Math.pow(Math.max(0, wave - 20), 1.45) * 0.06,
+    hp: 1 + Math.max(0, wave - 1) * 0.2 + Math.pow(Math.max(0, wave - 10), 1.35) * 0.04 + Math.pow(Math.max(0, wave - 20), 1.45) * 0.05,
     damage: 1 + Math.max(0, wave - 1) * 0.06 + Math.max(0, wave - 12) * 0.022 + Math.max(0, wave - 20) * 0.012,
     speed: 1 + Math.min(0.65, Math.max(0, wave - 1) * 0.015)
   };
@@ -3711,14 +3753,15 @@ function waveScalars(wave) {
 // acumulación de estructuras y mejoras, que es lo que realmente rompe la curva.
 function defenseValue() {
   let value = 0;
-  for (const t of state.towers) value += t.data.cost * (1 + ((t.level || 1) - 1) * .7);
+  for (const t of state.towers) value += t.data.cost * (1 + ((t.level || 1) - 1) * .25);
   return value;
 }
 // Presión adaptativa: el enemigo aprende de una defensa grande. Empieza a
 // notarse tras las primeras torres y tiene tope para que no sea un rubber-band
-// infinito. Se muestra en el panel de inteligencia.
+// infinito. Las mejoras pesan poco: el juego premia concentrar la inversión en
+// una defensa veterana en lugar de llenar el mapa de estructuras de nivel 1.
 function defensePressure() {
-  return 1 + Math.min(1.4, Math.max(0, defenseValue() - 1200) / 7500);
+  return 1 + Math.min(.6, Math.max(0, defenseValue() - 1500) / 10000);
 }
 function planCounts(plan) {
   const counts = new Map();
@@ -3831,6 +3874,7 @@ function makeWave() {
 function spawnEnemy(type, options = {}) {
   const d = ENEMIES[type];
   const inf = !!options.infiltrator;
+  const diff = difficultyDef();
   const scalars = waveScalars(state.wave);
   const pressure = state.wavePressure || defensePressure();
   const pressureDamage = 1 + (pressure - 1) * .55;
@@ -3849,21 +3893,22 @@ function spawnEnemy(type, options = {}) {
   state.spawned++;
   // Los jefes son más resistentes y golpean más fuerte, pero avanzan un 30 %
   // más despacio para dar tiempo a concentrar el fuego.
-  const hpScale = (d.boss ? (.32 + Math.min(1.1, state.wave * .028)) * 1.2 : scalars.hp) * pressure;
+  const hpScale = (d.boss ? (.32 + Math.min(1.1, state.wave * .028)) * .9 : scalars.hp) * pressure * diff.enemyHp;
   // Las aeronaves tienen menos margen de vida: su amenaza real es esquivar la
   // defensa terrestre, no aguantar el fuego antiaéreo.
-  const hp = d.hp * hpScale * rankMul * (inf ? 1.2 : 1) * (isAir ? .85 : 1);
-  const armorBonus = Math.min(.16, Math.max(0, state.wave - 1) * .008);
-  // La economía también se enfría: las recompensas crecen menos que la amenaza
-  // y la presión adaptativa reduce el ingreso de las defensas enormes.
-  const economyScale = .9 / (1 + Math.max(0, state.wave - 1) * .02) / (1 + (pressure - 1) * .35);
+  const hp = d.hp * hpScale * rankMul * (inf ? 1.2 : 1) * (isAir ? .65 : 1);
+  const armorBonus = Math.min(.1, Math.max(0, state.wave - 1) * .005);
+  // Las recompensas se mantienen estables (e incluso suben un poco) para que
+  // una defensa veterana pueda seguir creciendo en las oleadas tardías. Antes
+  // caían más rápido que la amenaza y el jugador quedaba sin margen de compra.
+  const economyScale = .95 * (1 + Math.max(0, state.wave - 1) * .01) / (1 + (pressure - 1) * .12);
   const e = {
     type, data: d, model, hp, maxHp: hp,
-    speed: d.speed * scalars.speed * (d.boss ? .7 : 1) * (inf ? 1.08 : 1),
-    damage: d.damage * scalars.damage * pressureDamage * (rank ? 1.12 : 1) * (d.boss ? 1.3 : 1) * (inf ? 1.08 : 1),
+    speed: d.speed * scalars.speed * (d.boss ? .7 : 1) * (inf ? 1.08 : 1) * (isAir ? .85 : 1),
+    damage: d.damage * scalars.damage * pressureDamage * diff.enemyDamage * (rank ? 1.12 : 1) * (d.boss ? 1.3 : 1) * (inf ? 1.08 : 1),
     armor: Math.min(d.boss ? .86 : .82, d.armor + armorBonus + (d.boss ? .1 : 0) + (inf ? .03 : 0)),
     progress: 0, traveled: 0, routeIndex: 0, route, routeLength: routeLength(route), lane,
-    reward: Math.max(1, Math.round(d.reward * (rank === 'elite' ? 1.8 : rank === 'veteran' ? 1.25 : 1) * economyScale * (inf ? 1.35 : 1))),
+    reward: Math.max(1, Math.round(d.reward * (rank === 'elite' ? 1.8 : rank === 'veteran' ? 1.25 : 1) * economyScale * diff.bounty * (inf ? 1.35 : 1))),
     slowTimer: 0, repelTimer: 0, jam: d.jam || 0, air: isAir, rank, infiltrator: inf, x: route.points[0][0], z: route.points[0][1],
     structureDamage: d.boss ? (d.structureDamage || 0) * 1.2 : (inf ? 6 + Math.min(10, Math.floor(state.wave * .5)) : 0),
     bossAttackTimer: d.boss ? 2.8 : 0,
@@ -3897,7 +3942,7 @@ function updateSpawn(dt) {
   if (!state.spawnQueue.length && state.enemies.length === 0) {
     state.active = false;
     document.getElementById('waveBtn').disabled = false;
-    state.cash += Math.round(22 + state.wave * 2.4);
+    state.cash += Math.round((22 + state.wave * 2.4) * difficultyDef().waveClear);
     if (state.wave > records.bestWave) { records.bestWave = state.wave; persistRecords(); updateRecordUI(); }
     Sound.cleared();
     toast(tr('toast.waveClear', { wave: state.wave }));
@@ -4076,12 +4121,14 @@ function updateEnemy(e, dt) {
       // El jefe golpea las estructuras más cercanas que le quedan dentro de su
       // cupo y después impacta la base al llegar al final.
       bossStrikeStructures(e, alt, 3);
-      state.hp -= e.damage * .45;
+      state.hp -= Math.min(36, e.damage * .28);
       toast(tr('toast.bossArrives', { name: loc(e.data, 'name') }));
     } else {
       // El daño de fuga se mantiene moderado: una defensa que deja pasar alguna
       // unidad debe sufrir desgaste progresivo, no perder la partida de golpe.
-      state.hp -= Math.max(2, e.damage * .5);
+      // En oleadas altas el daño enemigo crece, así que el impacto por fuga se
+      // limita para que unos pocos huecos no borren media base.
+      state.hp -= Math.min(22, Math.max(2, e.damage * .35));
     }
     cameraShake = Math.min(.5, cameraShake + .12);
     explode(e.x, alt, e.z, e.data.boss ? 0xf0b14f : 0xb96a4e, e.data.boss ? 32 : 12);
@@ -4487,7 +4534,15 @@ function updateTowers(dt) {
     if ((t.type === 'ew' || t.type === 'carrier' || t.type === 'destroyer') && t.pivot) t.pivot.rotation.y += dt * .4;
     const target = acquireTarget(t);
     t.target = target;
-    if (!target) continue;
+    if (!target) {
+      // El torreta láser vuelve al reposo cuando no hay objetivos: el modelo
+      // tampoco debe quedarse apuntando al último punto muerto.
+      if (t.type === 'laser' && t.pivot) {
+        const rest = ((0 - t.pivot.rotation.y + Math.PI * 3) % (Math.PI * 2)) - Math.PI;
+        t.pivot.rotation.y += rest * Math.min(1, dt * 3.5);
+      }
+      continue;
+    }
     const dx = target.x - t.group.position.x, dz = target.z - t.group.position.z;
     const desired = Math.atan2(-dx, -dz);
     if (t.pivot) {
@@ -4528,7 +4583,8 @@ function beam(a, b, width = .18, color = 0x62e7ff) {
     fx = { kind: key, mesh, life: 0, active: false };
     state.effects.push(fx);
   }
-  fx.active = true; fx.life = .06;
+  fx.active = true; fx.life = .09; fx.maxLife = .09;
+  fx.mesh.visible = true;
   fx.mesh.material.color.set(color);
   fx.mesh.material.opacity = .92;
   const d = b.clone().sub(a);
@@ -4698,7 +4754,14 @@ function updateEffects(dt) {
       fx.mesh.scale.multiplyScalar(1 + dt * 9); fx.mesh.material.opacity = Math.max(0, fx.life / fx.maxLife);
     } else if (fx.kind === 'muzzle') {
       fx.mesh.material.opacity = Math.max(0, fx.life / fx.maxLife); fx.mesh.scale.multiplyScalar(1 + dt * 6);
-    } else if (fx.kind === 'beam') fx.active = fx.life > 0;
+    } else if (fx.kind === 'beam') {
+      // Sin objetivo el haz se apaga y desaparece por completo. Antes el mesh
+      // quedaba visible apuntando al último punto hasta que otro enemigo entraba
+      // en rango, dejando un láser fantasma en el mapa.
+      fx.mesh.material.opacity = .92 * Math.max(0, fx.life / (fx.maxLife || .09));
+      fx.active = fx.life > 0;
+      fx.mesh.visible = fx.active;
+    }
     if (fx.life <= 0) {
       fx.active = false;
       if (fx.mesh && fx.kind !== 'particle' && fx.kind !== 'pulse' && fx.kind !== 'beam') fx.mesh.visible = false;
@@ -4812,6 +4875,7 @@ function updateHud() {
   set('enemyCount', state.enemies.length);
   set('hudFlag', state.army.flag);
   set('hudArmy', loc(state.army, 'name'));
+  set('hudDifficulty', loc(difficultyDef(), 'name'));
   set('threatLevel', state.wave <= 0 ? '—' : threatLevel(state.wave));
 
   // La facción mostrada es la de la oleada en curso o la próxima si aún no hay combate.
@@ -4867,7 +4931,41 @@ function endGame() {
   Sound.defeat();
   Music.stop();
 }
-function chooseArmy(i) { state.selectedArmy = i; document.querySelectorAll('.army-card').forEach((el, n) => el.classList.toggle('chosen', n === i)); }
+function chooseArmy(i) {
+  state.selectedArmy = i;
+  document.querySelectorAll('.army-card').forEach((el, n) => el.classList.toggle('chosen', n === i));
+  updateDifficultySummary();
+}
+function chooseDifficulty(i) {
+  state.selectedDifficulty = clampDifficulty(i);
+  document.querySelectorAll('.difficulty-card').forEach((el, n) => el.classList.toggle('chosen', n === state.selectedDifficulty));
+  updateDifficultySummary();
+}
+function updateDifficultySummary() {
+  const el = document.getElementById('diffSummary');
+  if (!el) return;
+  const diff = difficultyDef(state.selectedDifficulty);
+  const army = ARMIES[state.selectedArmy] || ARMIES[0];
+  el.textContent = tr('menu.difficultySummary', {
+    cash: Math.round(army.cash * diff.start),
+    bounty: diff.bounty.toFixed(2)
+  });
+}
+function renderDifficulties() {
+  const grid = document.getElementById('difficultyGrid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  DIFFICULTY_LEVELS.forEach((d, i) => {
+    const card = document.createElement('button');
+    card.type = 'button';
+    card.className = `difficulty-card ${d.tone}` + (i === state.selectedDifficulty ? ' chosen' : '');
+    card.innerHTML = `<div class="diff-head"><span class="diff-icon">${d.icon}</span><div><div class="diff-name">${loc(d, 'name')}</div><div class="diff-tag">${loc(d, 'tagline')}</div></div></div><div class="diff-stats"><span>${tr('menu.diffStart')} ◈×${d.start.toFixed(2)}</span><span>${tr('menu.diffBounty')} ×${d.bounty.toFixed(2)}</span></div>`;
+    card.title = tr('menu.difficultyHint');
+    card.addEventListener('click', () => chooseDifficulty(i));
+    grid.appendChild(card);
+  });
+  updateDifficultySummary();
+}
 function renderArmies() {
   const grid = document.getElementById('armyGrid'); grid.innerHTML = '';
   ARMIES.forEach((a, i) => {
@@ -4877,6 +4975,7 @@ function renderArmies() {
     card.addEventListener('click', () => chooseArmy(i));
     grid.appendChild(card);
   });
+  renderDifficulties();
 }
 function repaintBase(army) {
   if (state.base) {
@@ -4891,9 +4990,11 @@ function repaintBase(army) {
 }
 function deploy() {
   const nextArmy = ARMIES[state.selectedArmy];
-  const freshMatch = !state.deployed || state.gameOver || state.army.id !== nextArmy.id;
+  const nextDifficulty = clampDifficulty(state.selectedDifficulty);
+  const freshMatch = !state.deployed || state.gameOver || state.army.id !== nextArmy.id || state.difficultyIndex !== nextDifficulty;
   state.army = nextArmy;
-  settings.army = state.selectedArmy; persistSettings();
+  state.difficultyIndex = nextDifficulty;
+  settings.army = state.selectedArmy; settings.difficulty = nextDifficulty; persistSettings();
   if (freshMatch) {
     // Cambiar de facción (o desplegar desde el menú) empieza una partida nueva.
     resetGame();
@@ -4928,7 +5029,7 @@ function resetGame() {
   });
   state.effects = [];
   towerCells.clear();
-  state.wave = 0; state.hp = 100; state.cash = state.army.cash;
+  state.wave = 0; state.hp = 100; state.cash = Math.round(state.army.cash * difficultyDef().start);
   state.active = false; state.gameOver = false; state.paused = false; state.deployed = true;
   state.speed = 1; state.score = 0; state.spawnQueue = []; state.currentPlan = [];
   state.combatTime = 0; state.repairUses = 0; state.wavePressure = 1;
