@@ -156,9 +156,11 @@ const ENEMY_FACTIONS = [
     id: 'chinaTech', name: 'China Hi-Tech', nameEn: 'China Hi-Tech', flag: '🇨🇳', color: 0xde2910,
     climate: 'templado', tempC: 20, tempF: 68,
     units: [
-      { id: 'cyberSoldier', name: 'Soldado cibernético', kind: 'ground', hp: 120, speed: 1.1, reward: 24, radius: .22, color: 0xde2910, damage: 10, armor: .12, tier: 2, desc: 'Refuerzos sintéticos', counter: 'ew' },
-      { id: 'droneSoldier', name: 'Soldado dron', kind: 'ground', hp: 95, speed: 1.4, reward: 22, radius: .2, color: 0xa11212, damage: 8, armor: .05, tier: 2, desc: 'Unidad aérea terrestre', counter: 'aa' },
-      { id: 'mech', name: 'Mecha de combate', kind: 'ground', hp: 400, speed: 0.65, reward: 55, radius: .4, color: 0x8b1a1a, damage: 25, armor: .5, tier: 4, desc: 'Armas hipertecnológicas', counter: 'laser' }
+      { id: 'cyberSoldier', name: 'Soldado cibernético', nameEn: 'Cyber soldier', kind: 'ground', hp: 120, speed: 1.1, reward: 24, radius: .22, color: 0xde2910, damage: 10, armor: .12, tier: 2, desc: 'Refuerzos sintéticos', descEn: 'Synthetic reinforcements', counter: 'ew' },
+      { id: 'droneSoldier', name: 'Soldado dron', nameEn: 'Drone soldier', kind: 'ground', hp: 95, speed: 1.4, reward: 22, radius: .2, color: 0xa11212, damage: 8, armor: .05, tier: 2, desc: 'Unidad aérea terrestre', descEn: 'Ground air unit', counter: 'aa' },
+      { id: 'mech', name: 'Mecha de combate', nameEn: 'Combat mech', kind: 'ground', hp: 400, speed: 0.65, reward: 55, radius: .4, color: 0x8b1a1a, damage: 25, armor: .5, tier: 4, desc: 'Armas hipertecnológicas', descEn: 'Hyper-tech weapons', counter: 'laser' },
+      { id: 'fighter', name: 'Caza furtivo J-31', nameEn: 'J-31 stealth fighter', kind: 'air', hp: 210, speed: 2.6, reward: 48, radius: .26, color: 0x6a7080, damage: 14, armor: .1, tier: 4, desc: 'Caza supersónico furtivo', descEn: 'Supersonic stealth fighter', counter: 'aa' },
+      { id: 'bomber', name: 'Bombardero invisible H-20', nameEn: 'H-20 stealth bomber', kind: 'air', hp: 620, speed: 1.1, reward: 96, radius: .48, color: 0x2f3540, damage: 26, armor: .22, tier: 5, desc: 'Ala volante furtiva', descEn: 'Stealth flying wing', counter: 'laser' }
     ],
     boss: { id: 'chinaTechBoss', name: 'Comandante Mecha', kind: 'ground', hp: 6000, speed: 0.75, reward: 700, radius: 1.0, color: 0x5a0a0a, damage: 55, armor: .7, tier: 5, desc: 'Jefe de facción', boss: true, structureDamage: 35, counter: 'ew' }
   },
@@ -194,6 +196,24 @@ const ENEMY_FACTIONS = [
   }
 ];
 
+// Traducciones de apoyo para las tropas de facción (el resto de datos ya es bilingüe).
+const ENEMY_EN = {
+  clubber: 'Club brute', brute: 'Caveman brute', shaman: 'Shaman', cavemenBoss: 'Caveman Chief',
+  hoplite: 'Giant hoplite', spartan: 'Elite Spartan', spearman: 'Spearman', spartanBoss: 'Spartan King',
+  crusader: 'Crusader soldier', knight: 'Templar knight', archer: 'Crusader archer', crusaderBoss: 'Crusader Lord',
+  cutlass: 'Cutlass pirate', cannoneer: 'Pirate gunner', buccaneer: 'Buccaneer', pirateBoss: 'Pirate Captain',
+  doughboy: 'US infantryman', doughboyMG: 'Machine gunner', doughboyTank: 'Renault light tank', wwiBoss: 'Sergeant Pershing',
+  cyberSoldier: 'Cyber soldier', droneSoldier: 'Drone soldier', mech: 'Combat mech', chinaTechBoss: 'Mech Commander',
+  walker: 'Walker', runner: 'Runner', tankZombie: 'Armored zombie', zombieBoss: 'Colossal zombie',
+  scout: 'UFO scout', interceptor: 'UFO interceptor', mothershipScout: 'Lesser mothership', ufoBoss: 'Alien mothership',
+  angel: 'Messenger angel', archon: 'Archon', seraph: 'Seraph', celestialBoss: 'Supreme Being'
+};
+for (const fac of ENEMY_FACTIONS) {
+  if (!fac.nameEn) fac.nameEn = fac.name;
+  for (const u of fac.units) if (!u.nameEn) u.nameEn = ENEMY_EN[u.id] || u.name;
+  if (!fac.boss.nameEn) fac.boss.nameEn = ENEMY_EN[fac.boss.id] || fac.boss.name;
+}
+
 // Índice plano de todos los tipos (mantiene compatibilidad con código existente)
 const ENEMIES = {};
 for (const fac of ENEMY_FACTIONS) {
@@ -201,11 +221,20 @@ for (const fac of ENEMY_FACTIONS) {
   ENEMIES[fac.boss.id] = { ...fac.boss, faction: fac.id, icon: fac.boss.icon || '☠' };
 }
 function enemyFaction(type) { return ENEMIES[type] ? ENEMIES[type].faction : null; }
-function factionByWave(wave) {
-  const idx = (wave - 1) % ENEMY_FACTIONS.length;
-  return ENEMY_FACTIONS[idx];
+// Cada facción domina 3 oleadas normales y después aparece su jefe final.
+const WAVES_PER_FACTION = 3;
+const FACTION_CYCLE = WAVES_PER_FACTION + 1;
+function factionIndexForWave(wave) {
+  const w = Math.max(1, wave | 0);
+  return ((Math.floor((w - 1) / FACTION_CYCLE) % ENEMY_FACTIONS.length) + ENEMY_FACTIONS.length) % ENEMY_FACTIONS.length;
 }
-function isBossWave(wave) { return wave % 3 === 0; }
+function factionByWave(wave) { return ENEMY_FACTIONS[factionIndexForWave(wave)]; }
+function waveInFaction(wave) { return ((Math.max(1, wave | 0) - 1) % FACTION_CYCLE) + 1; }
+function isBossWave(wave) { return ((Math.max(1, wave | 0) - 1) % FACTION_CYCLE) === WAVES_PER_FACTION; }
+function wavesUntilBoss(wave) {
+  const stage = waveInFaction(wave);
+  return isBossWave(wave) ? 0 : FACTION_CYCLE - stage;
+}
 
 const MAP = { w: 44, h: 26, cell: 1 };
 const SEA_ROWS = 5;                 // filas cz 0..4
@@ -227,7 +256,7 @@ const ROUTES = [
 ];
 const AIR_ROUTE = { id: 'air', name: 'Corredor aéreo', nameEn: 'Air corridor', points: [[-21, -10], [-14, -11], [-6, -10], [2, -8], [10, -6], [18, -4], [13.5, -1.5]] };
 
-const APP_VERSION = '2.2.0';
+const APP_VERSION = '2.5.0';
 const STORE_SETTINGS = 'frente-global:settings:v1';
 const STORE_RECORDS = 'frente-global:records:v1';
 function loadStore(key, fallback) {
@@ -247,7 +276,7 @@ const I18N = {
     'doc.title': 'Frente Global | Defensa táctica',
     'doc.description': 'Tower defense táctico con ocho doctrinas militares, guerra naval y apoyo de mando. Defiende la línea en Android y escritorio.',
     'brand.sub': 'Comando de defensa',
-    'stat.credits': 'Créditos', 'stat.integrity': 'Integridad', 'stat.wave': 'Oleada', 'stat.enemies': 'Enemigos', 'stat.threat': 'Amenaza', 'stat.climate': 'Clima', 'stat.faction': 'Facción enemiga',
+    'stat.credits': 'Créditos', 'stat.integrity': 'Integridad', 'stat.wave': 'Oleada', 'stat.enemies': 'Enemigos', 'stat.threat': 'Amenaza', 'stat.climate': 'Clima', 'stat.faction': 'Facción',
     'action.army': 'Ejército', 'action.armyTitle': 'Cambiar ejército', 'action.centerTitle': 'Centrar cámara',
     'action.soundOn': 'Silenciar (M)', 'action.soundOff': 'Activar sonido (M)',
     'action.pause': 'Pausa (P)', 'action.resume': 'Reanudar (P)',
@@ -257,6 +286,12 @@ const I18N = {
     'inspect.kicker': 'Control táctico', 'inspect.title': 'Inspección',
     'inspect.empty': 'Selecciona una torre del mapa para ver sus parámetros y órdenes disponibles.',
     'wave.start': 'Iniciar oleada', 'zoom.out': 'Alejar cámara', 'zoom.in': 'Acercar cámara', 'common.cancel': 'Cancelar',
+    'wave.startFac': 'Iniciar oleada · {name}', 'wave.startBoss': '¡JEFE FINAL! · {name}', 'wave.inProgress': 'Oleada {wave} en curso',
+    'faction.stage': 'Oleada {stage}/{total}', 'faction.bossNow': 'JEFE FINAL', 'faction.bossIn': 'Jefe en {n}',
+    'waveBanner.boss': 'JEFE FINAL', 'waveBanner.stage': 'Oleada {stage} de {total}', 'waveBanner.climate': '{climate} · {temp}°C',
+    'waveBanner.incoming': 'Nueva facción detectada', 'waveBanner.escorts': 'Escolta: {n} unidades',
+    'climate.templado': 'Templado', 'climate.caluroso': 'Caluroso', 'climate.tropical': 'Tropical', 'climate.frío': 'Frío',
+    'climate.radiactivo': 'Radiactivo', 'climate.desconocido': 'Desconocido', 'climate.divino': 'Divino',
     'ability.strike': 'Ataque aéreo', 'ability.strikeHint': 'Z · 120 cr', 'ability.strikeTitle': 'Ataque aéreo (Z) · 120 créditos',
     'ability.emp': 'Pulso EMP', 'ability.empHint': 'X · 90 cr', 'ability.empTitle': 'Pulso EMP (X) · 90 créditos',
     'ability.repair': 'Reparar base', 'ability.repairHint': 'C · 80 cr', 'ability.repairTitle': 'Reparar base (C) · 80 créditos',
@@ -303,6 +338,7 @@ const I18N = {
     'toast.deployed': 'Sistema desplegado', 'toast.place': 'Coloca: {name}', 'toast.placeSea': 'Coloca en el mar: {name}',
     'toast.priority': 'Prioridad: {mode}', 'toast.upgrade': 'Mejora completada · nivel {level}',
     'toast.sold': 'Sistema vendido · 60% recuperado', 'toast.waveStart': 'Oleada {wave}: {summary}',
+    'toast.bossStructures': '¡El jefe está dañando tus estructuras!', 'toast.bossArrives': '¡{name} ha alcanzado el sector!',
     'toast.waveClear': 'Oleada {wave} contenida · bonificación recibida', 'toast.reloading': '{name} recargando · {s} s',
     'toast.strikeSelect': 'Ataque aéreo: selecciona el punto de impacto', 'toast.emp': 'Pulso EMP · amenazas ralentizadas y drones repelidos',
     'toast.repair': 'Base reparada · +22% de integridad', 'toast.strikeActive': 'Ataque aéreo en curso',
@@ -318,13 +354,14 @@ const I18N = {
     'intel.routes': 'Pista terrestre', 'intel.routesDetail': 'Única · dos carriles', 'intel.airRoute': 'Corredor aéreo',
     'intel.support': 'Apoyo de mando', 'intel.supportHtml': '<kbd>Z</kbd> ataque aéreo · <kbd>X</kbd> EMP · <kbd>C</kbd> reparar',
     'intel.air': 'Aire', 'intel.boss': 'Jefe', 'intel.ground': 'Tierra', 'intel.armor': 'blindaje {n}%',
+    'intel.counter': 'Débil ante {name}', 'intel.bossWave': 'Oleada de jefe final',
     'rank.elite': 'ÉLITE', 'rank.veteran': 'VETERANO'
   },
   en: {
     'doc.title': 'Frente Global | Tactical defense',
     'doc.description': 'Tactical tower defense with eight military doctrines, naval warfare and command support. Hold the line on Android and desktop.',
     'brand.sub': 'Defense command',
-    'stat.credits': 'Credits', 'stat.integrity': 'Integrity', 'stat.wave': 'Wave', 'stat.enemies': 'Enemies', 'stat.threat': 'Threat', 'stat.climate': 'Climate', 'stat.faction': 'Enemy faction',
+    'stat.credits': 'Credits', 'stat.integrity': 'Integrity', 'stat.wave': 'Wave', 'stat.enemies': 'Enemies', 'stat.threat': 'Threat', 'stat.climate': 'Climate', 'stat.faction': 'Faction',
     'action.army': 'Army', 'action.armyTitle': 'Change army', 'action.centerTitle': 'Center camera',
     'action.soundOn': 'Mute (M)', 'action.soundOff': 'Enable sound (M)',
     'action.pause': 'Pause (P)', 'action.resume': 'Resume (P)',
@@ -334,6 +371,12 @@ const I18N = {
     'inspect.kicker': 'Tactical control', 'inspect.title': 'Inspect',
     'inspect.empty': 'Select a tower on the map to view its stats and available orders.',
     'wave.start': 'Start wave', 'zoom.out': 'Zoom out', 'zoom.in': 'Zoom in', 'common.cancel': 'Cancel',
+    'wave.startFac': 'Start wave · {name}', 'wave.startBoss': 'FINAL BOSS! · {name}', 'wave.inProgress': 'Wave {wave} in progress',
+    'faction.stage': 'Wave {stage}/{total}', 'faction.bossNow': 'FINAL BOSS', 'faction.bossIn': 'Boss in {n}',
+    'waveBanner.boss': 'FINAL BOSS', 'waveBanner.stage': 'Wave {stage} of {total}', 'waveBanner.climate': '{climate} · {temp}°C',
+    'waveBanner.incoming': 'New faction detected', 'waveBanner.escorts': 'Escort: {n} units',
+    'climate.templado': 'Temperate', 'climate.caluroso': 'Hot', 'climate.tropical': 'Tropical', 'climate.frío': 'Cold',
+    'climate.radiactivo': 'Radioactive', 'climate.desconocido': 'Unknown', 'climate.divino': 'Divine',
     'ability.strike': 'Airstrike', 'ability.strikeHint': 'Z · 120 cr', 'ability.strikeTitle': 'Airstrike (Z) · 120 credits',
     'ability.emp': 'EMP pulse', 'ability.empHint': 'X · 90 cr', 'ability.empTitle': 'EMP pulse (X) · 90 credits',
     'ability.repair': 'Repair base', 'ability.repairHint': 'C · 80 cr', 'ability.repairTitle': 'Repair base (C) · 80 credits',
@@ -380,6 +423,7 @@ const I18N = {
     'toast.deployed': 'System deployed', 'toast.place': 'Place: {name}', 'toast.placeSea': 'Place at sea: {name}',
     'toast.priority': 'Priority: {mode}', 'toast.upgrade': 'Upgrade complete · level {level}',
     'toast.sold': 'System sold · 60% recovered', 'toast.waveStart': 'Wave {wave}: {summary}',
+    'toast.bossStructures': 'The boss is damaging your structures!', 'toast.bossArrives': '{name} reached the sector!',
     'toast.waveClear': 'Wave {wave} contained · bonus received', 'toast.reloading': '{name} reloading · {s} s',
     'toast.strikeSelect': 'Airstrike: select the impact point', 'toast.emp': 'EMP pulse · threats slowed and drones repelled',
     'toast.repair': 'Base repaired · +22% integrity', 'toast.strikeActive': 'Airstrike in progress',
@@ -395,6 +439,7 @@ const I18N = {
     'intel.routes': 'Land road', 'intel.routesDetail': 'Single · two lanes', 'intel.airRoute': 'Air corridor',
     'intel.support': 'Command support', 'intel.supportHtml': '<kbd>Z</kbd> airstrike · <kbd>X</kbd> EMP · <kbd>C</kbd> repair',
     'intel.air': 'Air', 'intel.boss': 'Boss', 'intel.ground': 'Ground', 'intel.armor': 'armor {n}%',
+    'intel.counter': 'Weak vs {name}', 'intel.bossWave': 'Final boss wave',
     'rank.elite': 'ELITE', 'rank.veteran': 'VETERAN'
   }
 };
@@ -433,6 +478,7 @@ const state = {
   selectedTower: null, buildType: null, abilityMode: null, gameOver: false,
   selectedArmy: Number.isInteger(settings.army) && ARMIES[settings.army] ? settings.army : 0,
   clock: 0, score: 0, paused: false, deployed: false, base: null,
+  climate: 'templado', tempC: 22,
   waveIntel: [], abilities: {
     strike: { cd: 0, max: 22, cost: 120, name: 'Ataque aéreo', key: 'Z', icon: '✈' },
     emp: { cd: 0, max: 26, cost: 90, name: 'Pulso EMP', key: 'X', icon: '⌁' },
@@ -448,8 +494,8 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = quality().shadows;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.outputEncoding = THREE.sRGBEncoding;
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.05;
+renderer.toneMapping = THREE.NoToneMapping;
+renderer.toneMappingExposure = 1;
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x8292a0);
@@ -460,12 +506,12 @@ let yaw = 0;
 const DEFAULT_DISTANCE = 26;
 let distance = DEFAULT_DISTANCE;
 let targetDistance = DEFAULT_DISTANCE;
-const minDistance = 12, maxDistance = 54;
+const minDistance = 6.5, maxDistance = 54;
 const inclination = 55 * Math.PI / 180;
 
-const hemi = new THREE.HemisphereLight(0xdfe9ee, 0x35402f, .58);
+const hemi = new THREE.HemisphereLight(0xdfe9ee, 0x35402f, .38);
 scene.add(hemi);
-const sun = new THREE.DirectionalLight(0xffe6bd, 1.35);
+const sun = new THREE.DirectionalLight(0xffe6bd, 1.25);
 sun.position.set(-16, 26, 12);
 sun.castShadow = quality().shadows;
 sun.shadow.mapSize.set(quality().shadow, quality().shadow);
@@ -473,7 +519,7 @@ sun.shadow.camera.left = -24; sun.shadow.camera.right = 24;
 sun.shadow.camera.top = 22; sun.shadow.camera.bottom = -22;
 sun.shadow.bias = -.00025; sun.shadow.radius = 4;
 scene.add(sun);
-const rimLight = new THREE.DirectionalLight(0x9fc6e6, .35);
+const rimLight = new THREE.DirectionalLight(0x9fc6e6, .5);
 rimLight.position.set(18, 12, -16);
 scene.add(rimLight);
 
@@ -489,6 +535,8 @@ const CLIMATE_PRESETS = {
 };
 function applyClimate(climate, tempC) {
   const p = CLIMATE_PRESETS[climate] || CLIMATE_PRESETS.templado;
+  state.climate = climate;
+  state.tempC = tempC;
   scene.background.setHex(p.bg);
   scene.fog.color.setHex(p.fog);
   sun.color.setHex(p.sun);
@@ -496,10 +544,15 @@ function applyClimate(climate, tempC) {
   waterUniforms.uShallow.value.setHex(p.waterShallow);
   waterMaterial.needsUpdate = true;
   const el = document.getElementById('climateLabel');
-  if (el) el.textContent = tempC != null ? `${tempC}°C · ${climate}` : climate;
+  if (el) el.textContent = tempC != null ? `${tempC}°C · ${tr('climate.' + climate)}` : tr('climate.' + climate);
+  const overlay = document.getElementById('weatherOverlay');
+  if (overlay) {
+    overlay.className = 'weather-overlay climate-' + climate;
+    overlay.dataset.temp = tempC != null ? `${tempC}°C` : '';
+  }
+  document.body.classList.remove('climate-templado', 'climate-caluroso', 'climate-tropical', 'climate-frío', 'climate-radiactivo', 'climate-desconocido', 'climate-divino');
+  document.body.classList.add('climate-' + climate);
 }
-// Clima inicial templado
-applyClimate('templado', 22);
 
 /* ---------------------------------------------------------------- helpers */
 const geoCache = new Map();
@@ -848,6 +901,9 @@ const water = new THREE.Mesh(waterGeometry, waterMaterial);
 water.rotation.x = -Math.PI / 2;
 water.position.set(0, -.3, -10.5);
 world.add(water);
+
+// Clima inicial templado (se aplica una vez existen los uniforms del agua)
+applyClimate('templado', 22);
 
 function buildTerrain() {
   const landCells = [];
@@ -1794,7 +1850,7 @@ function buildTowerModel(type, army, level = 1, preview = false) {
 }
 
 /* ------------------------------------------------------ modelos enemigos */
-const ALTITUDE = { scout: 3.0, interceptor: 4.0, mothershipScout: 3.5, angel: 3.2, archon: 3.8, seraph: 4.2, ufoBoss: 4.5, celestialBoss: 5.0 };
+const ALTITUDE = { scout: 3.0, interceptor: 4.0, mothershipScout: 3.5, angel: 3.2, archon: 3.8, seraph: 4.2, fighter: 4.2, bomber: 3.4, ufoBoss: 4.5, celestialBoss: 5.0 };
 const labelCache = new Map();
 function enemyLabelAccent(type) { return ENEMIES[type] && ENEMIES[type].boss ? '#e8c468' : type === 'bomber' ? '#e0a06a' : '#d8c78a'; }
 function labelSprite(text, accent = '#d8c78a') {
@@ -1833,299 +1889,1022 @@ function addRotor(parent, y, radius, blades, dark, glass) {
   disc.rotation.x = -Math.PI / 2; disc.material = new THREE.MeshBasicMaterial({ color: 0x222722, transparent: true, opacity: .13, side: THREE.DoubleSide, depthWrite: false });
   return rotor;
 }
-function addSoldier(parent, x, z, phase, paint, dark, skin) {
-  const unit = new THREE.Group(); unit.position.set(x, 0, z); parent.add(unit);
-  const legs = [];
-  addMesh(unit, rboxGeo(.13, .17, .09, .02), paint, 0, .37, 0);
-  addMesh(unit, rboxGeo(.14, .13, .1, .02), mat(0x4e5540), 0, .37, .01);
-  addMesh(unit, sphGeo(.045, 10), skin, 0, .51, 0);
-  addMesh(unit, new THREE.SphereGeometry(.052, 12, 8, 0, Math.PI * 2, 0, Math.PI * .62), mat(0x4b543c), 0, .525, 0);
-  addMesh(unit, rboxGeo(.1, .14, .07, .02), mat(0x4a513c), 0, .4, .065);
-  for (const side of [-1, 1]) {
-    const hip = new THREE.Group(); hip.position.set(side * .045, .29, 0); unit.add(hip);
-    addMesh(hip, cylGeo(.026, .034, .15, 8), paint, 0, -.075, 0);
-    addMesh(hip, rboxGeo(.06, .04, .11, .01), dark, 0, -.15, .02);
-    legs.push(hip);
-    const shoulder = new THREE.Group(); shoulder.position.set(side * .08, .43, 0); unit.add(shoulder);
-    addMesh(shoulder, cylGeo(.02, .028, .14, 8), paint, 0, -.06, 0);
-    shoulder.rotation.z = side * .18; shoulder.userData.side = side; legs.push(shoulder);
+/* ============================================================ arte de unidades
+   Estilo "miniatura táctica": figuras compactas y legibles, paletas de facción
+   saturadas, armas en mano y siluetas claras. Todo procedural y cacheado. */
+
+const FACTION_PALETTE = {
+  cavemen:    { cloth: 0x8a6036, cloth2: 0x4e3418, armor: 0x6b4e2a, accent: 0xd9a94e, skin: 0xb87a4a, metal: 0x8a7248, fur: 0x3a2412 },
+  spartans:   { cloth: 0x8f1e18, cloth2: 0x5c120e, armor: 0xb07a22, accent: 0xf0c052, skin: 0xb87a4a, metal: 0xd9a83a, fur: 0x6e1712 },
+  crusaders:  { cloth: 0xe4dcc2, cloth2: 0xb0a68a, armor: 0x6e747c, accent: 0xa51f1a, skin: 0xb87a4a, metal: 0xc9b06a, fur: 0x7a1c18 },
+  pirates:    { cloth: 0x24313d, cloth2: 0x101820, armor: 0x3a4a5a, accent: 0xd9a83a, skin: 0xa86a42, metal: 0xb0b0a0, fur: 0x0a1117 },
+  wwi:        { cloth: 0x6a6a48, cloth2: 0x454632, armor: 0x4e5548, accent: 0x8f3024, skin: 0xae7a52, metal: 0x8e8e80, fur: 0x33392c },
+  chinaTech:  { cloth: 0xb01515, cloth2: 0x5e0a0a, armor: 0x22262d, accent: 0x4fd8f5, skin: 0xb9875c, metal: 0x8a9aa8, fur: 0x14181e },
+  zombies:    { cloth: 0x4c5c2c, cloth2: 0x2e3a1a, armor: 0x5d6b32, accent: 0xc8d95c, skin: 0x7e9445, metal: 0x6a6a58, fur: 0x222c14 },
+  ufos:       { cloth: 0x2f5c9a, cloth2: 0x16305a, armor: 0x7fb0d8, accent: 0x55e8ff, skin: 0x8ec8dc, metal: 0xa8c8dc, fur: 0x0e2244 },
+  celestials: { cloth: 0xf7f2e0, cloth2: 0xd9c07c, armor: 0xf2dd9a, accent: 0xffdf63, skin: 0xf0c98a, metal: 0xe9c45e, fur: 0xc9a24a }
+};
+
+const basicMatCache = new Map();
+function basicMat(color, opacity = 1) {
+  const key = `${color}:${opacity}`;
+  if (!basicMatCache.has(key)) basicMatCache.set(key, new THREE.MeshBasicMaterial({ color, transparent: opacity < 1, opacity, depthWrite: opacity >= 1 }));
+  return basicMatCache.get(key);
+}
+const outlineMat = new THREE.MeshBasicMaterial({ color: 0x11140e, side: THREE.BackSide, depthWrite: true });
+function outlineGroup(group, thickness = 1.06) {
+  const meshes = [];
+  group.traverse(o => { if (o.isMesh && !o.userData.noOutline && !(o.material && o.material.transparent)) meshes.push(o); });
+  for (const mesh of meshes) {
+    const shell = new THREE.Mesh(mesh.geometry, outlineMat);
+    shell.position.copy(mesh.position);
+    shell.rotation.copy(mesh.rotation);
+    shell.scale.copy(mesh.scale).multiplyScalar(thickness);
+    shell.renderOrder = mesh.renderOrder;
+    mesh.parent.add(shell);
   }
-  const rifle = new THREE.Group(); rifle.position.set(.08, .37, -.08); unit.add(rifle);
-  addMesh(rifle, rboxGeo(.035, .04, .22, .01), dark, 0, 0, 0);
-  addMesh(rifle, cylGeo(.008, .01, .2, 6), mat(0x2a2f2a), 0, 0, -.2).rotation.x = Math.PI / 2;
-  addMesh(rifle, rboxGeo(.025, .05, .06, .005), dark, 0, -.03, .02);
-  unit.userData.phase = phase;
-  return unit;
+}
+const energyMatCache = new Map();
+function energyMat(color, intensity = 1.7) {
+  const key = `${color}:${intensity}`;
+  if (!energyMatCache.has(key)) energyMatCache.set(key, new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: intensity, roughness: .25, metalness: .1 }));
+  return energyMatCache.get(key);
+}
+const unitMatCache = new Map();
+function umat(color, rough = .78, metal = 0) {
+  const key = `${color}:${rough}:${metal}`;
+  if (!unitMatCache.has(key)) unitMatCache.set(key, new THREE.MeshStandardMaterial({ color, roughness: rough, metalness: metal, flatShading: true }));
+  return unitMatCache.get(key);
+}
+function paletteMats(P) {
+  return {
+    skin: umat(P.skin, .72), cloth: umat(P.cloth, .82), cloth2: umat(P.cloth2, .88),
+    armor: umat(P.armor, .42, .35), accent: umat(P.accent, .55, .15),
+    dark: umat(0x15181c, .92), metal: umat(P.metal, .28, .7), fur: umat(P.fur, .95),
+    bone: umat(0xd9d0b2, .72), glow: energyMat(P.accent, 1.4), basic: basicMat(P.accent)
+  };
+}
+
+/* --- rostros y cascos ------------------------------------------------ */
+function addFace(fig, kind, M, P) {
+  const head = addMesh(fig, sphGeo(.09, 14), M.skin, 0, .8, .005);
+  head.scale.set(1, 1.05, .96);
+  const helmet = kind || 'dome';
+  if (helmet === 'horns' || helmet === 'hornsBig') {
+    const big = helmet === 'hornsBig';
+    addMesh(fig, new THREE.SphereGeometry(.112, 14, 8, 0, Math.PI * 2, 0, Math.PI * .62), M.fur, 0, .805, 0);
+    addMesh(fig, rboxGeo(.2, .05, .22, .02), M.fur, 0, .86, -.02);
+    for (const side of [-1, 1]) {
+      const horn = addMesh(fig, coneGeo(big ? .04 : .03, big ? .28 : .2, 6), M.bone, side * .1, .9, 0);
+      horn.rotation.z = side * (big ? .75 : .6); horn.rotation.x = -.12;
+      if (big) addMesh(fig, coneGeo(.026, .14, 6), M.bone, side * .13, .78, .04).rotation.z = side * .95;
+    }
+    for (const side of [-1, 1]) addMesh(fig, sphGeo(.013, 6), M.glow, side * .034, .79, .096);
+    addMesh(fig, rboxGeo(.05, .022, .022, .005), M.bone, 0, .755, .098);
+  } else if (helmet === 'skull') {
+    addMesh(fig, sphGeo(.112, 12), M.bone, 0, .805, .01);
+    addMesh(fig, rboxGeo(.1, .07, .06, .015), M.bone, 0, .755, .07);
+    for (const side of [-1, 1]) addMesh(fig, sphGeo(.022, 8), M.dark, side * .038, .81, .102);
+    for (let i = 0; i < 4; i++) {
+      const f = addMesh(fig, rboxGeo(.014, .14, .02, .004), M.bone, -.09 + i * .06, .95, -.02);
+      f.rotation.x = -.35; f.rotation.z = (i - 1.5) * .18;
+    }
+    addMesh(fig, rboxGeo(.11, .018, .03, .004), M.bone, 0, .745, .1);
+  } else if (helmet === 'corinthian' || helmet === 'corinthianCrest') {
+    addMesh(fig, new THREE.SphereGeometry(.115, 14, 9, 0, Math.PI * 2, 0, Math.PI * .58), M.armor, 0, .805, 0);
+    addMesh(fig, rboxGeo(.19, .14, .05, .015), M.armor, 0, .775, .1);
+    addMesh(fig, rboxGeo(.045, .12, .03, .008), M.armor, 0, .75, .12);
+    addMesh(fig, rboxGeo(.16, .025, .02, .005), M.dark, 0, .81, .125);
+    const crestH = helmet === 'corinthianCrest' ? .26 : .17;
+    addMesh(fig, rboxGeo(.035, crestH, .27, .012), M.cloth, 0, .9 + crestH * .3, -.015);
+    addMesh(fig, rboxGeo(.055, .03, .29, .01), M.fur, 0, .89 + crestH * .3, -.015);
+  } else if (helmet === 'greatHelm') {
+    addMesh(fig, cylGeo(.105, .118, .2, 12), M.armor, 0, .81, 0);
+    addMesh(fig, new THREE.SphereGeometry(.108, 12, 6, 0, Math.PI * 2, 0, Math.PI * .5), M.armor, 0, .9, 0);
+    addMesh(fig, rboxGeo(.17, .025, .03, .005), M.dark, 0, .835, .098);
+    addMesh(fig, rboxGeo(.03, .08, .04, .006), M.armor, 0, .8, .1);
+    addMesh(fig, rboxGeo(.06, .1, .02, .006), M.accent, 0, .93, -.03);
+  } else if (helmet === 'hood') {
+    addMesh(fig, new THREE.SphereGeometry(.125, 12, 8, 0, Math.PI * 2, 0, Math.PI * .62), M.cloth2, 0, .805, -.01);
+    addMesh(fig, coneGeo(.13, .18, 8), M.cloth2, 0, .86, -.12).rotation.x = -.4;
+    addMesh(fig, rboxGeo(.08, .02, .02, .004), M.dark, 0, .81, .1);
+    for (const side of [-1, 1]) addMesh(fig, sphGeo(.012, 6), M.glow, side * .032, .8, .103);
+  } else if (helmet === 'crown') {
+    addMesh(fig, new THREE.SphereGeometry(.115, 12, 8, 0, Math.PI * 2, 0, Math.PI * .55), M.armor, 0, .805, 0);
+    const ring = addMesh(fig, new THREE.TorusGeometry(.095, .014, 6, 16), M.metal, 0, .885, 0);
+    ring.rotation.x = Math.PI / 2;
+    for (let i = 0; i < 5; i++) {
+      const a = i / 5 * Math.PI * 2;
+      addMesh(fig, coneGeo(.022, .09, 4), M.metal, Math.cos(a) * .09, .94, Math.sin(a) * .09);
+    }
+    addMesh(fig, rboxGeo(.2, .04, .03, .005), M.accent, 0, .86, -.06);
+  } else if (helmet === 'tricorn' || helmet === 'tricornBoss') {
+    const big = helmet === 'tricornBoss';
+    const R = big ? .24 : .205;
+    addMesh(fig, cylGeo(R, R * 1.04, .026, 16), M.dark, 0, .895, 0);
+    addMesh(fig, new THREE.TorusGeometry(R * .97, .012, 5, 18), M.metal, 0, .902, 0).rotation.x = Math.PI / 2;
+    addMesh(fig, coneGeo(R * .66, big ? .19 : .15, 12), M.dark, 0, .972, 0);
+    for (let i = 0; i < 3; i++) {
+      const a = i / 3 * Math.PI * 2 + Math.PI * .5;
+      const flap = addMesh(fig, rboxGeo(R * 1.9, .075, .03, .012), M.dark, Math.cos(a) * R * .62, .925, Math.sin(a) * R * .62);
+      flap.rotation.y = -a + Math.PI / 2;
+      flap.rotation.z = Math.sin(a) * .18;
+    }
+    // Emblema de calavera y huesos cruzados al frente.
+    addMesh(fig, sphGeo(big ? .035 : .028, 8), M.bone, 0, .9, R * .72);
+    addMesh(fig, rboxGeo(.05, .018, .025, .004), M.bone, 0, .868, R * .73);
+    for (const side of [-1, 1]) {
+      const bone = addMesh(fig, rboxGeo(.09, .012, .012, .003), M.bone, side * .022, .905, R * .73);
+      bone.rotation.z = side * .7;
+    }
+    addMesh(fig, rboxGeo(.045, .1, .03, .01), M.accent, .0, .925, -R * .84);
+    if (big) {
+      for (let i = 0; i < 3; i++) {
+        const plume = addMesh(fig, rboxGeo(.035, .3, .05, .01), M.accent, .16 + i * .02, 1.05, -.04 - i * .03);
+        plume.rotation.z = -.45 - i * .12;
+      }
+    }
+    for (const side of [-1, 1]) addMesh(fig, sphGeo(.012, 6), M.glow, side * .033, .79, .096);
+  } else if (helmet === 'bandana') {
+    addMesh(fig, rboxGeo(.21, .08, .21, .03), M.cloth2, 0, .865, 0);
+    addMesh(fig, rboxGeo(.035, .12, .02, .005), M.cloth2, .1, .83, -.08).rotation.z = -.5;
+    for (const side of [-1, 1]) addMesh(fig, sphGeo(.012, 6), M.glow, side * .033, .79, .096);
+  } else if (helmet === 'brodie') {
+    addMesh(fig, new THREE.SphereGeometry(.12, 12, 7, 0, Math.PI * 2, 0, Math.PI * .5), M.armor, 0, .825, 0);
+    addMesh(fig, cylGeo(.19, .2, .028, 16), M.armor, 0, .828, 0);
+    addMesh(fig, rboxGeo(.07, .03, .02, .004), M.dark, 0, .82, .1);
+    addMesh(fig, rboxGeo(.12, .09, .02, .004), M.cloth2, 0, .76, .085);
+  } else if (helmet === 'cap') {
+    addMesh(fig, cylGeo(.115, .12, .09, 12), M.cloth2, 0, .855, 0);
+    addMesh(fig, cylGeo(.17, .17, .022, 14), M.cloth2, 0, .905, 0).rotation.x = .08;
+    addMesh(fig, rboxGeo(.18, .025, .12, .02), M.dark, 0, .85, .1);
+    addMesh(fig, rboxGeo(.12, .03, .025, .005), M.metal, 0, .88, .1);
+  } else if (helmet === 'tech') {
+    addMesh(fig, new THREE.SphereGeometry(.112, 14, 8, 0, Math.PI * 2, 0, Math.PI * .6), M.armor, 0, .805, 0);
+    addMesh(fig, rboxGeo(.2, .1, .06, .015), M.armor, 0, .775, .075);
+    addMesh(fig, rboxGeo(.16, .028, .02, .005), M.glow, 0, .81, .106);
+    for (const side of [-1, 1]) addMesh(fig, rboxGeo(.03, .07, .05, .008), M.metal, side * .1, .83, -.01);
+    addMesh(fig, cylGeo(.008, .012, .18, 5), M.metal, .09, .92, -.02);
+    addMesh(fig, sphGeo(.018, 6), M.glow, .09, 1.01, -.02);
+  } else if (helmet === 'zombie' || helmet === 'zombieBoss') {
+    const big = helmet === 'zombieBoss';
+    addMesh(fig, sphGeo(big ? .13 : .105, 10), M.skin, 0, .79, .01);
+    addMesh(fig, rboxGeo(.1, .05, .07, .012), M.skin, 0, .75, .06);
+    for (const side of [-1, 1]) addMesh(fig, sphGeo(.015, 6), M.glow, side * .035, .8, .1);
+    for (let i = 0; i < 3; i++) addMesh(fig, rboxGeo(.05, .018, .03, .004), M.bone, 0, .735 + i * .028, .085);
+    addMesh(fig, rboxGeo(.12, .02, .03, .004), M.bone, 0, .745, .098);
+    if (big) for (const side of [-1, 1]) {
+      addMesh(fig, coneGeo(.03, .2, 5), M.bone, side * .11, .88, -.02).rotation.z = side * .8;
+    }
+  } else if (helmet === 'zombieHelm') {
+    addMesh(fig, new THREE.SphereGeometry(.12, 10, 6, 0, Math.PI * 2, 0, Math.PI * .55), M.armor, 0, .815, 0);
+    addMesh(fig, rboxGeo(.22, .03, .05, .006), M.armor, 0, .82, .09);
+    for (const side of [-1, 1]) addMesh(fig, sphGeo(.016, 6), M.glow, side * .035, .8, .096);
+    addMesh(fig, rboxGeo(.03, .16, .03, .006), M.metal, .11, .9, -.02).rotation.z = -.4;
+  } else if (helmet === 'circlet') {
+    addMesh(fig, rboxGeo(.18, .035, .18, .015), M.metal, 0, .87, 0);
+    const halo = addMesh(fig, new THREE.TorusGeometry(.17, .014, 6, 20), M.glow, 0, .96, -.03);
+    halo.rotation.x = Math.PI / 2;
+    for (const side of [-1, 1]) addMesh(fig, sphGeo(.013, 6), M.glow, side * .034, .79, .095);
+  } else if (helmet === 'goldhelm') {
+    addMesh(fig, new THREE.SphereGeometry(.118, 14, 9, 0, Math.PI * 2, 0, Math.PI * .58), M.metal, 0, .805, 0);
+    addMesh(fig, rboxGeo(.05, .16, .26, .01), M.glow, 0, .92, -.02);
+    addMesh(fig, rboxGeo(.18, .03, .03, .005), M.glow, 0, .85, .1);
+    for (const side of [-1, 1]) addMesh(fig, sphGeo(.013, 6), M.glow, side * .035, .8, .1);
+  } else {
+    addMesh(fig, new THREE.SphereGeometry(.115, 14, 8, 0, Math.PI * 2, 0, Math.PI * .58), M.armor, 0, .81, 0);
+    addMesh(fig, cylGeo(.15, .16, .025, 14), M.armor, 0, .825, .01);
+    for (const side of [-1, 1]) addMesh(fig, sphGeo(.012, 6), M.dark, side * .034, .79, .095);
+  }
+}
+/* --- ropa, capas, escudos y estandartes ------------------------------ */
+function addCape(fig, M, matColor, w = .42, h = .56, accentMat = null) {
+  const cape = new THREE.Group();
+  cape.position.set(0, .67, -.13);
+  fig.add(cape);
+  const panel = addMesh(cape, rboxGeo(w, h, .035, .015), matColor, 0, -h / 2, 0);
+  panel.rotation.x = -.14;
+  if (accentMat) addMesh(cape, rboxGeo(w * .92, .05, .04, .008), accentMat, 0, -h + .04, .005);
+  for (const side of [-1, 1]) {
+    const flap = addMesh(cape, rboxGeo(w * .2, h * .9, .03, .01), matColor, side * (w * .42), -h * .46, -.01);
+    flap.rotation.z = side * .18; flap.rotation.x = -.14;
+  }
+  return cape;
+}
+function shieldGeoKite(w, h) {
+  return cacheGeo(`kite:${w}:${h}`, () => {
+    const sh = new THREE.Shape();
+    sh.moveTo(0, -h * .52);
+    sh.quadraticCurveTo(w * .52, -h * .18, w * .5, h * .14);
+    sh.quadraticCurveTo(w * .48, h * .46, 0, h * .5);
+    sh.quadraticCurveTo(-w * .48, h * .46, -w * .5, h * .14);
+    sh.quadraticCurveTo(-w * .52, -h * .18, 0, -h * .52);
+    const geo = new THREE.ExtrudeGeometry(sh, { depth: .035, bevelEnabled: true, bevelSize: .012, bevelThickness: .012, bevelSegments: 1, curveSegments: 6 });
+    geo.center();
+    return geo;
+  });
+}
+function addShield(fig, M, kind, s = 1) {
+  if (!kind) return;
+  if (kind === 'round' || kind === 'roundBig') {
+    const big = kind === 'roundBig';
+    const r = (big ? .25 : .19) * s;
+    const disc = addMesh(fig, cylGeo(r, r, .04, 20), M.armor, .21 * s, .55 * s, .12 * s);
+    disc.rotation.x = Math.PI / 2;
+    const rim = addMesh(fig, new THREE.TorusGeometry(r * .97, .015, 6, 22), M.metal, .21 * s, .55 * s, .145 * s);
+    rim.rotation.x = 0;
+    addMesh(fig, cylGeo(r * .34, r * .34, .03, 14), M.metal, .21 * s, .55 * s, .15 * s).rotation.x = Math.PI / 2;
+    const barA = addMesh(fig, rboxGeo(.035 * s, r * .9, .022, .006), M.cloth, .21 * s, .55 * s, .155 * s);
+    barA.rotation.z = .6;
+    const barB = addMesh(fig, rboxGeo(.035 * s, r * .9, .022, .006), M.cloth, .2 * s, .55 * s, .156 * s);
+    barB.rotation.z = -.6;
+  } else {
+    const big = kind === 'kiteBig';
+    const w = (big ? .42 : .32) * s, h = (big ? .56 : .44) * s;
+    const shield = new THREE.Mesh(shieldGeoKite(w / s, h / s), M.cloth);
+    shield.position.set(.21 * s, .5 * s, .13 * s);
+    shield.scale.setScalar(s);
+    shield.castShadow = true;
+    fig.add(shield);
+    addMesh(fig, rboxGeo(.06 * s, h * .7, .025, .006), M.accent, .21 * s, .5 * s, .16 * s);
+    addMesh(fig, rboxGeo(w * .55, .055 * s, .025, .006), M.accent, .21 * s, .56 * s, .16 * s);
+    addMesh(fig, sphGeo(.028 * s, 8), M.metal, .21 * s, .5 * s, .17 * s);
+  }
+}
+function addUnitBanner(fig, M, P) {
+  const pole = addMesh(fig, cylGeo(.012, .016, 1.12, 6), M.dark, -.25, .62, -.12);
+  addMesh(fig, sphGeo(.028, 6), M.metal, -.25, 1.2, -.12);
+  const cloth = addMesh(fig, rboxGeo(.3, .24, .022, .006), M.cloth, -.1, 1.02, -.12);
+  addMesh(fig, rboxGeo(.05, .18, .026, .004), M.accent, -.1, 1.02, -.115);
+  addMesh(fig, rboxGeo(.2, .045, .026, .004), M.accent, -.1, 1.08, -.115);
+  cloth.userData.banner = true;
+  return cloth;
+}
+
+/* --- armas ------------------------------------------------------------ */
+function makeWeapon(kind, M, P) {
+  const w = new THREE.Group();
+  if (!kind) return w;
+  if (kind === 'sword' || kind === 'greatsword' || kind === 'cutlass' || kind === 'cutlass2') {
+    const big = kind === 'greatsword', curve = kind.startsWith('cutlass');
+    const L = big ? .78 : curve ? .5 : .46;
+    addMesh(w, cylGeo(.024, .028, .16, 8), M.dark, 0, .03, 0);
+    addMesh(w, rboxGeo(big ? .26 : .18, .03, .045, .008), M.metal, 0, .1, 0);
+    addMesh(w, sphGeo(.032, 8), M.metal, 0, -.05, 0);
+    const blade = addMesh(w, rboxGeo(big ? .075 : .052, L, .024, .008), M.metal, 0, .1 + L * .5, 0);
+    if (curve) { blade.rotation.z = -.08; addMesh(w, rboxGeo(.05, L * .42, .022, .006), M.metal, .01, .1 + L * .82, 0).rotation.z = -.22; }
+    addMesh(w, coneGeo(big ? .036 : .026, .1, 4), M.metal, 0, .1 + L + .04, 0);
+    if (big) addMesh(w, rboxGeo(.05, .05, .03, .005), M.accent, 0, .15, .02);
+  } else if (kind === 'spear' || kind === 'spearBig' || kind === 'trident') {
+    const big = kind === 'spearBig';
+    const L = big ? 1.5 : 1.2;
+    addMesh(w, cylGeo(.017, .023, L, 6), M.cloth2, 0, L * .5, 0);
+    addMesh(w, sphGeo(.026, 6), M.metal, 0, L * .5, 0);
+    addMesh(w, coneGeo(.042, big ? .24 : .17, 5), M.metal, 0, L + .06, 0);
+    addMesh(w, rboxGeo(.1, .025, .03, .005), M.metal, 0, L - .04, 0);
+    if (kind === 'trident') {
+      addMesh(w, coneGeo(.018, .14, 4), M.metal, .045, L + .04, 0).rotation.z = -.15;
+      addMesh(w, coneGeo(.018, .14, 4), M.metal, -.045, L + .04, 0).rotation.z = .15;
+    }
+    addMesh(w, rboxGeo(.03, .13, .03, .005), M.accent, 0, .16, .015);
+  } else if (kind === 'club' || kind === 'clubHeavy') {
+    const big = kind === 'clubHeavy';
+    const stone = umat(0x8f897a, .85);
+    addMesh(w, cylGeo(big ? .045 : .035, big ? .06 : .05, big ? .78 : .58, 7), M.fur, 0, (big ? .39 : .29), 0);
+    for (let i = 0; i < 3; i++) addMesh(w, cylGeo(.048, .05, .028, 7), M.cloth2, 0, .1 + i * .09, 0);
+    addMesh(w, sphGeo(big ? .18 : .13, 9), stone, 0, big ? .84 : .63, 0);
+    addMesh(w, sphGeo(big ? .12 : .085, 8), stone, .05, big ? .92 : .69, .02);
+    for (let i = 0; i < 6; i++) {
+      const a = i / 6 * Math.PI * 2;
+      addMesh(w, coneGeo(big ? .032 : .024, big ? .11 : .08, 5), M.bone, Math.cos(a) * (big ? .15 : .11), (big ? .85 : .64) + Math.sin(a) * .05, Math.sin(a) * (big ? .13 : .09)).rotation.z = Math.cos(a) * .5;
+    }
+    addMesh(w, rboxGeo(.06, .05, .06, .008), M.metal, 0, .08, 0);
+  } else if (kind === 'staff') {
+    addMesh(w, cylGeo(.018, .024, 1.25, 6), M.cloth2, 0, .55, 0);
+    addMesh(w, sphGeo(.075, 10), M.glow, 0, 1.2, 0);
+    const ring = addMesh(w, new THREE.TorusGeometry(.09, .012, 6, 16), M.bone, 0, 1.18, 0);
+    ring.rotation.x = Math.PI / 2;
+    addMesh(w, coneGeo(.03, .12, 5), M.bone, 0, 1.33, 0);
+  } else if (kind === 'rifle' || kind === 'mg' || kind === 'mgBig' || kind === 'energy') {
+    const big = kind === 'mgBig', mg = kind === 'mg' || big, tech = kind === 'energy';
+    const matBody = tech ? M.armor : M.cloth2, matGun = tech ? M.metal : M.dark;
+    addMesh(w, rboxGeo(.055, .07, .48, .012), matBody, 0, 0, .18);
+    addMesh(w, cylGeo(.014, .018, .42, 6), matGun, 0, .01, .55).rotation.x = Math.PI / 2;
+    addMesh(w, cylGeo(.024, .024, .06, 8), matGun, 0, .01, .76).rotation.x = Math.PI / 2;
+    addMesh(w, rboxGeo(.05, .1, .15, .012), matBody, 0, -.04, .02);
+    addMesh(w, rboxGeo(.03, .035, .08, .006), matGun, 0, .05, .28);
+    if (mg) {
+      addMesh(w, rboxGeo(.09, .12, .12, .012), M.metal, 0, -.07, .18);
+      addMesh(w, cylGeo(.012, .012, .3, 5), M.metal, 0, .01, .6).rotation.x = Math.PI / 2;
+      for (const side of [-1, 1]) addMesh(w, cylGeo(.01, .012, .24, 5), M.metal, side * .05, -.12, .46).rotation.x = .35;
+      if (big) addMesh(w, cylGeo(.04, .045, .2, 8), M.dark, 0, .01, .62).rotation.x = Math.PI / 2;
+    }
+    if (tech) {
+      addMesh(w, rboxGeo(.028, .03, .2, .005), M.glow, 0, .035, .32);
+      addMesh(w, sphGeo(.026, 8), M.glow, 0, -.02, .08);
+    }
+  } else if (kind === 'bow') {
+    const arc = addMesh(w, new THREE.TorusGeometry(.28, .013, 6, 18, Math.PI), M.cloth2, 0, .36, .02);
+    arc.rotation.y = Math.PI / 2; arc.rotation.z = Math.PI / 2;
+    addMesh(w, rboxGeo(.008, .56, .008, .002), M.bone, 0, .36, .015);
+    addMesh(w, cylGeo(.008, .01, .42, 4), M.metal, 0, .36, .06).rotation.x = Math.PI / 2;
+    addMesh(w, coneGeo(.018, .06, 4), M.metal, 0, .36, .3).rotation.x = Math.PI / 2;
+  } else if (kind === 'cannon' || kind === 'cannonBig') {
+    const big = kind === 'cannonBig';
+    const iron = umat(0x4c555e, .5, .55);
+    addMesh(w, cylGeo(big ? .08 : .06, big ? .1 : .075, big ? .58 : .42, 10), iron, 0, 0, .2).rotation.x = Math.PI / 2;
+    addMesh(w, cylGeo(big ? .11 : .085, big ? .11 : .085, .07, 10), M.metal, 0, 0, big ? .5 : .4).rotation.x = Math.PI / 2;
+    addMesh(w, cylGeo(big ? .085 : .067, big ? .085 : .067, .035, 10), M.accent, 0, 0, big ? .28 : .22).rotation.x = Math.PI / 2;
+    addMesh(w, cylGeo(.03, .03, .03, 8), M.accent, 0, 0, big ? .47 : .37).rotation.x = Math.PI / 2;
+    addMesh(w, rboxGeo(.1, .05, .14, .012), M.metal, 0, -.03, .08);
+    addMesh(w, cylGeo(.03, .035, .1, 6), M.accent, 0, .07, .12);
+  } else if (kind === 'claw' || kind === 'clawBig') {
+    const big = kind === 'clawBig';
+    for (let i = 0; i < 3; i++) {
+      const c = addMesh(w, coneGeo(.014, big ? .24 : .17, 5), M.bone, (i - 1) * .04, .02, .12);
+      c.rotation.x = Math.PI / 2 + .1; c.rotation.z = (i - 1) * .18;
+    }
+    addMesh(w, rboxGeo(.1, .07, .12, .012), M.skin, 0, 0, .04);
+  }
+  return w;
+}
+/* --- indumentaria por facción ---------------------------------------- */
+function dressFigure(fig, M, P, outfit, opts = {}) {
+  if (!outfit) return;
+  if (outfit === 'fur' || outfit === 'furHeavy') {
+    const heavy = outfit === 'furHeavy';
+    addMesh(fig, cylGeo(heavy ? .27 : .235, heavy ? .22 : .2, .06, 12), M.fur, 0, .655, -.01);
+    addMesh(fig, rboxGeo(heavy ? .3 : .26, .12, .24, .03), M.fur, 0, .6, .01);
+    for (let i = 0; i < (heavy ? 7 : 5); i++) {
+      const a = (i / (heavy ? 7 : 5) - .5) * 1.5;
+      addMesh(fig, coneGeo(.014, .07, 5), M.bone, Math.sin(a) * .11, .56 - Math.abs(a) * .03, .115 + Math.cos(a) * .02).rotation.x = .4;
+    }
+    // Collar de colmillos y correa de cuero.
+    for (let i = 0; i < 5; i++) {
+      const a = (i / 4 - .5) * 1.5;
+      addMesh(fig, sphGeo(.021, 6), M.bone, Math.sin(a) * .1, .7 - Math.abs(a) * .025, .1 + Math.cos(a) * .015);
+    }
+    const strap = addMesh(fig, rboxGeo(.045, .29, .022, .006), M.cloth2, .045, .61, .112);
+    strap.rotation.z = .55;
+    addMesh(fig, rboxGeo(.36, .09, .25, .02), M.fur, 0, .44, .01);
+    if (heavy) for (const side of [-1, 1]) addMesh(fig, coneGeo(.03, .16, 5), M.bone, side * .19, .71, -.02).rotation.z = side * .7;
+  } else if (outfit === 'robe') {
+    addMesh(fig, cylGeo(.19, .3, .52, 10), M.cloth2, 0, .27, 0);
+    addMesh(fig, rboxGeo(.34, .1, .24, .025), M.fur, 0, .58, 0);
+    addMesh(fig, new THREE.TorusGeometry(.16, .018, 6, 16), M.bone, 0, .63, .02).rotation.x = Math.PI / 2;
+  } else if (outfit === 'spartan' || outfit === 'spartanElite' || outfit === 'spartanLight' || outfit === 'spartanBoss') {
+    const elite = outfit === 'spartanElite' || outfit === 'spartanBoss';
+    const bronze = outfit === 'spartanBoss' ? M.metal : M.armor;
+    addMesh(fig, rboxGeo(.3, .22, .25, .05), bronze, 0, .57, 0);
+    addMesh(fig, rboxGeo(.2, .06, .02, .005), M.accent, 0, .6, .135);
+    for (const side of [-1, 1]) {
+      addMesh(fig, sphGeo(.07, 10), bronze, side * .185, .655, 0);
+      addMesh(fig, cylGeo(.045, .055, .16, 8), bronze, side * .085, .3, .02);
+    }
+    for (let i = -2; i <= 2; i++) {
+      addMesh(fig, rboxGeo(.055, .13, .02, .005), M.cloth2, i * .06, .4, .115);
+      addMesh(fig, rboxGeo(.055, .13, .02, .005), M.cloth2, i * .06, .4, -.115);
+    }
+    if (elite) {
+      addMesh(fig, rboxGeo(.32, .04, .26, .01), M.metal, 0, .67, 0);
+      for (const side of [-1, 1]) addMesh(fig, rboxGeo(.04, .18, .04, .006), M.metal, side * .13, .69, .02).rotation.z = side * .3;
+    }
+    if (outfit === 'spartanLight') addMesh(fig, rboxGeo(.28, .05, .24, .015), M.cloth2, 0, .45, 0);
+  } else if (outfit === 'crusader' || outfit === 'crusaderLight' || outfit === 'crusaderBoss') {
+    const boss = outfit === 'crusaderBoss';
+    addMesh(fig, rboxGeo(.3, .3, .24, .04), M.cloth, 0, .55, 0);
+    addMesh(fig, rboxGeo(.055, .24, .02, .005), M.accent, 0, .55, .125);
+    addMesh(fig, rboxGeo(.18, .055, .02, .005), M.accent, 0, .6, .125);
+    addMesh(fig, rboxGeo(.055, .24, .02, .005), M.accent, 0, .55, -.125);
+    addMesh(fig, rboxGeo(.18, .055, .02, .005), M.accent, 0, .6, -.125);
+    addMesh(fig, rboxGeo(.32, .075, .25, .02), M.metal, 0, .43, 0);
+    if (boss) {
+      addMesh(fig, rboxGeo(.34, .05, .27, .01), M.metal, 0, .68, 0);
+      addMesh(fig, sphGeo(.055, 8), M.metal, 0, .5, .15);
+      for (const side of [-1, 1]) addMesh(fig, sphGeo(.07, 8), M.metal, side * .19, .65, 0);
+    } else addMesh(fig, rboxGeo(.34, .08, .26, .02), M.armor, 0, .64, 0);
+    if (outfit === 'crusaderLight') addMesh(fig, cylGeo(.17, .27, .38, 10), M.cloth, 0, .25, 0);
+  } else if (outfit === 'plate') {
+    addMesh(fig, rboxGeo(.34, .3, .25, .05), M.armor, 0, .55, 0);
+    addMesh(fig, rboxGeo(.2, .05, .02, .005), M.metal, 0, .6, .13);
+    addMesh(fig, rboxGeo(.34, .06, .26, .015), M.accent, 0, .44, 0);
+    for (const side of [-1, 1]) {
+      addMesh(fig, sphGeo(.075, 8), M.armor, side * .19, .65, 0);
+      addMesh(fig, cylGeo(.05, .055, .2, 8), M.metal, side * .085, .28, .01);
+    }
+  } else if (outfit === 'pirate' || outfit === 'pirateHeavy' || outfit === 'pirateLight' || outfit === 'pirateBoss') {
+    const boss = outfit === 'pirateBoss', heavy = outfit === 'pirateHeavy';
+    addMesh(fig, rboxGeo(.32, .28, .23, .04), M.cloth, 0, .55, 0);
+    if (outfit !== 'pirateLight') {
+      addMesh(fig, rboxGeo(.24, .2, .02, .006), M.cloth2, 0, .61, .12);
+      for (const side of [-1, 1]) {
+        const tail = addMesh(fig, rboxGeo(.14, .34, .03, .008), M.cloth, side * .1, .32, -.13);
+        tail.rotation.z = side * .08;
+      }
+    }
+    addMesh(fig, rboxGeo(.33, .08, .24, .02), boss ? M.accent : M.cloth2, 0, .44, 0);
+    const sash = addMesh(fig, rboxGeo(.06, .36, .02, .005), boss ? M.accent : M.cloth2, -.02, .57, .125);
+    sash.rotation.z = .6;
+    addMesh(fig, sphGeo(.035, 8), M.metal, .08, .44, .13);
+    if (heavy || boss) {
+      const band = addMesh(fig, rboxGeo(.055, .34, .02, .005), M.fur, .06, .58, .13);
+      band.rotation.z = -.55;
+      for (let i = 0; i < 3; i++) addMesh(fig, rboxGeo(.035, .05, .03, .004), M.metal, .02 + i * .05, .5 + i * .05, .14);
+    }
+    if (boss) {
+      addMesh(fig, rboxGeo(.36, .04, .27, .01), M.accent, 0, .68, 0);
+      addMesh(fig, sphGeo(.045, 8), M.metal, 0, .47, .14);
+    }
+  } else if (outfit === 'wwi' || outfit === 'wwiHeavy' || outfit === 'wwiBoss') {
+    const heavy = outfit === 'wwiHeavy', boss = outfit === 'wwiBoss';
+    addMesh(fig, rboxGeo(.33, .29, .23, .04), M.cloth, 0, .55, 0);
+    addMesh(fig, rboxGeo(.34, .07, .24, .02), M.cloth2, 0, .44, 0);
+    addMesh(fig, rboxGeo(.09, .07, .03, .006), M.metal, 0, .45, .135);
+    addMesh(fig, rboxGeo(.24, .17, .12, .02), M.cloth2, 0, .56, -.18);
+    addMesh(fig, rboxGeo(.2, .05, .13, .02), M.fur, 0, .66, -.18);
+    if (heavy) for (const side of [-1, 1]) addMesh(fig, rboxGeo(.08, .1, .06, .01), M.fur, side * .12, .47, .14);
+    if (boss) {
+      addMesh(fig, cylGeo(.16, .21, .46, 10), M.cloth2, 0, .24, 0);
+      for (let i = 0; i < 3; i++) addMesh(fig, rboxGeo(.028, .028, .02, .004), M.metal, -.03 + i * .03, .58 - i * .04, .13);
+      addMesh(fig, rboxGeo(.33, .04, .25, .01), M.fur, 0, .69, 0);
+    }
+  } else if (outfit === 'tech' || outfit === 'techLight') {
+    addMesh(fig, rboxGeo(.3, .26, .23, .04), M.cloth, 0, .55, 0);
+    addMesh(fig, rboxGeo(.32, .16, .26, .03), M.armor, 0, .6, 0);
+    addMesh(fig, rboxGeo(.2, .035, .02, .005), M.glow, 0, .57, .13);
+    addMesh(fig, rboxGeo(.14, .14, .02, .005), M.armor, 0, .46, .12);
+    addMesh(fig, sphGeo(.032, 8), M.glow, 0, .6, .135);
+    for (const side of [-1, 1]) {
+      addMesh(fig, rboxGeo(.1, .08, .16, .02), M.armor, side * .2, .66, 0);
+      addMesh(fig, rboxGeo(.06, .12, .06, .01), M.armor, side * .1, .47, -.02);
+    }
+    addMesh(fig, rboxGeo(.2, .16, .09, .02), M.armor, 0, .58, -.18);
+    for (const side of [-1, 1]) addMesh(fig, cylGeo(.025, .03, .08, 6), M.glow, side * .06, .58, -.23).rotation.x = Math.PI / 2;
+    if (outfit === 'techLight') addMesh(fig, rboxGeo(.26, .04, .05, .008), M.glow, 0, .69, .05);
+  } else if (outfit === 'zombie' || outfit === 'zombieRunner' || outfit === 'zombieArmor' || outfit === 'zombieBoss') {
+    const heavy = outfit === 'zombieArmor', boss = outfit === 'zombieBoss';
+    if (boss) {
+      addMesh(fig, rboxGeo(.42, .34, .3, .06), M.skin, 0, .56, 0);
+      addMesh(fig, rboxGeo(.44, .08, .31, .02), M.fur, 0, .43, 0);
+      for (let i = 0; i < 4; i++) {
+        addMesh(fig, rboxGeo(.22, .022, .02, .004), M.bone, 0, .48 + i * .05, .16);
+        addMesh(fig, sphGeo(.02, 6), M.glow, .05, .5 + i * .05, .17);
+      }
+      addMesh(fig, sphGeo(.075, 8), M.glow, 0, .56, .17);
+      for (const side of [-1, 1]) addMesh(fig, coneGeo(.04, .24, 5), M.bone, side * .24, .73, -.02).rotation.z = side * .6;
+      addMesh(fig, rboxGeo(.3, .1, .03, .008), M.skin, .06, .5, .16).rotation.z = -.3;
+    } else {
+      addMesh(fig, rboxGeo(.3, .25, .21, .04), M.cloth, 0, .55, 0);
+      for (let i = 0; i < 3; i++) addMesh(fig, rboxGeo(heavy ? .22 : .16, .02, .02, .004), M.bone, 0, .48 + i * .055, .115);
+      addMesh(fig, rboxGeo(.12, .1, .02, .006), M.skin, .08, .54, .12).rotation.z = -.25;
+      addMesh(fig, rboxGeo(.1, .08, .02, .006), M.skin, -.07, .6, .12).rotation.z = .2;
+      addMesh(fig, rboxGeo(.06, .02, .02, .004), M.accent, -.02, .45, .115);
+      if (heavy) {
+        addMesh(fig, rboxGeo(.36, .22, .27, .04), M.armor, 0, .57, -.01);
+        for (const side of [-1, 1]) addMesh(fig, rboxGeo(.12, .12, .04, .01), M.metal, side * .13, .66, .1);
+        addMesh(fig, coneGeo(.035, .14, 5), M.metal, .18, .72, 0).rotation.z = -.5;
+      }
+      if (outfit === 'zombieRunner') addMesh(fig, rboxGeo(.3, .03, .22, .008), M.accent, 0, .44, 0);
+    }
+  } else if (outfit === 'celestial' || outfit === 'celestialArch' || outfit === 'celestialBoss') {
+    const boss = outfit === 'celestialBoss', arch = outfit === 'celestialArch';
+    addMesh(fig, cylGeo(.2, .3, .3, 12), M.cloth, 0, .3, 0);
+    addMesh(fig, new THREE.TorusGeometry(.295, .014, 5, 18), M.metal, 0, .155, 0).rotation.x = Math.PI / 2;
+    addMesh(fig, rboxGeo(.09, .28, .022, .006), M.metal, 0, .3, .19);
+    for (let i = 0; i < 8; i++) {
+      const a = i / 8 * Math.PI * 2;
+      const fold = addMesh(fig, rboxGeo(.016, .26, .012, .004), M.cloth2, Math.cos(a) * .255, .29, Math.sin(a) * .255);
+      fold.rotation.y = -a;
+    }
+    addMesh(fig, rboxGeo(.3, .25, .23, .04), M.armor, 0, .57, 0);
+    addMesh(fig, rboxGeo(.26, .035, .02, .006), M.glow, 0, .61, .125);
+    addMesh(fig, rboxGeo(.2, .035, .02, .006), M.glow, 0, .53, .125);
+    addMesh(fig, new THREE.TorusGeometry(.2, .016, 6, 18), M.metal, 0, .455, 0).rotation.x = Math.PI / 2;
+    for (const side of [-1, 1]) {
+      addMesh(fig, sphGeo(.075, 10), M.metal, side * .19, .66, 0);
+      addMesh(fig, rboxGeo(.055, .17, .055, .008), M.metal, side * .1, .46, .02);
+    }
+    addMesh(fig, cylGeo(.06, .07, .05, 10), M.metal, 0, .735, 0);
+    if (arch || boss) addMesh(fig, rboxGeo(.075, .3, .028, .006), M.glow, 0, .76, .02);
+    if (boss) {
+      addMesh(fig, rboxGeo(.36, .04, .26, .01), M.glow, 0, .7, 0);
+      for (const side of [-1, 1]) addMesh(fig, coneGeo(.032, .2, 5), M.glow, side * .16, .87, 0).rotation.z = side * .5;
+    }
+  }
+}
+
+/* --- figura humana ---------------------------------------------------- */
+function buildFigure(parent, opts) {
+  const P = opts.palette, M = paletteMats(P);
+  const fig = new THREE.Group();
+  fig.scale.setScalar(opts.scale || 1);
+  parent.add(fig);
+  const walk = [];
+  for (const side of [-1, 1]) {
+    const hip = new THREE.Group();
+    hip.position.set(side * .072, .43, 0);
+    hip.userData.kind = 'leg'; hip.userData.phase = side > 0 ? Math.PI : 0;
+    fig.add(hip); walk.push(hip);
+    addMesh(hip, cylGeo(.038, .05, .34, 8), M.cloth2, 0, -.17, 0);
+    addMesh(hip, rboxGeo(.1, .08, .19, .025), M.dark, 0, -.36, .04);
+  }
+  addMesh(fig, rboxGeo(.21, .13, .18, .03), M.cloth2, 0, .44, 0);
+  addMesh(fig, rboxGeo(.27, .29, .19, .045), M.cloth, 0, .575, 0);
+  addMesh(fig, rboxGeo(.31, .075, .205, .02), M.cloth, 0, .7, 0);
+  addMesh(fig, cylGeo(.052, .058, .07, 10), M.skin, 0, .755, 0);
+  addMesh(fig, cylGeo(.062, .066, .03, 10), M.dark, 0, .74, 0);
+  dressFigure(fig, M, P, opts.outfit, opts);
+  const arms = {};
+  for (const side of [-1, 1]) {
+    const arm = new THREE.Group();
+    arm.position.set(side * .172, .685, 0);
+    arm.rotation.z = side * .09;
+    arm.userData.kind = 'arm'; arm.userData.phase = side > 0 ? Math.PI : 0;
+    fig.add(arm); walk.push(arm); arms[side] = arm;
+    addMesh(arm, sphGeo(.057, 9), M.cloth, 0, .01, 0);
+    addMesh(arm, cylGeo(.035, .044, .24, 8), M.cloth, 0, -.12, 0);
+    addMesh(arm, cylGeo(.05, .052, .035, 8), M.dark, 0, -.245, 0);
+    addMesh(arm, sphGeo(.046, 8), M.skin, 0, -.27, .012);
+    if (opts.bracer) addMesh(arm, cylGeo(.05, .056, .1, 8), M.armor, 0, -.17, 0);
+  }
+  const headGroup = new THREE.Group();
+  headGroup.position.y = .045;
+  fig.add(headGroup);
+  addFace(headGroup, opts.head, M, P);
+  outlineGroup(headGroup, 1.055);
+  addShield(fig, M, opts.shield, opts.scale || 1);
+  if (opts.cape) addCape(fig, M, opts.cape === 'accent' ? M.accent : opts.capeColor ? umat(opts.capeColor, .88) : M.cloth2, opts.capeW || .42, opts.capeH || .56, M.metal);
+  if (opts.banner) addUnitBanner(fig, M, P);
+  if (opts.weapon) {
+    const weapon = makeWeapon(opts.weapon, M, P);
+    weapon.scale.setScalar(opts.weaponScale || 1);
+    const sideSign = (opts.weaponSide || -1) < 0 ? 1 : -1;
+    const arm = arms[opts.weaponSide || -1];
+    const gun = opts.weapon === 'rifle' || opts.weapon === 'mg' || opts.weapon === 'mgBig' || opts.weapon === 'energy';
+    const cannon = opts.weapon === 'cannon' || opts.weapon === 'cannonBig';
+    const club = opts.weapon === 'club' || opts.weapon === 'clubHeavy';
+    weapon.position.set(0, -.25, .05);
+    if (cannon) { weapon.rotation.y = sideSign * .85; weapon.position.x = sideSign * .06; }
+    weapon.rotation.x = gun || cannon || opts.weapon === 'bow' ? -.2 : -.1;
+    arm.add(weapon);
+    arm.rotation.x = gun || cannon || opts.weapon === 'bow' ? -.62 : club ? -.3 : -.18;
+    if (club) arm.rotation.z = sideSign * .38;
+    fig.userData.weapon = weapon;
+  }
+  fig.userData.walk = walk;
+  return fig;
+}
+
+function addUnitBase(g, radius, P, spikes = 0) {
+  const disc = addMesh(g, cylGeo(radius, radius * 1.03, .035, 24), basicMat(0x141a13, .5), 0, .018, 0, false, false);
+  disc.receiveShadow = true;
+  const ring = addMesh(g, new THREE.TorusGeometry(radius * .93, .011, 6, 26), basicMat(P.accent, .65), 0, .04, 0, false, false);
+  ring.rotation.x = Math.PI / 2;
+  for (let i = 0; i < spikes; i++) {
+    const a = i / spikes * Math.PI * 2;
+    addMesh(g, coneGeo(.045, .2, 5), basicMat(P.accent, .5), Math.cos(a) * radius, .09, Math.sin(a) * radius, false, false);
+  }
+}
+/* --- mechas ----------------------------------------------------------- */
+function buildMech(parent, P, opts = {}) {
+  const M = paletteMats(P);
+  const g = new THREE.Group();
+  const boss = opts.boss === true;
+  g.scale.setScalar(opts.scale || 1);
+  parent.add(g);
+  const walk = [];
+  for (const side of [-1, 1]) {
+    const hip = new THREE.Group();
+    hip.position.set(side * .17, .82, 0);
+    hip.userData.kind = 'leg'; hip.userData.phase = side > 0 ? Math.PI : 0;
+    g.add(hip); walk.push(hip);
+    addMesh(hip, rboxGeo(.16, .34, .19, .03), M.armor, 0, -.16, 0);
+    addMesh(hip, rboxGeo(.18, .12, .21, .03), M.cloth, 0, -.02, 0);
+    const knee = new THREE.Group(); knee.position.set(0, -.34, 0); hip.add(knee);
+    addMesh(knee, rboxGeo(.12, .32, .15, .025), M.metal, 0, -.15, .01);
+    addMesh(knee, rboxGeo(.17, .09, .3, .03), M.dark, 0, -.32, .06);
+    addMesh(knee, rboxGeo(.14, .06, .18, .02), M.cloth, 0, -.28, .02);
+  }
+  addMesh(g, rboxGeo(.4, .18, .26, .04), M.dark, 0, .85, 0);
+  addMesh(g, rboxGeo(.5, .38, .3, .05), M.armor, 0, 1.1, 0);
+  addMesh(g, rboxGeo(.34, .24, .05, .02), M.cloth, 0, 1.12, .17);
+  addMesh(g, rboxGeo(.24, .05, .03, .008), M.accent, 0, 1.16, .195);
+  addMesh(g, rboxGeo(.1, .22, .03, .008), M.cloth2, 0, 1.1, .195);
+  addMesh(g, sphGeo(.075, 10), M.glow, 0, 1.1, .2);
+  for (const side of [-1, 1]) {
+    addMesh(g, rboxGeo(.2, .18, .26, .04), M.armor, side * .33, 1.25, 0);
+    addMesh(g, rboxGeo(.16, .05, .2, .02), M.cloth, side * .34, 1.36, 0);
+    for (let i = 0; i < 2; i++) addMesh(g, cylGeo(.032, .036, .16, 8), M.dark, side * .36, 1.36, -.12 + i * .06).rotation.x = Math.PI / 2;
+    const arm = new THREE.Group(); arm.position.set(side * .38, 1.15, 0); g.add(arm);
+    addMesh(arm, cylGeo(.06, .07, .3, 8), M.armor, 0, -.15, 0);
+    addMesh(arm, rboxGeo(.16, .16, .16, .03), M.metal, 0, -.33, 0);
+    const cannon = addMesh(arm, cylGeo(.05, .06, .4, 10), M.dark, 0, -.34, .2);
+    cannon.rotation.x = Math.PI / 2;
+    addMesh(arm, cylGeo(.075, .075, .06, 10), M.accent, 0, -.34, .4).rotation.x = Math.PI / 2;
+    walk.push(arm); arm.userData.kind = 'arm'; arm.userData.phase = side > 0 ? Math.PI : 0;
+  }
+  addMesh(g, rboxGeo(.24, .2, .22, .04), M.armor, 0, 1.45, .02);
+  addMesh(g, rboxGeo(.2, .05, .03, .006), M.glow, 0, 1.45, .14);
+  addMesh(g, rboxGeo(.16, .03, .02, .004), M.cloth, 0, 1.36, .13);
+  addMesh(g, cylGeo(.012, .016, .26, 5), M.metal, .1, 1.63, 0);
+  addMesh(g, sphGeo(.02, 6), M.glow, .1, 1.76, 0);
+  addMesh(g, rboxGeo(.3, .24, .12, .03), M.dark, 0, 1.12, -.2);
+  for (const side of [-1, 1]) addMesh(g, cylGeo(.045, .05, .1, 8), M.glow, side * .08, 1.12, -.27).rotation.x = Math.PI / 2;
+  if (boss) {
+    for (const side of [-1, 1]) {
+      const blade = addMesh(g, rboxGeo(.06, .5, .12, .015), M.metal, side * .45, 1.5, -.05);
+      blade.rotation.z = side * .32;
+      addMesh(g, coneGeo(.04, .16, 5), M.accent, side * .52, 1.76, -.05).rotation.z = side * .32;
+      addMesh(g, rboxGeo(.2, .06, .3, .02), M.cloth, side * .28, .98, .05);
+    }
+    addMesh(g, new THREE.TorusGeometry(.34, .02, 6, 22), M.glow, 0, 1.1, 0).rotation.x = Math.PI / 2;
+  }
+  return { group: g, walk };
+}
+
+/* --- blindados -------------------------------------------------------- */
+function buildTank(parent, P) {
+  const M = paletteMats(P);
+  const g = new THREE.Group();
+  parent.add(g);
+  addTrack(g, -1, -.36, .17, 0, .98, .36, .16, M.cloth, M.dark, M.metal);
+  addTrack(g, 1, .36, .17, 0, .98, .36, .16, M.cloth, M.dark, M.metal);
+  addMesh(g, rboxGeo(.64, .3, 1.02, .06), M.cloth, 0, .33, 0);
+  addMesh(g, rboxGeo(.54, .12, .3, .03), M.cloth2, 0, .42, -.38).rotation.x = -.3;
+  addMesh(g, rboxGeo(.66, .07, .96, .02), M.dark, 0, .19, 0);
+  addMesh(g, rboxGeo(.4, .07, .18, .02), M.armor, 0, .3, .46).rotation.x = .25;
+  addMesh(g, rboxGeo(.16, .1, .18, .02), M.armor, 0, .46, .34);
+  const turret = new THREE.Group(); turret.position.set(0, .5, .06); g.add(turret);
+  addMesh(turret, cylGeo(.2, .25, .16, 14), M.cloth, 0, .08, 0);
+  addMesh(turret, new THREE.SphereGeometry(.22, 14, 8, 0, Math.PI * 2, 0, Math.PI * .5), M.cloth, 0, .16, 0).scale.set(1, .8, 1);
+  addMesh(turret, rboxGeo(.18, .09, .2, .02), M.armor, 0, .15, .16);
+  addMesh(turret, cylGeo(.03, .04, .34, 8), M.dark, 0, .12, .36).rotation.x = Math.PI / 2;
+  addMesh(turret, cylGeo(.05, .05, .05, 8), M.metal, 0, .12, .54).rotation.x = Math.PI / 2;
+  addMesh(turret, rboxGeo(.05, .05, .08, .01), M.metal, .2, .13, 0);
+  for (const side of [-1, 1]) {
+    addMesh(g, rboxGeo(.1, .08, .14, .015), M.metal, side * .28, .42, .38);
+    addMesh(g, cylGeo(.02, .025, .3, 6), M.dark, side * .3, .48, -.32);
+    addMesh(g, sphGeo(.035, 6), M.accent, side * .33, .34, -.12);
+  }
+  addMesh(g, rboxGeo(.26, .03, .26, .006), M.cloth2, 0, .585, 0);
+  return { group: g, walk: [] };
+}
+
+/* --- aviación --------------------------------------------------------- */
+function addStar(parent, x, y, z, r, color = 0xd42b25) {
+  const disc = addMesh(parent, cylGeo(r, r, .012, 14), basicMat(color), x, y, z);
+  disc.rotation.x = Math.PI / 2;
+  for (let i = 0; i < 5; i++) {
+    const a = i / 5 * Math.PI * 2;
+    const p = addMesh(parent, coneGeo(r * .34, r * .8, 3), basicMat(0xffd34a), x + Math.cos(a) * r * .32, y, z + Math.sin(a) * r * .32);
+    p.rotation.x = Math.PI / 2; p.rotation.z = a;
+  }
+}
+function buildFighter(parent, P, opts = {}) {
+  const M = paletteMats(P);
+  const paint = umat(opts.paint || 0x5b6672, .42, .35), dark = umat(0x232a31, .6, .3), glass = umat(0x9fd8e8, .1, .3);
+  const g = new THREE.Group();
+  g.scale.setScalar(opts.scale || 1);
+  parent.add(g);
+  const sh = new THREE.Shape();
+  sh.moveTo(0, 1.0); sh.lineTo(1.08, -.3); sh.lineTo(1.0, -.5); sh.lineTo(.28, -.32);
+  sh.lineTo(.2, -.64); sh.lineTo(-.2, -.64); sh.lineTo(-.28, -.32); sh.lineTo(-1.0, -.5);
+  sh.lineTo(-1.08, -.3); sh.closePath();
+  const wing = new THREE.Mesh(new THREE.ExtrudeGeometry(sh, { depth: .075, bevelEnabled: true, bevelSize: .02, bevelThickness: .015, bevelSegments: 1 }), paint);
+  wing.rotation.x = Math.PI / 2; wing.position.y = .56; wing.castShadow = true; g.add(wing);
+  addMesh(g, cylGeo(.09, .13, .95, 14), paint, 0, .57, .05).rotation.x = Math.PI / 2;
+  addMesh(g, coneGeo(.09, .36, 14), paint, 0, .57, .62).rotation.x = Math.PI / 2;
+  addMesh(g, cylGeo(.09, .09, .12, 14), dark, 0, .57, .78).rotation.x = Math.PI / 2;
+  addMesh(g, sphGeo(.085, 12), glass, 0, .64, .22).scale.set(.78, .62, 1.5);
+  addMesh(g, rboxGeo(.2, .12, .3, .02), paint, 0, .64, .0);
+  for (const side of [-1, 1]) {
+    const tail = addMesh(g, rboxGeo(.04, .26, .2, .01), paint, side * .13, .7, -.5);
+    tail.rotation.z = side * .24;
+    addMesh(g, cylGeo(.055, .065, .26, 10), dark, side * .15, .56, -.42).rotation.x = Math.PI / 2;
+    addMesh(g, cylGeo(.05, .05, .02, 10), basicMat(0xffb15c), side * .15, .56, -.56).rotation.x = Math.PI / 2;
+    addMesh(g, rboxGeo(.02, .03, .34, .004), umat(0xd8dde0, .4, .5), side * .56, .575, .05);
+    addMissilePylon(g, side * .55, .52, -.06, paint, dark);
+    addMesh(g, rboxGeo(.05, .012, .6, .004), basicMat(0xd42b25), side * .3, .602, .02);
+  }
+  addMesh(g, coneGeo(.028, .18, 8), dark, 0, .57, .86).rotation.x = Math.PI / 2;
+  addStar(g, 0, .605, .02, .075);
+  return { group: g, walk: [] };
+}
+function buildBomber(parent, P, opts = {}) {
+  const M = paletteMats(P);
+  const paint = umat(opts.paint || 0x353c45, .5, .3), dark = umat(0x1c2229, .65, .25), glass = umat(0x8ec4d8, .1, .3);
+  const g = new THREE.Group();
+  g.scale.setScalar(opts.scale || 1);
+  parent.add(g);
+  const sh = new THREE.Shape();
+  sh.moveTo(0, 1.0); sh.lineTo(1.55, -.05); sh.lineTo(1.5, -.4); sh.lineTo(.42, -.28);
+  sh.lineTo(0, -.38); sh.lineTo(-.42, -.28); sh.lineTo(-1.5, -.4); sh.lineTo(-1.55, -.05);
+  sh.closePath();
+  const wing = new THREE.Mesh(new THREE.ExtrudeGeometry(sh, { depth: .1, bevelEnabled: true, bevelSize: .025, bevelThickness: .02, bevelSegments: 1 }), paint);
+  wing.rotation.x = Math.PI / 2; wing.position.y = .5; wing.castShadow = true; g.add(wing);
+  addMesh(g, rboxGeo(.46, .16, .82, .08), paint, 0, .57, .05);
+  addMesh(g, new THREE.SphereGeometry(.14, 14, 8), glass, 0, .66, .34).scale.set(1.1, .7, 1.2);
+  addMesh(g, rboxGeo(.34, .05, .3, .02), dark, 0, .66, .52);
+  for (const side of [-1, 1]) {
+    addMesh(g, rboxGeo(.26, .12, .5, .05), dark, side * .38, .56, .1);
+    addMesh(g, cylGeo(.07, .08, .06, 10), basicMat(0x66d9ff), side * .38, .56, .36).rotation.x = Math.PI / 2;
+    for (let i = 0; i < 3; i++) addMesh(g, rboxGeo(.4, .012, .035, .004), umat(0x59636e, .5, .3), side * (0.55 + i * .22), .557, -.05 - i * .06);
+    addMesh(g, sphGeo(.032, 6), basicMat(0xff4a3c), side * 1.42, .53, -.2);
+    addMesh(g, rboxGeo(.26, .015, .34, .004), basicMat(0xd42b25), side * .72, .558, -.02);
+  }
+  addMesh(g, sphGeo(.028, 6), basicMat(0x7dff9a), 0, .6, .78);
+  addStar(g, 0, .6, .1, .09);
+  return { group: g, walk: [] };
+}
+
+/* --- OVNIs ------------------------------------------------------------ */
+function buildSaucer(parent, P, opts = {}) {
+  const M = paletteMats(P);
+  const R = opts.r || .38;
+  const g = new THREE.Group();
+  g.scale.setScalar(opts.scale || 1);
+  parent.add(g);
+  const ring = new THREE.Group(); ring.position.y = .4; g.add(ring);
+  addMesh(g, sphGeo(R, 20), M.armor, 0, .36, 0).scale.set(1, .34, 1);
+  addMesh(g, cylGeo(R * .99, R * .9, .1, 22), M.cloth2, 0, .35, 0);
+  addMesh(g, cylGeo(R * .7, R * .82, .06, 18), M.metal, 0, .42, 0);
+  addMesh(g, new THREE.SphereGeometry(R * .46, 16, 10, 0, Math.PI * 2, 0, Math.PI * .58), umat(0x9fe0f0, .08, .2), 0, .43, 0);
+  const halo = addMesh(ring, new THREE.TorusGeometry(R * .93, .02, 6, 28), M.glow, 0, 0, 0, false, false);
+  halo.rotation.x = Math.PI / 2;
+  const lights = 10;
+  for (let i = 0; i < lights; i++) {
+    const a = i / lights * Math.PI * 2;
+    addMesh(ring, sphGeo(R * .055, 6), basicMat(P.accent), Math.cos(a) * R * .94, .02, Math.sin(a) * R * .94, false, false);
+  }
+  addMesh(g, cylGeo(R * .2, R * .3, .06, 10), M.dark, 0, .27, 0);
+  addMesh(g, new THREE.TorusGeometry(R * .52, .014, 6, 20), basicMat(P.accent, .8), 0, .24, 0, false, false).rotation.x = Math.PI / 2;
+  if (opts.interceptor) {
+    for (const side of [-1, 1]) {
+      const prong = addMesh(g, rboxGeo(.06, .05, .62, .015), M.metal, side * R * .5, .36, R * .75);
+      prong.rotation.y = side * .18;
+      addMesh(g, coneGeo(.03, .14, 5), M.accent, side * R * .54, .36, R * 1.06).rotation.x = Math.PI / 2;
+    }
+  }
+  if (opts.mother) {
+    addMesh(g, cylGeo(R * .58, R * .8, .1, 18), M.armor, 0, .56, 0);
+    addMesh(g, sphGeo(R * .3, 12), umat(0x9fe0f0, .08, .2), 0, .62, 0).scale.y = .6;
+    addMesh(g, new THREE.TorusGeometry(R * .72, .018, 6, 22), basicMat(P.accent, .7), 0, .5, 0, false, false).rotation.x = Math.PI / 2;
+  }
+  if (opts.boss) {
+    const outer = new THREE.Group(); outer.rotation.x = .35; g.add(outer);
+    addMesh(outer, new THREE.TorusGeometry(R * 1.18, .03, 6, 30), M.glow, 0, .36, 0, false, false).rotation.x = Math.PI / 2;
+    for (let i = 0; i < 8; i++) {
+      const a = i / 8 * Math.PI * 2;
+      addMesh(outer, sphGeo(R * .07, 6), basicMat(P.accent), Math.cos(a) * R * 1.18, .36, Math.sin(a) * R * 1.18, false, false);
+    }
+    const beam = addMesh(g, new THREE.ConeGeometry(R * .55, R * 1.6, 18, 1, true), basicMat(P.accent, .18), 0, -.4, 0, false, false);
+    beam.rotation.x = Math.PI;
+    addMesh(g, new THREE.SphereGeometry(R * .4, 14, 10), M.glow, 0, .38, 0);
+    g.userData.outer = outer;
+  }
+  g.userData.ring = ring;
+  return { group: g, walk: [] };
+}
+
+/* --- alas celestiales -------------------------------------------------- */
+function addCelestialWing(parent, side, size, matColor, glowMat, layer = 0) {
+  const wing = new THREE.Group();
+  wing.position.set(side * .12, .78 + layer * .1, -.1);
+  wing.rotation.y = side * .22;
+  wing.rotation.z = side * .18;
+  parent.add(wing);
+  // Hueso maestro del ala.
+  const arm = addMesh(wing, rboxGeo(size * .62, .055, .1, .02), matColor, side * size * .3, .01, -.03);
+  addMesh(wing, sphGeo(.07, 8), matColor, 0, 0, 0);
+  const feathers = layer === 0 ? 7 : 5;
+  for (let i = 0; i < feathers; i++) {
+    const L = size * (1 - i * .09) * (layer === 0 ? 1 : .68);
+    const y = layer * .05 - i * .018;
+    const z = -.04 - i * .07;
+    const feather = addMesh(wing, rboxGeo(L, .032, .14, .028), matColor,
+      side * (L * .5 + size * .06), y, z);
+    feather.rotation.y = -side * (i * .16 + .1);
+    feather.rotation.z = side * (.04 + i * .028);
+    if (glowMat) {
+      const tip = addMesh(wing, rboxGeo(L * .34, .036, .075, .012), glowMat,
+        side * (L * .82 + size * .06), y + .004, z - L * .1);
+      tip.rotation.y = -side * (i * .16 + .1);
+      tip.rotation.z = side * (.04 + i * .028);
+      addMesh(wing, rboxGeo(L * .5, .014, .02, .006), glowMat,
+        side * (L * .52 + size * .06), y + .02, z + .055).rotation.y = -side * (i * .16 + .1);
+    }
+  }
+  return wing;
+}
+function buildCelestial(parent, P, opts = {}) {
+  const M = paletteMats(P);
+  const g = new THREE.Group();
+  parent.add(g);
+  const big = opts.boss === true;
+  const figScale = big ? 1.42 : 1.06;
+  const fig = buildFigure(g, {
+    palette: P, scale: figScale, outfit: big ? 'celestialBoss' : opts.arch ? 'celestialArch' : 'celestial',
+    head: big ? 'goldhelm' : 'circlet', weapon: opts.weapon || 'staff', cape: true, capeColor: P.cloth,
+    capeW: big ? .5 : .4, capeH: big ? .7 : .55, weaponScale: big ? 1.2 : 1
+  });
+  fig.position.y = .2;
+  addMesh(g, sphGeo(.05, 8), M.glow, 0, .82, .17);
+  const wings = [];
+  const wingCol = umat(P.cloth, .5);
+  for (const side of [-1, 1]) {
+    wings.push(addCelestialWing(g, side, big ? 1.0 : .68, wingCol, M.basic, 0));
+    wings.push(addCelestialWing(g, side, big ? .78 : .52, wingCol, M.basic, 1));
+  }
+  const aura = new THREE.Mesh(new THREE.SphereGeometry(big ? 1.05 : .68, 16, 12), basicMat(P.accent, .13));
+  aura.position.y = .85; g.add(aura);
+  const haloR = big ? .3 : .16;
+  const haloY = big ? 1.7 : 1.31;
+  const halo = addMesh(g, new THREE.TorusGeometry(haloR, big ? .03 : .02, 6, 26), M.glow, 0, haloY, -.02, false, false);
+  halo.rotation.x = Math.PI / 2;
+  const haloGlow = addMesh(g, new THREE.TorusGeometry(haloR * 1.12, big ? .012 : .008, 5, 24), basicMat(P.accent, .55), 0, haloY, -.02, false, false);
+  haloGlow.rotation.x = Math.PI / 2;
+  if (big) {
+    for (let i = 0; i < 8; i++) {
+      const a = i / 8 * Math.PI * 2;
+      addMesh(g, coneGeo(.03, .22, 4), M.glow, Math.cos(a) * .62, 1.72, Math.sin(a) * .62, false, false).rotation.z = Math.PI / 2 - a;
+    }
+  }
+  g.userData.celestialGlow = aura;
+  g.userData.flap = wings;
+  return g;
+}
+/* --- configuración visual de cada tropa ------------------------------- */
+const UNIT_SPECS = {
+  clubber:     { head: 'horns', outfit: 'fur', weapon: 'club', weaponScale: 1.25, squad: 2, scale: 1.28, labelY: 1.3 },
+  brute:       { head: 'hornsBig', outfit: 'furHeavy', weapon: 'clubHeavy', weaponScale: 1.15, squad: 1, scale: 1.5, labelY: 1.55 },
+  shaman:      { head: 'skull', outfit: 'robe', weapon: 'staff', squad: 1, scale: 1.34, labelY: 1.4 },
+  cavemenBoss: { head: 'hornsBig', outfit: 'furHeavy', weapon: 'clubHeavy', squad: 1, scale: 1.9, labelY: 2.0, boss: true, cape: true, capeColor: 0x4a3320, weaponScale: 1.35, spikes: 6 },
+
+  hoplite:     { head: 'corinthian', outfit: 'spartan', weapon: 'spear', shield: 'round', squad: 2, scale: 1.34, labelY: 1.36 },
+  spartan:     { head: 'corinthian', outfit: 'spartanElite', weapon: 'sword', shield: 'round', squad: 1, scale: 1.5, labelY: 1.55, cape: true, capeColor: 0x8f1f1a, bracer: true },
+  spearman:    { head: 'corinthian', outfit: 'spartanLight', weapon: 'spear', squad: 2, scale: 1.28, labelY: 1.32 },
+  spartanBoss: { head: 'corinthianCrest', outfit: 'spartanBoss', weapon: 'spearBig', shield: 'roundBig', squad: 1, scale: 1.92, labelY: 2.05, boss: true, cape: true, capeColor: 0x8f1f1a, weaponScale: 1.2, spikes: 6 },
+
+  crusader:    { head: 'greatHelm', outfit: 'crusader', weapon: 'sword', shield: 'kite', banner: true, squad: 2, scale: 1.3, labelY: 1.4 },
+  knight:      { head: 'greatHelm', outfit: 'plate', weapon: 'sword', shield: 'kite', squad: 1, scale: 1.46, labelY: 1.5, cape: true, capeColor: 0xefe8d6 },
+  archer:      { head: 'hood', outfit: 'crusaderLight', weapon: 'bow', squad: 2, scale: 1.26, labelY: 1.32 },
+  crusaderBoss:{ head: 'crown', outfit: 'crusaderBoss', weapon: 'greatsword', shield: 'kiteBig', banner: true, squad: 1, scale: 1.92, labelY: 2.1, boss: true, cape: true, capeColor: 0xb42c25, weaponScale: 1.15, spikes: 6 },
+
+  cutlass:     { head: 'tricorn', outfit: 'pirate', weapon: 'cutlass', squad: 2, scale: 1.28, labelY: 1.34 },
+  cannoneer:   { head: 'bandana', outfit: 'pirateHeavy', weapon: 'cannon', squad: 1, scale: 1.36, labelY: 1.4 },
+  buccaneer:   { head: 'bandana', outfit: 'pirateLight', weapon: 'cutlass2', squad: 2, scale: 1.26, labelY: 1.32 },
+  pirateBoss:  { head: 'tricornBoss', outfit: 'pirateBoss', weapon: 'cannonBig', squad: 1, scale: 1.92, labelY: 2.05, boss: true, cape: true, capeColor: 0x16202a, weaponScale: 1.2, spikes: 6 },
+
+  doughboy:    { head: 'brodie', outfit: 'wwi', weapon: 'rifle', squad: 2, scale: 1.3, labelY: 1.34 },
+  doughboyMG:  { head: 'brodie', outfit: 'wwiHeavy', weapon: 'mg', squad: 1, scale: 1.38, labelY: 1.42 },
+  wwiBoss:     { head: 'cap', outfit: 'wwiBoss', weapon: 'mgBig', squad: 1, scale: 1.92, labelY: 2.0, boss: true, cape: true, capeColor: 0x53523c, weaponScale: 1.2, spikes: 6 },
+
+  cyberSoldier:{ head: 'tech', outfit: 'tech', weapon: 'energy', squad: 2, scale: 1.34, labelY: 1.36, bracer: true },
+  droneSoldier:{ head: 'tech', outfit: 'techLight', weapon: 'energy', squad: 2, scale: 1.28, labelY: 1.32, drone: true },
+
+  walker:      { head: 'zombie', outfit: 'zombie', weapon: 'claw', squad: 2, scale: 1.3, labelY: 1.34 },
+  runner:      { head: 'zombie', outfit: 'zombieRunner', weapon: 'claw', squad: 2, scale: 1.24, labelY: 1.3, lean: true },
+  tankZombie:  { head: 'zombieHelm', outfit: 'zombieArmor', weapon: 'clawBig', squad: 1, scale: 1.5, labelY: 1.56 },
+  zombieBoss:  { head: 'zombieBoss', outfit: 'zombieBoss', weapon: 'clawBig', squad: 1, scale: 1.98, labelY: 2.1, boss: true, spikes: 6 }
+};
+
+function buildSquad(g, spec, P) {
+  const count = Math.max(1, spec.squad || 1);
+  const offsets = count === 1 ? [[0, 0]]
+    : count === 2 ? [[-.12, .05], [.18, .2]]
+    : [[-.2, .04], [.18, .12], [.02, .3]];
+  const figs = [];
+  for (let i = 0; i < count; i++) {
+    const [x, z] = offsets[i];
+    const fig = buildFigure(g, {
+      palette: P, scale: (spec.figureScale || 1) * (i === 0 ? 1 : .9),
+      head: spec.head, outfit: spec.outfit, weapon: spec.weapon, weaponScale: spec.weaponScale,
+      weaponSide: i === 0 ? -1 : 1, shield: i === 0 ? spec.shield : null,
+      cape: i === 0 ? spec.cape : false, capeColor: spec.capeColor,
+      banner: i === 0 ? spec.banner : false, bracer: spec.bracer
+    });
+    fig.position.set(x, 0, z);
+    fig.rotation.y = i === 0 ? 0 : (i * .5 - .25);
+    if (spec.lean && i === 0) fig.rotation.x = -.06;
+    figs.push(fig);
+  }
+  return figs;
 }
 
 function enemyModel(type) {
   const d = ENEMIES[type];
+  const P = FACTION_PALETTE[d.faction] || FACTION_PALETTE.cavemen;
+  const spec = UNIT_SPECS[type] || { head: 'dome', outfit: 'fur', weapon: 'rifle', squad: 1, scale: 1.3, labelY: 1.34 };
   const g = new THREE.Group();
-  const paint = camoMaterial(d.color);
-  const dark = mat(0x2d3430), armor = mat(0x424b3f), steel = mat(0x7b837d, .45, .55), metal = steel;
-  const glass = mat(0x9fc0c4, .13, .05), black = mat(0x1b201c, .9), white = mat(0xd9d4c2), gold = mat(0xc0a052, .45, .45);
-  let mover = null, rotor = null, tailRotor = null, propeller = null, legs = [];
-  let labelY = 1.02, scale = 1.5;
+  let walk = [], flap = null, ring = null, labelY = spec.labelY || 1.35, scale = spec.scale || 1.35;
 
-  if (type === 'infantry') {
-    const units = [];
-    for (let i = 0; i < 4; i++) {
-      const unit = addSoldier(g, (i - 1.5) * .19, (i % 2 ? .06 : -.04), i * 1.7, paint, dark, mat(0x9a7d62));
-      units.push(unit);
-    }
-    legs = units;
-    scale = 1.55; labelY = 1.08;
-  } else if (type === 'jeep') {
-    addMesh(g, rboxGeo(.64, .16, .82, .05), paint, 0, .24, 0);
-    addMesh(g, rboxGeo(.58, .06, .3, .02), paint, 0, .34, -.28);
-    addMesh(g, rboxGeo(.5, .13, .34, .03), paint, 0, .37, .02);
-    addMesh(g, rboxGeo(.44, .12, .03, .01), glass, 0, .45, -.16).rotation.x = -.16;
-    addMesh(g, rboxGeo(.46, .12, .02, .01), glass, 0, .43, .2);
-    addMesh(g, rboxGeo(.55, .045, .74, .01), dark, 0, .2, 0);
-    for (const side of [-1, 1]) {
-      addMesh(g, rboxGeo(.03, .34, .03, .01), metal, side * .3, .5, .22);
-      addMesh(g, rboxGeo(.03, .34, .03, .01), metal, side * .3, .5, -.08);
-      addMesh(g, rboxGeo(.03, .03, .34, .01), metal, side * .3, .67, .07);
-      for (const z of [-.25, .26]) addWheel(g, side * .32, .12, z, .11, .075, black, metal);
-    }
-    addMesh(g, rboxGeo(.34, .04, .2, .01), dark, 0, .63, .07);
-    const turret = new THREE.Group(); turret.position.set(0, .69, -.02); g.add(turret);
-    addMesh(turret, cylGeo(.055, .07, .08, 10), dark, 0, 0, 0);
-    addMesh(turret, rboxGeo(.07, .06, .2, .01), dark, 0, .04, -.08);
-    addMesh(turret, cylGeo(.015, .02, .34, 8), metal, 0, .04, -.24).rotation.x = Math.PI / 2;
-    addMesh(turret, rboxGeo(.09, .12, .1, .01), paint, 0, .04, .08);
-    addMesh(g, rboxGeo(.16, .18, .06, .02), dark, 0, .28, .44);
-    addMesh(g, cylGeo(.03, .04, .3, 8), metal, -.32, .58, .22);
-    mover = turret; labelY = 1.12;
-  } else if (type === 'apc') {
-    addMesh(g, rboxGeo(.6, .22, .86, .05), paint, 0, .28, 0);
-    addMesh(g, rboxGeo(.5, .12, .42, .04), paint, 0, .42, -.12).rotation.x = -.14;
-    addMesh(g, rboxGeo(.54, .08, .14, .02), armor, 0, .18, -.43).rotation.x = -.4;
-    addMesh(g, rboxGeo(.12, .1, .03, .01), glass, .38, .38, -.2).rotation.y = -.3;
-    addMesh(g, rboxGeo(.12, .1, .03, .01), glass, -.38, .38, -.2).rotation.y = .3;
-    for (const side of [-1, 1]) for (const z of [-.34, -.1, .16, .4]) addWheel(g, side * .34, .13, z, .12, .08, black, metal);
-    const turret = new THREE.Group(); turret.position.set(0, .48, .0); g.add(turret);
-    addMesh(turret, rboxGeo(.28, .16, .3, .04), paint, 0, 0, 0);
-    addMesh(turret, rboxGeo(.18, .09, .18, .02), armor, 0, .11, .02);
-    addMesh(turret, cylGeo(.025, .03, .36, 10), metal, 0, .04, -.26).rotation.x = Math.PI / 2;
-    addMesh(turret, rboxGeo(.05, .05, .09, .01), gold, .1, .1, .03);
-    addMesh(g, cylGeo(.02, .03, .4, 8), metal, .22, .62, .25);
-    mover = turret; labelY = 1.18;
-  } else if (type === 'tank') {
-    addMesh(g, rboxGeo(.58, .2, .9, .04), paint, 0, .3, 0);
-    addMesh(g, rboxGeo(.52, .08, .26, .03), paint, 0, .38, -.44).rotation.x = -.28;
-    addTrack(g, -1, -.35, .18, 0, .86, .32, .14, paint, black, metal);
-    addTrack(g, 1, .35, .18, 0, .86, .32, .14, paint, black, metal);
-    const turret = new THREE.Group(); turret.position.set(0, .55, .04); g.add(turret);
-    addMesh(turret, rboxGeo(.5, .22, .56, .05), paint, 0, 0, 0);
-    addMesh(turret, rboxGeo(.38, .1, .4, .03), armor, 0, .13, 0);
-    addMesh(turret, rboxGeo(.24, .18, .24, .04), armor, 0, .02, -.32);
-    const barrel = addMesh(turret, cylGeo(.028, .036, .82, 14), metal, 0, .04, -.7); barrel.rotation.x = Math.PI / 2;
-    addMesh(turret, cylGeo(.05, .05, .08, 10), dark, 0, .04, -1.1).rotation.x = Math.PI / 2;
-    addMesh(turret, rboxGeo(.08, .06, .14, .01), dark, 0, .04, -1.03);
-    for (let i = 0; i < 4; i++) for (let j = 0; j < 2; j++) addMesh(turret, rboxGeo(.1, .04, .12, .01), mat(0x4a513d), -.17 + i * .11, .14, -.15 + j * .16);
-    for (const side of [-1, 1]) {
-      addMesh(turret, cylGeo(.025, .025, .16, 8), dark, side * .22, .12, .18).rotation.z = side * .5;
-      addMesh(g, rboxGeo(.16, .12, .1, .02), armor, side * .39, .37, -.05);
-    }
-    addMesh(turret, sphGeo(.055, 10), glass, .26, .12, .18);
-    addMesh(g, cylGeo(.015, .02, .6, 6), metal, -.34, .56, .36);
-    mover = turret; labelY = 1.22;
-  } else if (type === 'mlrs') {
-    addMesh(g, rboxGeo(.58, .16, .96, .04), paint, 0, .25, 0);
-    addMesh(g, rboxGeo(.46, .3, .3, .04), paint, 0, .47, -.36);
-    addMesh(g, rboxGeo(.34, .18, .02, .01), glass, 0, .5, -.52);
-    for (const side of [-1, 1]) for (const z of [-.38, -.12, .28, .44]) addWheel(g, side * .31, .13, z, .12, .08, black, metal);
-    const rack = new THREE.Group(); rack.position.set(0, .55, .18); rack.rotation.x = .32; g.add(rack);
-    addMesh(rack, rboxGeo(.56, .3, .64, .04), paint, 0, 0, 0);
-    for (let r = 0; r < 2; r++) for (let c = 0; c < 3; c++) {
-      addMesh(rack, cylGeo(.05, .05, .48, 10), dark, (c - 1) * .16, -.06 + r * .12, -.34).rotation.x = Math.PI / 2;
-      addMesh(rack, cylGeo(.057, .057, .05, 10), gold, (c - 1) * .16, -.06 + r * .12, -.58).rotation.x = Math.PI / 2;
-    }
-    addMesh(rack, rboxGeo(.6, .05, .26, .02), armor, 0, .17, .08);
-    addMesh(g, cylGeo(.02, .03, .45, 8), metal, -.25, .66, .34);
-    mover = rack; labelY = 1.18;
-  } else if (type === 'heli') {
-    addMesh(g, new THREE.SphereGeometry(.26, 18, 12), paint, 0, .36, 0).scale.set(1.45, .8, 1);
-    addMesh(g, new THREE.SphereGeometry(.17, 14, 10), glass, 0, .4, -.23).scale.set(1.1, .8, 1.1);
-    addMesh(g, cylGeo(.07, .11, .68, 12), paint, 0, .4, .46).rotation.x = Math.PI / 2;
-    addMesh(g, coneGeo(.08, .42, 10), paint, 0, .43, .8).rotation.x = -Math.PI / 2;
-    addMesh(g, rboxGeo(.12, .18, .04, .01), paint, 0, .56, .74).rotation.x = -.25;
-    for (const side of [-1, 1]) {
-      const wing = addMesh(g, rboxGeo(.34, .035, .16, .01), paint, side * .26, .38, .02);
-      addMissilePylon(g, side * .38, .33, .02, paint, dark);
-      addMissilePylon(g, side * .38, .33, .12, paint, dark);
-      addMesh(g, cylGeo(.022, .022, .38, 6), dark, side * .17, .12, .02).rotation.z = side * .25;
-      addMesh(g, rboxGeo(.03, .02, .48, .005), metal, side * .23, .04, .04);
-      addMesh(g, rboxGeo(.035, .06, .035, .005), metal, side * .26, .02, .04);
-    }
-    addMesh(g, cylGeo(.06, .08, .08, 12), dark, 0, .58, 0);
-    rotor = addRotor(g, .62, 1.05, 4, dark, glass);
-    tailRotor = addRotor(g, .43, .18, 3, dark, glass);
-    tailRotor.position.set(.06, .48, .93); tailRotor.rotation.z = Math.PI / 2;
-    addMesh(g, rboxGeo(.1, .1, .14, .02), armor, .2, .36, -.02);
-    mover = rotor; labelY = 1.4;
-  } else if (type === 'drone') {
-    addMesh(g, rboxGeo(.11, .1, .62, .04), mat(0x858c8c, .4, .2), 0, .3, 0);
-    addMesh(g, coneGeo(.055, .2, 8), mat(0x858c8c, .4, .2), 0, .3, -.41).rotation.x = -Math.PI / 2;
-    addMesh(g, rboxGeo(.96, .025, .16, .01), mat(0x858c8c, .4, .2), 0, .31, -.02);
-    addMesh(g, rboxGeo(.22, .02, .1, .01), mat(0x858c8c, .4, .2), 0, .36, .25);
-    for (const side of [-1, 1]) addMesh(g, rboxGeo(.02, .18, .12, .01), mat(0x858c8c, .4, .2), side * .1, .44, .3).rotation.z = side * .3;
-    addMesh(g, sphGeo(.045, 10), glass, 0, .25, -.18);
-    addMesh(g, cylGeo(.02, .02, .12, 8), dark, 0, .3, .34).rotation.x = Math.PI / 2;
-    propeller = new THREE.Group(); propeller.position.set(0, .3, .41); g.add(propeller);
-    addMesh(propeller, rboxGeo(.3, .008, .03, .003), dark, 0, 0, 0);
-    addMesh(propeller, rboxGeo(.03, .008, .3, .003), dark, 0, 0, 0);
-    addMissilePylon(g, -.28, .25, -.02, paint, dark); addMissilePylon(g, .28, .25, -.02, paint, dark);
-    mover = propeller; labelY = 1.05;
-  } else if (type === 'fighter') {
-    addMesh(g, cylGeo(.09, .16, .8, 14), steel, 0, .34, 0).rotation.x = Math.PI / 2;
-    addMesh(g, coneGeo(.09, .34, 12), steel, 0, .34, -.55).rotation.x = -Math.PI / 2;
-    addMesh(g, sphGeo(.08, 12), glass, 0, .41, -.2).scale.set(.85, .75, 1.5);
-    addMesh(g, rboxGeo(1.2, .035, .34, .02), steel, 0, .33, .02);
-    addMesh(g, rboxGeo(.42, .03, .22, .01), steel, 0, .33, .27);
-    for (const side of [-1, 1]) {
-      addMesh(g, rboxGeo(.2, .035, .14, .01), steel, side * .28, .35, .36).rotation.y = side * .2;
-      addMesh(g, rboxGeo(.04, .18, .18, .01), steel, side * .12, .47, .3).rotation.z = side * .18;
-      addMesh(g, cylGeo(.055, .07, .26, 10), dark, side * .2, .26, .12).rotation.x = Math.PI / 2;
-      addMesh(g, cylGeo(.05, .05, .02, 10), jetGlow(), side * .2, .26, .25).rotation.x = Math.PI / 2;
-      addMissilePylon(g, side * .5, .28, -.02, paint, dark);
-    }
-    addMesh(g, coneGeo(.035, .22, 8), dark, 0, .34, -.75).rotation.x = -Math.PI / 2;
-    labelY = 1.16;
+  if (type === 'fighter') {
+    const r = buildFighter(g, P, { paint: 0x7c8b99 });
+    walk = r.walk; scale = 1.28; labelY = 1.35;
   } else if (type === 'bomber') {
-    addMesh(g, cylGeo(.13, .2, 1.25, 14), steel, 0, .42, 0).rotation.x = Math.PI / 2;
-    addMesh(g, coneGeo(.13, .4, 12), steel, 0, .42, -.78).rotation.x = -Math.PI / 2;
-    addMesh(g, new THREE.SphereGeometry(.11, 12, 8), glass, 0, .5, -.55).scale.set(.9, .8, 1.5);
-    addMesh(g, rboxGeo(1.9, .04, .38, .02), steel, 0, .4, .03);
-    addMesh(g, rboxGeo(.42, .04, .24, .02), steel, 0, .4, .52);
-    for (const side of [-1, 1]) {
-      addMesh(g, rboxGeo(.5, .03, .2, .01), steel, side * .5, .4, .52).rotation.y = side * .25;
-      for (const z of [-.05, .18]) {
-        addMesh(g, cylGeo(.055, .07, .28, 10), dark, side * (z < 0 ? .5 : .36), .36, z).rotation.x = Math.PI / 2;
-        addMesh(g, cylGeo(.05, .05, .02, 10), jetGlow(), side * (z < 0 ? .5 : .36), .36, z + .15).rotation.x = Math.PI / 2;
-      }
-      addMesh(g, rboxGeo(.16, .12, .3, .02), dark, side * .22, .36, -.02);
-    }
-    addMesh(g, rboxGeo(.06, .28, .3, .02), steel, 0, .6, .58).rotation.x = -.18;
-    scale = 1.7; labelY = 1.55;
-  } else if (type === 'boss') {
-    addMesh(g, rboxGeo(1.35, .42, 1.7, .06), paint, 0, .42, 0);
-    addMesh(g, rboxGeo(1.15, .18, .5, .04), paint, 0, .55, -.82).rotation.x = -.2;
-    addTrack(g, -1, -.72, .26, 0, 1.65, .5, .22, paint, black, metal);
-    addTrack(g, 1, .72, .26, 0, 1.65, .5, .22, paint, black, metal);
-    const turret = new THREE.Group(); turret.position.set(0, .78, .08); g.add(turret);
-    addMesh(turret, rboxGeo(.9, .32, .92, .06), paint, 0, 0, 0);
-    addMesh(turret, rboxGeo(.68, .14, .7, .03), armor, 0, .2, 0);
-    addMesh(turret, rboxGeo(.44, .28, .4, .05), armor, 0, .03, -.48);
-    for (const side of [-1, 1]) {
-      addMesh(turret, cylGeo(.055, .065, 1.1, 14), metal, side * .18, .08, -.85).rotation.x = Math.PI / 2;
-      addMesh(turret, cylGeo(.08, .08, .1, 10), gold, side * .18, .08, -1.4).rotation.x = Math.PI / 2;
-      addMesh(g, rboxGeo(.65, .3, .5, .04), armor, side * .45, .72, .7);
-      for (let i = 0; i < 3; i++) addMesh(g, cylGeo(.09, .09, .42, 12), dark, side * .45, .72, .66 + i * .02).rotation.x = Math.PI / 2;
-      addMesh(g, sphGeo(.07, 10), mat(0xb34d3c), side * .45, .92, .72);
-    }
-    addMesh(turret, sphGeo(.11, 12), glass, .3, .16, .22);
-    addMesh(g, cylGeo(.025, .04, .9, 8), metal, -.55, .95, .5);
-    addMesh(g, cylGeo(.04, .055, .8, 8), metal, .58, .9, -.1);
-    mover = turret; scale = 1.15; labelY = 1.85;
+    const r = buildBomber(g, P, { paint: 0x4b5561 });
+    walk = r.walk; scale = 1.34; labelY = 1.45;
   } else if (type === 'scout') {
-    // OVNI explorador: pequeño platillo volante.
-    addMesh(g, new THREE.SphereGeometry(.22, 16, 12), paint, 0, .32, 0).scale.set(1.3, .5, 1.3);
-    addMesh(g, new THREE.SphereGeometry(.14, 12, 8), glass, 0, .4, -.1);
-    addMesh(g, rboxGeo(.6, .02, .2, .01), paint, 0, .3, .02);
-    for (const side of [-1, 1]) addMesh(g, cylGeo(.025, .03, .2, 8), dark, side * .16, .32, -.05).rotation.x = Math.PI / 2;
-    scale = 1.2; labelY = 1.2;
+    const r = buildSaucer(g, P, { r: .46 });
+    walk = r.walk; ring = r.group.userData.ring; scale = 1.12; labelY = 1.1;
   } else if (type === 'interceptor') {
-    // Caza OVNI: aerodinámico, alas delgadas.
-    addMesh(g, cylGeo(.08, .14, .75, 12), paint, 0, .34, 0).rotation.x = Math.PI / 2;
-    addMesh(g, coneGeo(.08, .3, 10), paint, 0, .34, -.5).rotation.x = -Math.PI / 2;
-    addMesh(g, sphGeo(.07, 10), glass, 0, .4, -.25);
-    addMesh(g, rboxGeo(.9, .02, .25, .01), paint, 0, .32, .04);
-    for (const side of [-1, 1]) {
-      addMesh(g, cylGeo(.035, .05, .22, 10), dark, side * .2, .3, .1).rotation.x = Math.PI / 2;
-      addMesh(g, cylGeo(.03, .03, .03, 8), jetGlow(), side * .2, .26, .18).rotation.x = Math.PI / 2;
-    }
-    scale = 1.3; labelY = 1.25;
+    const r = buildSaucer(g, P, { r: .5, interceptor: true });
+    walk = r.walk; ring = r.group.userData.ring; scale = 1.24; labelY = 1.2;
+  } else if (type === 'mothershipScout') {
+    const r = buildSaucer(g, P, { r: .66, mother: true });
+    walk = r.walk; ring = r.group.userData.ring; scale = 1.3; labelY = 1.4;
   } else if (type === 'ufoBoss') {
-    // Nave Madre: bombardero invisible, ala voladora grande y oscura.
-    addMesh(g, rboxGeo(2.2, .05, 1.1, .02), paint, 0, .4, 0);
-    addMesh(g, coneGeo(.3, .6, 12), paint, 0, .45, -.7).rotation.x = -Math.PI / 2;
-    addMesh(g, new THREE.SphereGeometry(.15, 14, 10), glass, 0, .5, -.4);
-    addMesh(g, rboxGeo(2.4, .03, .5, .01), paint, 0, .38, .06);
-    for (const side of [-1, 1]) {
-      addMesh(g, cylGeo(.05, .06, .45, 12), dark, side * .45, .38, .15).rotation.x = Math.PI / 2;
-      addMesh(g, cylGeo(.04, .04, .04, 8), jetGlow(), side * .45, .34, .3).rotation.x = Math.PI / 2;
-    }
-    scale = 1.6; labelY = 1.8;
-  } else if (type === 'celestialBoss') {
-    // Ser Supremo: ser de energía brillante y grande.
-    addMesh(g, new THREE.SphereGeometry(.35, 20, 14), mat(0xffff88, .3, .1), 0, .5, 0);
-    addMesh(g, new THREE.SphereGeometry(.2, 16, 10), mat(0xffffff, .2, 0), 0, .5, 0);
-    addMesh(g, cylGeo(.08, .12, .4, 12), mat(0xfff0d4, .5, 0), 0, .6, -.2);
-    addMesh(g, rboxGeo(.8, .02, .4, .01), mat(0xfff0d4, .4, 0), 0, .55, -.1);
-    const glow = new THREE.Mesh(new THREE.SphereGeometry(.5, 16, 12), new THREE.MeshBasicMaterial({ color: 0xfff0d4, transparent: true, opacity: .4 }));
-    g.add(glow); g.userData.celestialGlow = glow;
-    scale = 1.8; labelY = 2.2;
+    const r = buildSaucer(g, P, { r: .92, boss: true, mother: true });
+    walk = r.walk; ring = r.group.userData.ring; scale = 1.85; labelY = 1.65;
+  } else if (type === 'chinaTechBoss') {
+    const r = buildMech(g, P, { boss: true, scale: 1 });
+    walk = r.walk; scale = 1.2; labelY = 2.1;
+  } else if (type === 'mech') {
+    const r = buildMech(g, P, { scale: 1 });
+    walk = r.walk; scale = .9; labelY = 1.8;
+  } else if (type === 'doughboyTank') {
+    const r = buildTank(g, P);
+    walk = r.walk; scale = 1.2; labelY = 1.1;
+  } else if (d.faction === 'celestials') {
+    const boss = type === 'celestialBoss';
+    const cel = buildCelestial(g, P, { boss, arch: type !== 'angel', weapon: boss ? 'staff' : 'spear' });
+    flap = cel.userData.flap;
+    scale = boss ? 1.5 : type === 'seraph' ? 1.3 : type === 'archon' ? 1.16 : 1.02;
+    labelY = boss ? 2.8 : 1.85;
+    if (boss) labelY = 2.9;
   } else {
-    // Modelo genérico para tropas de facción no modeladas específicamente.
-    const isBoss = d.boss === true;
-    const isAir = d.kind === 'air';
-    const size = isBoss ? 1.5 : (d.tier >= 4 ? 1.15 : d.tier >= 2 ? 0.95 : 0.75);
-    if (isAir) {
-      addMesh(g, cylGeo(.1, .16, .7, 12), paint, 0, .35, 0).rotation.x = Math.PI / 2;
-      addMesh(g, coneGeo(.1, .28, 10), paint, 0, .35, -.5).rotation.x = -Math.PI / 2;
-      addMesh(g, sphGeo(.07, 10), glass, 0, .42, -.25);
-      addMesh(g, rboxGeo(1, .03, .3, .02), paint, 0, .33, .05);
-      for (const side of [-1, 1]) {
-        addMesh(g, cylGeo(.04, .06, .24, 10), dark, side * .18, .3, .1).rotation.x = Math.PI / 2;
-        addMesh(g, cylGeo(.04, .04, .03, 8), jetGlow(), side * .18, .26, .2).rotation.x = Math.PI / 2;
-      }
-      labelY = 1.3;
-    } else if (isBoss) {
-      addMesh(g, rboxGeo(1.1, .38, 1.3, .06), paint, 0, .42, 0);
-      addTrack(g, -1, -.65, .28, 0, 1.2, .5, .22, paint, black, metal);
-      addTrack(g, 1, .65, .28, 0, 1.2, .5, .22, paint, black, metal);
-      const turret = new THREE.Group(); turret.position.set(0, .75, .1); g.add(turret);
-      addMesh(turret, rboxGeo(.85, .3, .85, .06), paint, 0, 0, 0);
-      addMesh(turret, rboxGeo(.6, .15, .65, .04), armor, 0, .18, 0);
-      addMesh(turret, sphGeo(.1, 12), glass, .3, .15, .25);
-      labelY = 2.0;
-    } else if (d.tier >= 3) {
-      addMesh(g, rboxGeo(.75, .22, .9, .04), paint, 0, .32, 0);
-      addTrack(g, -1, -.38, .2, 0, .8, .32, .15, paint, black, metal);
-      addTrack(g, 1, .38, .2, 0, .8, .32, .15, paint, black, metal);
-      const turret = new THREE.Group(); turret.position.set(0, .55, .05); g.add(turret);
-      addMesh(turret, rboxGeo(.55, .2, .6, .05), paint, 0, 0, 0);
-      addMesh(turret, cylGeo(.025, .035, .7, 14), metal, 0, .04, -.65).rotation.x = Math.PI / 2;
-      labelY = 1.35;
-    } else if (d.tier >= 2) {
-      for (let i = 0; i < 3; i++) addSoldier(g, (i - 1) * .24, 0, i * 1.6, paint, dark, mat(0x9a7d62));
-      labelY = 1.15;
-    } else {
-      for (let i = 0; i < 3; i++) addSoldier(g, (i - 1) * .2, 0, i * 1.5, paint, dark, mat(0x9a7d62));
-      labelY = 1.08;
+    const figs = buildSquad(g, spec, P);
+    for (const f of figs) walk = walk.concat(f.userData.walk || []);
+    if (spec.drone) {
+      const M = paletteMats(P);
+      const drone = new THREE.Group();
+      drone.position.set(.46, .52, -.04); g.add(drone);
+      addMesh(drone, rboxGeo(.14, .08, .2, .03), M.armor, 0, 0, 0);
+      addMesh(drone, sphGeo(.05, 8), M.glow, 0, -.01, .1);
+      const rr = new THREE.Group(); drone.add(rr);
+      addMesh(rr, new THREE.TorusGeometry(.12, .012, 5, 16), M.glow, 0, 0, 0, false, false).rotation.x = Math.PI / 2;
+      ring = rr;
     }
-    scale = size;
+    if (spec.boss) {
+      addUnitBase(g, .52, P, spec.spikes || 0);
+      const aura = new THREE.Mesh(new THREE.SphereGeometry(.72 * scale * .9, 14, 10), basicMat(P.accent, .08));
+      aura.position.y = .55; g.add(aura); g.userData.bossAura = aura;
+    } else if (type !== 'doughboyTank') {
+      addUnitBase(g, spec.squad === 2 ? .33 : .27, P, 0);
+    }
   }
 
+  // Escala general de las miniaturas: presencia clara incluso con la cámara alejada.
+  scale *= 1.12;
   const alt = ALTITUDE[type] || 0;
-  const blob = new THREE.Mesh(new THREE.CircleGeometry(1, 18), new THREE.MeshBasicMaterial({ color: 0x1c2418, transparent: true, opacity: .3, depthWrite: false }));
+  const isAir = d.kind === 'air';
+  const blob = new THREE.Mesh(new THREE.CircleGeometry(1, 20), new THREE.MeshBasicMaterial({ color: 0x10160f, transparent: true, opacity: .32, depthWrite: false }));
   blob.rotation.x = -Math.PI / 2; blob.position.y = -alt + .02;
-  blob.scale.setScalar(type === 'boss' ? .82 : type === 'bomber' ? .7 : type === 'tank' ? .55 : .4);
+  blob.scale.setScalar(d.boss ? 1.0 : isAir ? .55 : spec.squad === 2 ? .42 : .34);
   g.add(blob);
-  const hpbg = new THREE.Sprite(new THREE.SpriteMaterial({ color: 0x171b17, transparent: true, opacity: .9, depthTest: false }));
-  hpbg.scale.set(type === 'boss' ? 1.55 : .78, .085, 1); hpbg.position.y = labelY;
+
+  // Barras y etiqueta con tamaño constante en pantalla, independiente de la escala.
+  const ui = 1 / scale;
+  const hpbg = new THREE.Sprite(new THREE.SpriteMaterial({ color: 0x141812, transparent: true, opacity: .92, depthTest: false }));
+  hpbg.scale.set((d.boss ? 1.3 : .7) * ui, .08 * ui, 1); hpbg.position.y = labelY;
   g.add(hpbg);
   const hpfg = new THREE.Sprite(new THREE.SpriteMaterial({ color: 0x9b443a, depthTest: false }));
-  hpfg.scale.set(type === 'boss' ? 1.45 : .7, .052, 1); hpfg.position.set(0, labelY, .008);
+  hpfg.scale.set((d.boss ? 1.2 : .64) * ui, .048 * ui, 1); hpfg.position.set(0, labelY, .008);
   g.add(hpfg);
   const label = labelSprite(loc(d, 'name'), enemyLabelAccent(type));
-  label.position.y = labelY + .22; label.visible = settings.labels !== false;
+  label.scale.set((d.boss ? 1.75 : 1.18) * ui, (d.boss ? .33 : .225) * ui, 1);
+  label.position.y = labelY + .2 * ui;
+  label.visible = settings.labels !== false;
   g.add(label);
   g.scale.setScalar(scale);
-  g.userData = { mover, hpfg, hpbg, label, type, legs, rotor, tailRotor, propeller, labelY };
+  g.userData = {
+    mover: null, hpbg, hpfg, label, type, legs: walk, walk, flap, ring,
+    rotor: null, tailRotor: null, propeller: null, labelY, ui,
+    hpW: (d.boss ? 1.2 : .64) * ui,
+    hpBgW: (d.boss ? 1.3 : .7) * ui, hpBgH: .08 * ui, hpFgH: .048 * ui,
+    labelW: (d.boss ? 1.75 : 1.18) * ui, labelH: (d.boss ? .33 : .225) * ui
+  };
   return g;
+}
+
+function buildFighterProp(color = 0x828a8a) {
+  const jet = new THREE.Group();
+  const paint = umat(color, .4, .35), dark = umat(0x2d3430), glass = umat(0x9fc0c4, .13, .05);
+  addMesh(jet, cylGeo(.06, .1, .8, 12), paint, 0, 0, 0).rotation.x = Math.PI / 2;
+  addMesh(jet, coneGeo(.06, .34, 12), paint, 0, 0, .55).rotation.x = Math.PI / 2;
+  addMesh(jet, sphGeo(.07, 10), glass, 0, .06, .16).scale.set(.8, .7, 1.35);
+  for (const side of [-1, 1]) {
+    const wing = addMesh(jet, rboxGeo(.66, .026, .28, .02), paint, side * .34, 0, -.04);
+    wing.rotation.y = side * .32;
+    addMesh(jet, rboxGeo(.24, .02, .12, .01), paint, side * .6, 0, .1).rotation.y = side * .2;
+    const fin = addMesh(jet, rboxGeo(.03, .19, .15, .01), paint, side * .13, .13, -.26);
+    fin.rotation.z = side * .2;
+    addMesh(jet, cylGeo(.04, .05, .2, 10), dark, side * .15, -.05, -.24).rotation.x = Math.PI / 2;
+    addMesh(jet, cylGeo(.038, .038, .03, 8), basicMat(0xffb15c), side * .15, -.05, -.35).rotation.x = Math.PI / 2;
+    addMesh(jet, rboxGeo(.04, .012, .28, .004), basicMat(0xd42b25), side * .26, .022, -.02);
+  }
+  addMesh(jet, coneGeo(.025, .16, 8), dark, 0, 0, .76).rotation.x = Math.PI / 2;
+  return jet;
 }
 
 /* ------------------------------------------------------------ construcción */
@@ -2219,8 +2998,19 @@ function removeGhost() {
 }
 function setBuild(type) {
   if (state.gameOver) return;
+  // Pulsar de nuevo la misma unidad cancela la selección.
+  if (state.buildType === type) {
+    state.buildType = null; removeGhost(); updateInspect(); renderTowerList(); renderAbilities();
+    return;
+  }
   const cost = getCost(type);
-  if (state.cash < cost) { Sound.error(); toast(tr('toast.noCredits')); return; }
+  if (state.cash < cost) {
+    Sound.error();
+    // Sin créditos no se puede mantener una unidad seleccionada.
+    state.buildType = null; removeGhost(); updateInspect(); renderTowerList(); renderAbilities();
+    toast(tr('toast.noCredits'));
+    return;
+  }
   state.abilityMode = null;
   state.selectedTower = null; state.buildType = type;
   updateInspect(); renderTowerList(); renderAbilities(); ensureGhost();
@@ -2322,9 +3112,12 @@ function sellSelected() {
 function buildWavePlan(wave) {
   const fac = factionByWave(wave);
   const boss = isBossWave(wave);
-  const total = boss ? 1 : Math.min(48, Math.round(6 + wave * 1.8));
+  const total = boss ? Math.min(22, 4 + Math.floor(wave / 5)) : Math.min(48, Math.round(6 + wave * 1.8));
   const plan = [];
   if (boss) {
+    // El jefe llega al final de la oleada, escoltado por tropas de su facción.
+    const escorts = Math.min(18, 3 + Math.floor(wave / 8));
+    for (let i = 0; i < escorts; i++) plan.push(fac.units[(i + wave) % fac.units.length].id);
     plan.push(fac.boss.id);
   } else {
     const unitTypes = fac.units.map(u => u.id);
@@ -2373,16 +3166,27 @@ function renderIntel() {
   const body = document.getElementById('inspectBody');
   if (!body || state.selectedTower) return;
   const nextWave = state.active ? state.wave : state.wave + 1;
+  const fac = factionByWave(nextWave);
   const plan = state.active ? (state.currentPlan || []) : buildWavePlan(nextWave);
   const counts = planCounts(plan);
   const scalars = waveScalars(nextWave);
+  const stage = waveInFaction(nextWave);
+  const bossNow = isBossWave(nextWave);
   const rows = [...counts.entries()].map(([type, n]) => {
     const d = ENEMIES[type];
     const kind = d.kind === 'air' ? tr('intel.air') : d.boss ? tr('intel.boss') : tr('intel.ground');
-    return `<div class="intel-row"><span class="intel-icon t${d.tier}">${d.icon}</span><span class="intel-name">${loc(d, 'name')}<em>${kind} · ${tr('intel.armor', { n: Math.round(d.armor * 100) })}</em></span><b>×${n}</b></div>`;
+    const counter = d.counter ? TOWERS.find(t => t.id === d.counter) : null;
+    const counterHtml = counter ? `<span class="intel-counter">▸ ${tr('intel.counter', { name: loc(counter, 'name') })}</span>` : '';
+    return `<div class="intel-row"><span class="intel-icon t${d.tier}${counter ? ' countered' : ''}">${d.icon}</span><span class="intel-name">${loc(d, 'name')}<em>${kind} · ${tr('intel.armor', { n: Math.round(d.armor * 100) })}${counterHtml}</em></span><b>×${n}</b></div>`;
   }).join('');
   const extra = state.active ? tr('intel.inProgress') : tr('intel.planned');
+  const bossBadge = bossNow ? tr('faction.bossNow') : tr('faction.bossIn', { n: wavesUntilBoss(nextWave) });
   body.innerHTML = `
+    <div class="intel-faction">
+      <span class="if-flag">${fac.flag}</span>
+      <div class="if-copy"><div class="if-name">${loc(fac, 'name')}</div><div class="if-sub">${tr('climate.' + fac.climate)} · ${fac.tempC}°C · ${bossNow ? tr('intel.bossWave') : tr('faction.stage', { stage, total: WAVES_PER_FACTION })}</div></div>
+      <span class="if-boss">${bossBadge}</span>
+    </div>
     <div class="intel-head"><span>${tr('intel.head', { wave: nextWave, state: extra })}</span><b class="threat threat-${threatClass(nextWave)}">${threatLevel(nextWave)}</b></div>
     <div class="intel-sub">${tr('intel.scaling', { hp: scalars.hp.toFixed(1), dmg: scalars.damage.toFixed(1) })}</div>
     <div class="intel-list">${rows || `<div class="intel-row"><span class="intel-name">${tr('intel.noThreats')}</span></div>`}</div>
@@ -2396,11 +3200,15 @@ function makeWave() {
   const fac = factionByWave(state.wave);
   applyClimate(fac.climate, fac.tempC);
   state.currentPlan = buildWavePlan(state.wave);
-  state.spawnQueue = state.currentPlan.map((type, i) => ({ type, delay: type === 'boss' ? 1.2 : Math.max(.26, 1.05 - state.wave * .02) }));
+  state.spawnQueue = state.currentPlan.map(type => ({
+    type,
+    delay: ENEMIES[type].boss ? 2.4 : Math.max(.26, 1.05 - state.wave * .02)
+  }));
   state.spawnTimer = .25;
   state.spawned = 0;
   document.getElementById('waveBtn').disabled = true;
   updateHud(); renderIntel();
+  showWaveBanner(fac, isBossWave(state.wave));
   Sound.wave();
   toast(tr('toast.waveStart', { wave: state.wave, summary: planSummary(state.currentPlan) }));
 }
@@ -2408,14 +3216,16 @@ function spawnEnemy(type) {
   const d = ENEMIES[type];
   const scalars = waveScalars(state.wave);
   const rankRoll = Math.random();
-  const rank = state.wave >= 11 && rankRoll > .7 ? 'elite' : state.wave >= 7 && rankRoll > .5 ? 'veteran' : '';
+  const rank = !d.boss && state.wave >= 11 && rankRoll > .7 ? 'elite' : !d.boss && state.wave >= 7 && rankRoll > .5 ? 'veteran' : '';
   const rankMul = rank === 'elite' ? 1.7 : rank === 'veteran' ? 1.3 : 1;
   const model = enemyModel(type);
   const isAir = d.kind === 'air';
   const route = isAir ? AIR_ROUTE : ROUTES[0];
   const lane = state.spawned % 2 === 0 ? -1 : 1;
   state.spawned++;
-  const hp = d.hp * scalars.hp * rankMul;
+  // Los jefes escalan más despacio que la tropa común para que sigan siendo batibles.
+  const hpScale = d.boss ? .55 + Math.min(1.15, state.wave * .03) : scalars.hp;
+  const hp = d.hp * hpScale * rankMul;
   const armorBonus = Math.min(.12, Math.max(0, state.wave - 1) * .006);
   const e = {
     type, data: d, model, hp, maxHp: hp, speed: d.speed * scalars.speed,
@@ -2424,13 +3234,15 @@ function spawnEnemy(type) {
     progress: 0, traveled: 0, routeIndex: 0, route, routeLength: routeLength(route), lane,
     reward: Math.round(d.reward * (rank === 'elite' ? 1.8 : rank === 'veteran' ? 1.25 : 1) * .9),
     slowTimer: 0, repelTimer: 0, air: isAir, rank, x: route.points[0][0], z: route.points[0][1],
-    structureDamage: d.structureDamage || 0
+    structureDamage: d.structureDamage || 0, bossAttackTimer: d.boss ? 3.2 : 0
   };
   model.position.set(e.x, isAir ? ALTITUDE[type] : 0, e.z);
   world.add(model);
   if (rank) {
     const tag = labelSprite(tr(rank === 'elite' ? 'rank.elite' : 'rank.veteran'), rank === 'elite' ? '#e8a06a' : '#b9c47e');
-    tag.position.y = (model.userData.labelY || 1) + .46; tag.scale.set(.78, .18, 1); tag.visible = settings.labels !== false;
+    const ui = 1 / model.scale.x;
+    tag.position.y = (model.userData.labelY || 1) + .46 * ui;
+    tag.scale.set(.78 * ui, .18 * ui, 1); tag.visible = settings.labels !== false;
     model.add(tag); e.rankTag = tag;
   }
   state.enemies.push(e);
@@ -2536,6 +3348,10 @@ function updateEnemy(e, dt) {
   }
   const ud = e.model.userData;
   const isBoss = e.data.boss === true;
+  if (isBoss && e.structureDamage > 0 && dt > 0) {
+    e.bossAttackTimer -= dt;
+    if (e.bossAttackTimer <= 0) { e.bossAttackTimer = 4.2; bossStrikeStructures(e, alt); }
+  }
   if (ud.mover && !e.air && e.type !== 'infantry') ud.mover.rotation.y += dt * (isBoss || e.data.tier >= 3 ? .35 : .15);
   if (ud.rotor) ud.rotor.rotation.y += dt * (jammed ? 46 : 20);
   if (ud.tailRotor) ud.tailRotor.rotation.z += dt * 34;
@@ -2544,24 +3360,55 @@ function updateEnemy(e, dt) {
     ud.celestialGlow.material.opacity = .3 + Math.sin(state.clock * 4) * .2;
     ud.celestialGlow.scale.setScalar(1 + Math.sin(state.clock * 3) * .1);
   }
-  if (e.type === 'infantry' && Array.isArray(ud.legs)) {
-    for (const unit of ud.legs) {
-      const phase = state.clock * 8 + unit.userData.phase;
-      const parts = unit.children.filter(c => c.isGroup && c.children.length && c.children[0].geometry && c.children[0].geometry.type === 'CylinderGeometry');
-      parts.forEach((part, i) => { part.rotation.x = Math.sin(phase + i * Math.PI) * .45; });
-      unit.position.y = Math.abs(Math.sin(phase * 2)) * .012;
+  if (Array.isArray(ud.walk) && ud.walk.length) {
+    const pace = e.air ? 0 : 9.5;
+    for (const part of ud.walk) {
+      const ph = state.clock * pace + (part.userData.phase || 0);
+      if (part.userData.kind === 'leg') part.rotation.x = Math.sin(ph) * .5;
+      else part.rotation.x = Math.sin(ph + Math.PI) * .34;
     }
   }
+  if (Array.isArray(ud.flap) && ud.flap.length) {
+    const fl = Math.sin(state.clock * 3.2) * .38;
+    for (let i = 0; i < ud.flap.length; i++) {
+      const side = i % 2 === 0 ? -1 : 1;
+      ud.flap[i].rotation.z = side * (.35 + fl);
+    }
+  }
+  if (ud.ring) ud.ring.rotation.y += dt * 1.8;
+  if (ud.bossAura) ud.bossAura.material.opacity = .06 + Math.sin(state.clock * 3) * .035;
   const ratio = Math.max(0, e.hp / e.maxHp);
-  ud.hpfg.scale.x = (e.data.boss ? 1.45 : .7) * ratio;
+  // Etiquetas y barras con tamaño casi constante en pantalla: se encogen al acercar la cámara.
+  const camD = camera.position.distanceTo(e.model.position);
+  const uiF = THREE.MathUtils.clamp(Math.pow(camD / DEFAULT_DISTANCE, .85), .25, 2.1);
+  ud.hpfg.scale.set((ud.hpW || .7) * ratio * uiF, (ud.hpFgH || .048) * uiF, 1);
+  if (ud.hpbg) ud.hpbg.scale.set((ud.hpBgW || .7) * uiF, (ud.hpBgH || .08) * uiF, 1);
+  const showLabel = settings.labels !== false && camD < 23;
+  if (ud.label) {
+    ud.label.visible = showLabel;
+    if (showLabel) {
+      const s = e.model.scale.x || 1;
+      const worldW = camD * (2 * Math.tan(camera.fov * Math.PI / 360) * 96) / window.innerHeight;
+      ud.label.scale.set(worldW / s, worldW * .19 / s, 1);
+    }
+  }
+  if (e.rankTag) {
+    e.rankTag.visible = showLabel;
+    if (showLabel) {
+      const s = e.model.scale.x || 1;
+      const worldW = camD * (2 * Math.tan(camera.fov * Math.PI / 360) * 62) / window.innerHeight;
+      e.rankTag.scale.set(worldW / s, worldW * .231 / s, 1);
+    }
+  }
   ud.hpfg.material.color.set(ratio < .3 ? 0xe17950 : 0x9b443a);
   ud.hpbg.visible = ratio > 0;
   if (e.routeIndex >= e.route.points.length - 1) {
     Sound.leak();
     if (e.data.boss && e.structureDamage > 0) {
-      // El jefe daña estructuras cercanas al llegar al final.
+      // El jefe arrasa estructuras cercanas y golpea la base al llegar al final.
       damageStructures(e.x, e.z, e.structureDamage);
-      toast('¡Jefe daña estructuras!');
+      state.hp -= e.damage * .55;
+      toast(tr('toast.bossArrives', { name: loc(e.data, 'name') }));
     } else {
       state.hp -= e.damage;
     }
@@ -2581,6 +3428,24 @@ function applyDamage(e, amount, pierce = 0, towerType = null) {
   e.hp -= dealt;
   if (e.hp <= 0) removeEnemy(e, true);
   return dealt;
+}
+function bossStrikeStructures(e, alt) {
+  let best = null, bestDist = 5.2;
+  for (const t of state.towers) {
+    const d = Math.hypot(t.group.position.x - e.x, t.group.position.z - e.z);
+    if (d < bestDist) { bestDist = d; best = t; }
+  }
+  if (!best) return;
+  const from = new THREE.Vector3(e.x, (alt || 0) + .75, e.z);
+  const to = best.group.position.clone(); to.y += .75;
+  const line = makeLine(from, to, 0xff8a4a, .92);
+  setTimeout(() => { if (line.parent) world.remove(line); }, 150);
+  makeSparks(to.x, to.y, to.z, 0xffa45c, 7);
+  explode(to.x, .35, to.z, 0xe07a3f, 7);
+  damageStructures(best.group.position.x, best.group.position.z, e.structureDamage);
+  toast(tr('toast.bossStructures'));
+  cameraShake = Math.min(.42, cameraShake + .09);
+  Sound.explosion();
 }
 function damageStructures(x, z, amount) {
   let hit = 0;
@@ -2730,11 +3595,8 @@ function carrierStrike(t, e) {
   const deck = t.group.position.clone();
   const from = new THREE.Vector3(deck.x, .55, deck.z + .3);
   const target = new THREE.Vector3(e.x, .5, e.z);
-  const jet = new THREE.Group();
-  addMesh(jet, cylGeo(.05, .08, .42, 10), mat(0x828a8a, .4, .35), 0, 0, 0).rotation.x = Math.PI / 2;
-  addMesh(jet, coneGeo(.05, .18, 8), mat(0x828a8a, .4, .35), 0, 0, -.3).rotation.x = -Math.PI / 2;
-  addMesh(jet, rboxGeo(.6, .025, .16, .01), mat(0x828a8a, .4, .35), 0, 0, .04);
-  addMesh(jet, rboxGeo(.18, .02, .1, .01), mat(0x828a8a, .4, .35), 0, .05, .22);
+  const jet = buildFighterProp();
+  jet.scale.setScalar(.5);
   jet.position.copy(from);
   world.add(jet);
   const distance = from.distanceTo(target);
@@ -2884,8 +3746,8 @@ function updateEffects(dt) {
       p.mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction.clone().normalize());
       if (Math.random() < .85) spawnParticle(p.mesh.position.x, p.mesh.position.y, p.mesh.position.z, 0x9d9b8d, .45, .28);
       if (step >= dist - .08) {
-        if (p.splash) impactArtillery(destination.x, destination.z, p.damage, p.splash, p.pierce, p.data.towerType);
-        else { applyDamage(e, p.damage, p.pierce, p.data.towerType); explosionEffect(e.x, destination.y, e.z); }
+        if (p.splash) impactArtillery(destination.x, destination.z, p.damage, p.splash, p.pierce, p.towerType);
+        else { applyDamage(e, p.damage, p.pierce, p.towerType); explosionEffect(e.x, destination.y, e.z); }
         recycleProjectile(p.mesh); fx.active = false;
       }
       continue;
@@ -2898,7 +3760,7 @@ function updateEffects(dt) {
       p.mesh.position.lerpVectors(p.start, destination, progress);
       p.mesh.position.y += Math.sin(progress * Math.PI) * (p.arc || 2.2);
       if (Math.random() < .32) spawnParticle(p.mesh.position.x, p.mesh.position.y, p.mesh.position.z, 0x827d6a, .35, .32);
-      if (progress >= 1) { impactArtillery(destination.x, destination.z, p.damage, p.splash, p.pierce, p.data.towerType); recycleProjectile(p.mesh); fx.active = false; }
+      if (progress >= 1) { impactArtillery(destination.x, destination.z, p.damage, p.splash, p.pierce, p.towerType); recycleProjectile(p.mesh); fx.active = false; }
       continue;
     }
     if (fx.kind === 'rocket') {
@@ -2910,7 +3772,7 @@ function updateEffects(dt) {
       p.mesh.position.y += Math.sin(progress * Math.PI) * (p.arc || 1.4);
       const prev = p.mesh.position.clone();
       if (Math.random() < .6) spawnParticle(prev.x, prev.y, prev.z, 0xb9b4a4, .3, .24);
-      if (progress >= 1) { impactArtillery(p.targetPos.x, p.targetPos.z, p.damage, p.splash, p.pierce, p.data.towerType); recycleProjectile(p.mesh); fx.active = false; }
+      if (progress >= 1) { impactArtillery(p.targetPos.x, p.targetPos.z, p.damage, p.splash, p.pierce, p.towerType); recycleProjectile(p.mesh); fx.active = false; }
       continue;
     }
     if (fx.kind === 'airstrike') {
@@ -2928,7 +3790,7 @@ function updateEffects(dt) {
           p.impacted = true;
           for (let i = 0; i < 3; i++) {
             const ox = (Math.random() - .5) * p.splash * 1.1, oz = (Math.random() - .5) * p.splash * 1.1;
-            setTimeout(() => impactArtillery(p.target.x + ox, p.target.z + oz, p.damage, p.splash * .55, p.pierce, p.data.towerType), i * 90);
+            setTimeout(() => impactArtillery(p.target.x + ox, p.target.z + oz, p.damage, p.splash * .55, p.pierce, p.towerType), i * 90);
           }
         }
         if (progress >= 1) { p.returning = true; p.elapsed = 0; }
@@ -2998,11 +3860,8 @@ function executeStrike(x, z) {
   state.cash -= ab.cost; ab.cd = ab.max;
   state.abilityMode = null;
   Sound.jet();
-  const jet = new THREE.Group();
-  addMesh(jet, cylGeo(.055, .09, .46, 10), mat(0x828a8a, .4, .35), 0, 0, 0).rotation.x = Math.PI / 2;
-  addMesh(jet, coneGeo(.055, .2, 8), mat(0x828a8a, .4, .35), 0, 0, -.33).rotation.x = -Math.PI / 2;
-  addMesh(jet, rboxGeo(.72, .03, .18, .01), mat(0x828a8a, .4, .35), 0, 0, .04);
-  addMesh(jet, rboxGeo(.22, .025, .12, .01), mat(0x828a8a, .4, .35), 0, .06, .24);
+  const jet = buildFighterProp();
+  jet.scale.setScalar(.72);
   jet.position.set(x - 8, 4, z - 5);
   jet.rotation.y = Math.PI / 4;
   world.add(jet);
@@ -3034,6 +3893,22 @@ function toast(message) {
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => el.classList.remove('show'), 2300);
 }
+let waveBannerTimer;
+function showWaveBanner(fac, boss) {
+  const el = document.getElementById('waveBanner');
+  if (!el) return;
+  const stage = waveInFaction(state.wave);
+  const escorts = (state.currentPlan || []).filter(t => !ENEMIES[t].boss).length;
+  el.className = 'wave-banner show' + (boss ? ' boss' : '');
+  el.innerHTML = `
+    <div class="wb-flag">${fac.flag}</div>
+    <div class="wb-kicker">${boss ? tr('waveBanner.boss') : tr('waveBanner.incoming')}</div>
+    <div class="wb-title">${loc(fac, 'name')}</div>
+    <div class="wb-meta"><span>${tr('waveBanner.stage', { stage, total: FACTION_CYCLE })}</span><b>${tr('waveBanner.climate', { climate: tr('climate.' + fac.climate), temp: fac.tempC })}</b>${boss ? `<span>${tr('waveBanner.escorts', { n: escorts })}</span>` : ''}</div>
+    <div class="wb-bar"><i></i></div>`;
+  clearTimeout(waveBannerTimer);
+  waveBannerTimer = setTimeout(() => el.classList.remove('show'), boss ? 4400 : 2700);
+}
 function updateHud() {
   const set = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
   set('cash', Math.floor(state.cash));
@@ -3043,13 +3918,20 @@ function updateHud() {
   set('hudFlag', state.army.flag);
   set('hudArmy', loc(state.army, 'name'));
   set('threatLevel', state.wave <= 0 ? '—' : threatLevel(state.wave));
-  if (state.wave > 0) {
-    const fac = factionByWave(state.wave);
-    set('factionFlag', fac.flag);
-    set('factionName', loc(fac, 'name'));
-  } else {
-    set('factionFlag', '—');
-    set('factionName', '—');
+
+  // La facción mostrada es la de la oleada en curso o la próxima si aún no hay combate.
+  const nextWave = state.active ? state.wave : state.wave + 1;
+  const fac = factionByWave(nextWave);
+  set('factionFlag', fac.flag);
+  set('factionName', loc(fac, 'name'));
+  const stage = waveInFaction(nextWave);
+  set('factionStage', isBossWave(nextWave) ? tr('faction.bossNow') : tr('faction.stage', { stage, total: WAVES_PER_FACTION }));
+
+  const wb = document.getElementById('waveBtn');
+  if (wb) {
+    if (state.active) wb.textContent = tr('wave.inProgress', { wave: state.wave });
+    else if (isBossWave(nextWave)) wb.textContent = tr('wave.startBoss', { name: loc(fac, 'name') });
+    else wb.textContent = tr('wave.startFac', { name: loc(fac, 'name') });
   }
 }
 function renderAbilities() {
@@ -3374,15 +4256,18 @@ function refreshEnemyLabels() {
     const ud = e.model.userData;
     if (ud.label) {
       e.model.remove(ud.label);
+      const ui = 1 / e.model.scale.x;
       const label = labelSprite(loc(e.data, 'name'), enemyLabelAccent(e.type));
-      label.position.y = (ud.labelY || 1) + .22;
+      label.scale.set((e.data.boss ? 1.75 : 1.18) * ui, (e.data.boss ? .33 : .225) * ui, 1);
+      label.position.y = (ud.labelY || 1) + .2 * ui;
       label.visible = settings.labels !== false;
       e.model.add(label); ud.label = label;
     }
     if (e.rankTag) {
       e.model.remove(e.rankTag);
+      const ui = 1 / e.model.scale.x;
       const tag = labelSprite(tr(e.rank === 'elite' ? 'rank.elite' : 'rank.veteran'), e.rank === 'elite' ? '#e8a06a' : '#b9c47e');
-      tag.position.y = (ud.labelY || 1) + .46; tag.scale.set(.78, .18, 1); tag.visible = settings.labels !== false;
+      tag.position.y = (ud.labelY || 1) + .46 * ui; tag.scale.set(.78 * ui, .18 * ui, 1); tag.visible = settings.labels !== false;
       e.model.add(tag); e.rankTag = tag;
     }
   }
@@ -3397,6 +4282,7 @@ function applyLanguage() {
   document.querySelectorAll('[data-i18n-html]').forEach(el => { el.innerHTML = tr(el.getAttribute('data-i18n-html')); });
   document.querySelectorAll('[data-i18n-title]').forEach(el => { el.title = tr(el.getAttribute('data-i18n-title')); });
   updateHud(); renderArmies(); renderTowerList(); updateInspect(); updateRecordUI();
+  if (state.climate) applyClimate(state.climate, state.tempC);
   updateSoundButton(); updateLabelsUI(); updatePauseButton(); updateQualityHint();
   updateInstallUI(); updateFullscreenUI(); renderAbilities(); syncSettingsUI();
   refreshEnemyLabels();
@@ -3602,7 +4488,11 @@ canvas.addEventListener('wheel', e => {
   const after = pointerGround(e.clientX, e.clientY);
   if (before && after) { target.add(before.sub(after)); clampTarget(); }
 }, { passive: false });
-function clampTarget() { target.x = THREE.MathUtils.clamp(target.x, -20, 20); target.z = THREE.MathUtils.clamp(target.z, -12, 12); }
+function clampTarget() {
+  const mx = MAP.w / 2 - 1.6, mz = MAP.h / 2 - 1.6;
+  target.x = THREE.MathUtils.clamp(target.x, -mx, mx);
+  target.z = THREE.MathUtils.clamp(target.z, -mz, mz);
+}
 function updateKeys(dt) {
   let dx = 0, dz = 0;
   if (keys.w || keys.arrowup) dz -= 1;
